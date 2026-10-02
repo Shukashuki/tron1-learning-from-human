@@ -1,0 +1,4 @@
+# Dedicated motion/IK environment only. Never install into Isaac's Python.
+# GMR core is loaded from the source/hash-pinned third_party/GMR checkout.
+-r requirements-mink.txt
+rich>=13,<15

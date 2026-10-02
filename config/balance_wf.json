@@ -1,0 +1,693 @@
+{
+  "schema_version": 1,
+  "source": {
+    "repository": "https://github.com/limxdynamics/tron1-rl-isaaclab",
+    "revision": "307145edfe95f49c45fd9ccd090ab950e8884b33",
+    "asset": "assets/robots/WF_TRON1A/WF_TRON1A.usd",
+    "asset_lock": "config/assets.lock.json",
+    "extraction": "OpenUSD 25.5.1, composed Physics=PhysX/Sensor=Sensors; zero joint angles, root identity",
+    "units": {
+      "mass": "kg",
+      "length": "m",
+      "inertia": "kg*m^2",
+      "angle": "rad",
+      "torque": "N*m"
+    }
+  },
+  "model": {
+    "body_mass": 20.112999925389886,
+    "wheel_mass_total": 2.1600000858306885,
+    "wheel_inertia_total": 0.019485442913112588,
+    "radius": 0.12700000405311584,
+    "length": 0.48838611449141256,
+    "body_inertia": 0.9533001183537841,
+    "gravity": 9.81
+  },
+  "axle_in_base": [
+    -0.02143999934196472,
+    0,
+    -0.7798199653625488
+  ],
+  "body_com_in_base": [
+    0.0005160244706665561,
+    0.00006671804535172404,
+    -0.291927631085448
+  ],
+  "body_com_from_axle": [
+    0.021956023812631276,
+    0.00006671804535172404,
+    0.4878923342771008
+  ],
+  "equilibrium_base_pitch_rad": -0.04497143891322241,
+  "equilibrium_base_pitch_deg": -2.576673648358042,
+  "equilibrium_base_position_for_axle_x_zero": [
+    -0.013639483608479767,
+    0,
+    0.9069953991912695
+  ],
+  "zero_pitch_contact_base_height": 0.9068199694156647,
+  "wheel_signs_by_joint": {
+    "wheel_L_Joint": 1,
+    "wheel_R_Joint": 1
+  },
+  "conventions": {
+    "forward_axis": "+X",
+    "left_axis": "+Y",
+    "up_axis": "+Z",
+    "positive_pitch": "Right-hand rotation about +Y; body COM moves toward +X for positive pitch deviation.",
+    "positive_wheel_effort": "Both wheel joints rotate about +Y; positive equal wheel effort drives forward +X under no-slip rolling.",
+    "state_pitch": "theta = atan2(body_COM_world.x - axle_world.x, body_COM_world.z - axle_world.z), in the sagittal plane at zero yaw. Base pitch alone needs the equilibrium offset.",
+    "input": "tau is TOTAL torque on both wheels; apply +tau/2 to each wheel joint. The reaction on the nonwheel body is -tau.",
+    "generalized_force": "For q=[axle_x, COM_pitch], Q=[tau/radius, -tau]; include both entries."
+  },
+  "assumptions": [
+    "The six nonwheel actuated joints are held at zero angles. The nonwheel body includes base, both abad/hip/knee links, and the fixed IMU.",
+    "The rigid-body sagittal approximation ignores leg deflection, yaw/roll, slip, and the small transverse COM offset.",
+    "Body inertia is the nonwheel aggregate inertia ABOUT ITS COM, projected on base +Y. It excludes the body_mass*length^2 parallel-axis term.",
+    "length is hypot(COM_from_axle.x, COM_from_axle.z); body COM is aligned vertically above the axle at equilibrium_base_pitch_rad.",
+    "Wheel inertia is the sum about each physical wheel's rolling axis through its joint origin, including the tiny x/z COM-offset parallel-axis terms.",
+    "Wheel COM radial offsets of 30 micrometers and -20 micrometers are ignored in equilibrium/rolling kinematics; the inertial correction remains included.",
+    "All inertia tensors are evaluated by rotating USD principal-axis diagonal inertia into base axes, then applying the parallel-axis theorem.",
+    "The nominal rolling radius is the collision Cylinder radius, not the slightly larger visual mesh radius. The cylinder height is its axial width.",
+    "No contact/rest offset is authored on the upstream collision groups. The configured runtime may use defaults; rest offset, ground rest offset, cylinder approximation, and penetration can change the effective axle height.",
+    "The upstream CollisionAPI is on each link/collisions Xform. Geometric Cylinder descendants do not themselves carry the API. Verify runtime collision parsing; if unsupported, apply collision APIs to those existing collision geometries in the scene override.",
+    "PD stiffness500/damping30 and other controller settings are supplied by the runtime; these are not part of the asset-derived parameters."
+  ],
+  "aggregation_formula": {
+    "com": "C = sum(m_i * C_i) / sum(m_i)",
+    "inertia": "I_C = sum(R_i * diag(Iprincipal_i) * transpose(R_i) + m_i * (dot(d_i,d_i)*Identity - outer(d_i,d_i))), d_i=C_i-C",
+    "equilibrium_pitch": "-atan2(body_com_from_axle[0], body_com_from_axle[2])"
+  },
+  "zero_pose_joint_axes_in_base": {
+    "abad_L_Joint": [
+      1,
+      0,
+      0
+    ],
+    "hip_L_Joint": [
+      0,
+      1,
+      0
+    ],
+    "knee_L_Joint": [
+      0,
+      -1,
+      1.2246467991473532e-16
+    ],
+    "wheel_L_Joint": [
+      0,
+      1,
+      0
+    ],
+    "abad_R_Joint": [
+      1,
+      0,
+      0
+    ],
+    "hip_R_Joint": [
+      0,
+      -1,
+      1.2246467991473532e-16
+    ],
+    "knee_R_Joint": [
+      0,
+      1,
+      0
+    ],
+    "wheel_R_Joint": [
+      0,
+      1,
+      0
+    ]
+  },
+  "whole_robot": {
+    "mass": 22.273000011220574,
+    "com_in_base": [
+      -0.0016103264158322265,
+      0.00006024783551858166,
+      -0.3392445925807282
+    ],
+    "inertia_com_in_base_axes": [
+      [
+        1.5816032486423817,
+        0.00047137181588122364,
+        -0.1212612119997733
+      ],
+      [
+        0.00047137181588122364,
+        1.438062633942774,
+        -0.00026246618400107413
+      ],
+      [
+        -0.12126121199977329,
+        -0.0002624661840010738,
+        0.3702823678817806
+      ]
+    ]
+  },
+  "nonwheel_body": {
+    "mass": 20.112999925389886,
+    "com_in_base": [
+      0.0005160244706665561,
+      0.00006671804535172404,
+      -0.291927631085448
+    ],
+    "inertia_com_in_base_axes": [
+      [
+        1.0540030454678073,
+        0.00047422516622338076,
+        -0.10039258094172783
+      ],
+      [
+        0.00047422516622338076,
+        0.9533001183537841,
+        -0.00019897155142198667
+      ],
+      [
+        -0.10039258094172782,
+        -0.00019897155142198635,
+        0.3060860468053359
+      ]
+    ]
+  },
+  "wheel_joint_origin_track_width": 0.296999990940094,
+  "wheel_collision_center_track_width": 0.3111399905756116,
+  "wheel_collisions": [
+    {
+      "link_name": "wheel_L_Link",
+      "radius": 0.12700000405311584,
+      "height": 0.05000000074505806,
+      "center_in_base": [
+        -0.02143999934196472,
+        0.1555699952878058,
+        -0.7798199653625488
+      ],
+      "axis_in_base": [
+        0,
+        -0.9999999999999993,
+        -3.422854177870249e-8
+      ],
+      "collision_api_on_parent_group": true,
+      "geometry_has_collision_api": false
+    },
+    {
+      "link_name": "wheel_R_Link",
+      "radius": 0.12700000405311584,
+      "height": 0.05000000074505806,
+      "center_in_base": [
+        -0.02143999934196472,
+        -0.1555699952878058,
+        -0.7798199653625488
+      ],
+      "axis_in_base": [
+        0,
+        -0.9999999999999993,
+        -3.422854177870249e-8
+      ],
+      "collision_api_on_parent_group": true,
+      "geometry_has_collision_api": false
+    }
+  ],
+  "bodies": [
+    {
+      "link_name": "base_Link",
+      "mass": 9.585000038146973,
+      "com_local": [
+        0.04575999826192856,
+        0.00014000000373926014,
+        -0.16398000717163086
+      ],
+      "com_in_base": [
+        0.04575999826192856,
+        0.00014000000373926014,
+        -0.16398000717163086
+      ],
+      "origin_in_base": [
+        0,
+        0,
+        0
+      ],
+      "diagonal_inertia": [
+        0.15443234145641327,
+        0.11063925921916962,
+        0.08462487906217575
+      ],
+      "principal_axes_wxyz": [
+        0.9724851846694946,
+        -0.006218296475708485,
+        -0.2328483760356903,
+        0.003965523559600115
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.1401105249033903,
+          0.0005349380565170872,
+          0.028184085012034864
+        ],
+        [
+          0.0005349380565170872,
+          0.110641455950833,
+          -0.00002727862962297273
+        ],
+        [
+          0.028184085012034878,
+          -0.000027278629622972403,
+          0.09894449888353538
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "abad_L_Link",
+      "mass": 1.468999981880188,
+      "com_local": [
+        -0.06977000087499619,
+        0.04478999972343445,
+        0.0005699999746866524
+      ],
+      "com_in_base": [
+        -0.01421000063419342,
+        0.14978999644517899,
+        -0.259629993874114
+      ],
+      "origin_in_base": [
+        0.055560000240802765,
+        0.10499999672174454,
+        -0.26019999384880066
+      ],
+      "diagonal_inertia": [
+        0.0013916267780587077,
+        0.0025228853337466717,
+        0.0020810416899621487
+      ],
+      "principal_axes_wxyz": [
+        0.9809780120849609,
+        -0.008187533356249332,
+        -0.007064875215291977,
+        -0.19381769001483917
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.0015553834935319005,
+          0.0003977794896449369,
+          -0.000013099979139633979
+        ],
+        [
+          0.0003977794896449368,
+          0.0023592502224739067,
+          -9.800030852505972e-7
+        ],
+        [
+          -0.000013099979139633979,
+          -9.800030852505972e-7,
+          0.002080920085761721
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "hip_L_Link",
+      "mass": 2.299999952316284,
+      "com_local": [
+        -0.028689999133348465,
+        -0.04769999906420708,
+        -0.03991999849677086
+      ],
+      "com_in_base": [
+        -0.05012999847531319,
+        0.07779999449849129,
+        -0.3001199923455715
+      ],
+      "origin_in_base": [
+        -0.02143999934196472,
+        0.12549999356269836,
+        -0.26019999384880066
+      ],
+      "diagonal_inertia": [
+        0.023022914305329323,
+        0.023326361551880836,
+        0.0027754795737564564
+      ],
+      "principal_axes_wxyz": [
+        0.9056360721588135,
+        -0.02411648817360401,
+        0.29677271842956543,
+        -0.30193981528282166
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.016937283539963537,
+          0.0016470296456203002,
+          -0.00923253098878958
+        ],
+        [
+          0.0016470296456203002,
+          0.022853283220480722,
+          0.002202400644000076
+        ],
+        [
+          -0.00923253098878958,
+          0.002202400644000076,
+          0.009334188670522355
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "knee_L_Link",
+      "mass": 1.4900000095367432,
+      "com_local": [
+        0.11913000047206879,
+        0.011060000397264957,
+        -0.2036300003528595
+      ],
+      "com_in_base": [
+        -0.05231000483036041,
+        0.1160599896684289,
+        -0.7236399948596954
+      ],
+      "origin_in_base": [
+        -0.1714400053024292,
+        0.10499998927116394,
+        -0.5200099945068359
+      ],
+      "diagonal_inertia": [
+        0.01718549057841301,
+        0.017710663378238678,
+        0.001014997367747128
+      ],
+      "principal_axes_wxyz": [
+        0.966303825378418,
+        0.029415728524327278,
+        -0.2556636929512024,
+        -0.005277751479297876
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.013232806365536268,
+          -0.00043545988760306675,
+          0.0069356846042631076
+        ],
+        [
+          -0.00043545988760306675,
+          0.017661372756947635,
+          0.0007908694092823142
+        ],
+        [
+          0.006935684604263108,
+          0.0007908694092823142,
+          0.005016972201914911
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "wheel_L_Link",
+      "mass": 1.0800000429153442,
+      "com_local": [
+        0.000029999999242136255,
+        0.008070000447332859,
+        -0.000019999999494757503
+      ],
+      "com_in_base": [
+        -0.021409999342722585,
+        0.15656999591737986,
+        -0.7798399653620436
+      ],
+      "origin_in_base": [
+        -0.02143999934196472,
+        0.148499995470047,
+        -0.7798199653625488
+      ],
+      "diagonal_inertia": [
+        0.005155680235475302,
+        0.009742720052599907,
+        0.005153439939022064
+      ],
+      "principal_axes_wxyz": [
+        0.9659222364425659,
+        -7.70559381635394e-7,
+        0.25883248448371887,
+        -0.0000013350669405554072
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.005155120107564086,
+          9.999999304703091e-9,
+          -9.701079128889822e-7
+        ],
+        [
+          9.999999304703091e-9,
+          0.009742720052556308,
+          -9.999999554253916e-9
+        ],
+        [
+          -9.701079128885485e-7,
+          -9.999999554253918e-9,
+          0.00515400006697688
+        ]
+      ],
+      "is_wheel": true
+    },
+    {
+      "link_name": "abad_R_Link",
+      "mass": 1.468999981880188,
+      "com_local": [
+        -0.06977000087499619,
+        -0.04478999972343445,
+        0.0005699999746866524
+      ],
+      "com_in_base": [
+        -0.01421000063419342,
+        -0.14978999644517899,
+        -0.259629993874114
+      ],
+      "origin_in_base": [
+        0.055560000240802765,
+        -0.10499999672174454,
+        -0.26019999384880066
+      ],
+      "diagonal_inertia": [
+        0.0013916267780587077,
+        0.0025228853337466717,
+        0.0020810416899621487
+      ],
+      "principal_axes_wxyz": [
+        0.9809780120849609,
+        0.008187533356249332,
+        -0.007064875215291977,
+        0.19381769001483917
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.0015553834935319005,
+          -0.0003977794896449369,
+          -0.000013099979139633979
+        ],
+        [
+          -0.0003977794896449368,
+          0.0023592502224739067,
+          9.800030852505972e-7
+        ],
+        [
+          -0.000013099979139633979,
+          9.800030852505972e-7,
+          0.002080920085761721
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "hip_R_Link",
+      "mass": 2.299999952316284,
+      "com_local": [
+        -0.028689999133348465,
+        0.04769999906420708,
+        -0.03991999849677086
+      ],
+      "com_in_base": [
+        -0.05012999847531319,
+        -0.07779999449849129,
+        -0.3001199923455715
+      ],
+      "origin_in_base": [
+        -0.02143999934196472,
+        -0.12549999356269836,
+        -0.26019999384880066
+      ],
+      "diagonal_inertia": [
+        0.023022914305329323,
+        0.023326361551880836,
+        0.0027754795737564564
+      ],
+      "principal_axes_wxyz": [
+        0.9056360721588135,
+        0.02411648817360401,
+        0.29677271842956543,
+        0.30193981528282166
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.016937283539963537,
+          -0.0016470296456203002,
+          -0.00923253098878958
+        ],
+        [
+          -0.0016470296456203002,
+          0.022853283220480722,
+          -0.002202400644000076
+        ],
+        [
+          -0.00923253098878958,
+          -0.002202400644000076,
+          0.009334188670522355
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "knee_R_Link",
+      "mass": 1.4900000095367432,
+      "com_local": [
+        0.11913000047206879,
+        -0.011060000397264957,
+        -0.2036300003528595
+      ],
+      "com_in_base": [
+        -0.05231000483036041,
+        -0.1160599896684289,
+        -0.7236399948596954
+      ],
+      "origin_in_base": [
+        -0.1714400053024292,
+        -0.10499998927116394,
+        -0.5200099945068359
+      ],
+      "diagonal_inertia": [
+        0.01718549057841301,
+        0.017710663378238678,
+        0.001014997367747128
+      ],
+      "principal_axes_wxyz": [
+        0.966303825378418,
+        -0.029415728524327278,
+        -0.2556636929512024,
+        0.005277751479297876
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.013232806365536268,
+          0.00043545988760306675,
+          0.0069356846042631076
+        ],
+        [
+          0.00043545988760306675,
+          0.017661372756947635,
+          -0.0007908694092823142
+        ],
+        [
+          0.006935684604263108,
+          -0.0007908694092823142,
+          0.005016972201914911
+        ]
+      ],
+      "is_wheel": false
+    },
+    {
+      "link_name": "wheel_R_Link",
+      "mass": 1.0800000429153442,
+      "com_local": [
+        0.000029999999242136255,
+        -0.008070000447332859,
+        -0.000019999999494757503
+      ],
+      "com_in_base": [
+        -0.021409999342722585,
+        -0.15656999591737986,
+        -0.7798399653620436
+      ],
+      "origin_in_base": [
+        -0.02143999934196472,
+        -0.148499995470047,
+        -0.7798199653625488
+      ],
+      "diagonal_inertia": [
+        0.005155680235475302,
+        0.009742720052599907,
+        0.005153439939022064
+      ],
+      "principal_axes_wxyz": [
+        0.9659222364425659,
+        7.70559381635394e-7,
+        0.25883248448371887,
+        0.0000013350669405554072
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          0.005155120107564086,
+          -9.999999304703091e-9,
+          -9.701079128889822e-7
+        ],
+        [
+          -9.999999304703091e-9,
+          0.009742720052556308,
+          9.999999554253916e-9
+        ],
+        [
+          -9.701079128885485e-7,
+          9.999999554253918e-9,
+          0.00515400006697688
+        ]
+      ],
+      "is_wheel": true
+    },
+    {
+      "link_name": "limx_imu",
+      "mass": 0.009999999776482582,
+      "com_local": [
+        0,
+        0,
+        0
+      ],
+      "com_in_base": [
+        0,
+        0,
+        0
+      ],
+      "origin_in_base": [
+        0,
+        0,
+        0
+      ],
+      "diagonal_inertia": [
+        9.999999974752427e-7,
+        9.999999974752427e-7,
+        9.999999974752427e-7
+      ],
+      "principal_axes_wxyz": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "inertia_com_in_base_axes": [
+        [
+          9.999999974752427e-7,
+          0,
+          0
+        ],
+        [
+          0,
+          9.999999974752427e-7,
+          0
+        ],
+        [
+          0,
+          0,
+          9.999999974752427e-7
+        ]
+      ],
+      "is_wheel": false
+    }
+  ]
+}

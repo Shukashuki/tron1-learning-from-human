@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "robot": "WF_TRON1A",
+  "repository": "https://github.com/limxdynamics/tron1-rl-isaaclab",
+  "revision": "307145edfe95f49c45fd9ccd090ab950e8884b33",
+  "raw_base_url": "https://raw.githubusercontent.com/limxdynamics/tron1-rl-isaaclab/307145edfe95f49c45fd9ccd090ab950e8884b33/",
+  "license": "Apache-2.0",
+  "entrypoint": "WF_TRON1A.usd",
+  "default_prim": "/wheel_biped",
+  "articulation_root": "/wheel_biped/base_Link",
+  "simulator_provided_dependencies": ["OmniPBR.mdl"],
+  "revolute_joints": [
+    "abad_L_Joint", "hip_L_Joint", "knee_L_Joint", "wheel_L_Joint",
+    "abad_R_Joint", "hip_R_Joint", "knee_R_Joint", "wheel_R_Joint"
+  ],
+  "files": [
+    {
+      "source": "exts/bipedal_locomotion/bipedal_locomotion/assets/usd/WF_TRON1A/WF_TRON1A.usd",
+      "destination": "WF_TRON1A.usd",
+      "size": 1609,
+      "sha256": "5c6dc532474650d5aa7f815cc4417069550b9bedabd543ab7e871ccefc08b374"
+    },
+    {
+      "source": "exts/bipedal_locomotion/bipedal_locomotion/assets/usd/WF_TRON1A/configuration/WF_TRON1A_base.usd",
+      "destination": "configuration/WF_TRON1A_base.usd",
+      "size": 28923015,
+      "sha256": "a0ea7f829532bad642bbe7856f95b8fc1c1bf2fa8dd2b7e76284428af77a9535"
+    },
+    {
+      "source": "exts/bipedal_locomotion/bipedal_locomotion/assets/usd/WF_TRON1A/configuration/WF_TRON1A_physics.usd",
+      "destination": "configuration/WF_TRON1A_physics.usd",
+      "size": 4752,
+      "sha256": "b39dd19bf692480d56913deacfe751f186bbf0ab09e936cc0d569220b8ed66db"
+    },
+    {
+      "source": "exts/bipedal_locomotion/bipedal_locomotion/assets/usd/WF_TRON1A/configuration/WF_TRON1A_sensor.usd",
+      "destination": "configuration/WF_TRON1A_sensor.usd",
+      "size": 651,
+      "sha256": "1884814ffbfc6cda279b94ca4b971f05bb0e91ddb77902b3548365d6da339c54"
+    },
+    {
+      "source": "LICENCE",
+      "destination": "LICENSE.txt",
+      "size": 11362,
+      "sha256": "ff28cacaef7b9919a0fb905136cf4ccffba5191522bf5d024c4339932c0edc28"
+    }
+  ]
+}

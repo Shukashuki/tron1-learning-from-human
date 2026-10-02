@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/limxdynamics/tron1-robot-description",
+  "revision": "5b97add1f3b461c9ed26ff2ff2f5025cc6ee4316",
+  "license": "Apache-2.0",
+  "model": "WF_TRON1A",
+  "output_directory": "assets/robots/WF_TRON1A/mujoco",
+  "files": [
+    {"source": "LICENSE", "destination": "LICENSE.txt", "size": 11357, "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"},
+    {"source": "pointfoot/WF_TRON1A/xml/robot.xml", "destination": "upstream/robot.xml", "size": 9315, "git_blob_sha1": "245d2fc22eb01ecfcec29118daa635e6f2c3e6e1"},
+    {"source": "pointfoot/WF_TRON1A/urdf/robot.urdf", "destination": "upstream/robot.urdf", "size": 21232, "git_blob_sha1": "a558e9375dcf6dc2666825ac224cbb750032ead8"},
+    {"source": "pointfoot/WF_TRON1A/meshes/base_Link.STL", "destination": "meshes/base_Link.STL", "size": 6225184, "git_blob_sha1": "62a7837a98e37a784e9bd2f9f66ed4350980bc97"},
+    {"source": "pointfoot/WF_TRON1A/meshes/abad_L_Link.STL", "destination": "meshes/abad_L_Link.STL", "size": 1658684, "git_blob_sha1": "562152a171e9344dafddb98133b757adb3e100d9"},
+    {"source": "pointfoot/WF_TRON1A/meshes/hip_L_Link.STL", "destination": "meshes/hip_L_Link.STL", "size": 2121684, "git_blob_sha1": "a88548378708be1bb8b2b27dccba292fd953eeda"},
+    {"source": "pointfoot/WF_TRON1A/meshes/knee_L_Link.STL", "destination": "meshes/knee_L_Link.STL", "size": 2273084, "git_blob_sha1": "bde12153f0431bec19a5248379c51177b458fbda"},
+    {"source": "pointfoot/WF_TRON1A/meshes/wheel_L_Link.STL", "destination": "meshes/wheel_L_Link.STL", "size": 1000384, "git_blob_sha1": "07c39ec4a620f1b0c113ee5bbada45c5dbd8be61"},
+    {"source": "pointfoot/WF_TRON1A/meshes/abad_R_Link.STL", "destination": "meshes/abad_R_Link.STL", "size": 1300984, "git_blob_sha1": "5064e376232a13c1c7662f247ccf4c2e3e320193"},
+    {"source": "pointfoot/WF_TRON1A/meshes/hip_R_Link.STL", "destination": "meshes/hip_R_Link.STL", "size": 2125684, "git_blob_sha1": "9f59b5ef4a4c0c2cd42850102be151bd53828fe9"},
+    {"source": "pointfoot/WF_TRON1A/meshes/knee_R_Link.STL", "destination": "meshes/knee_R_Link.STL", "size": 2372284, "git_blob_sha1": "9230da6dc8b9c77d4e9f20e3f4fb8e7dc56e0af7"},
+    {"source": "pointfoot/WF_TRON1A/meshes/wheel_R_Link.STL", "destination": "meshes/wheel_R_Link.STL", "size": 1000384, "git_blob_sha1": "c51e99fc41a733a01ff1e9f237ed1eaffc32951e"}
+  ],
+  "joint_order": ["abad_L_Joint", "hip_L_Joint", "knee_L_Joint", "wheel_L_Joint", "abad_R_Joint", "hip_R_Joint", "knee_R_Joint", "wheel_R_Joint"],
+  "joint_axes": [[1,0,0], [0,1,0], [0,-1,0], [0,1,0], [1,0,0], [0,-1,0], [0,1,0], [0,1,0]],
+  "joint_ranges_rad": [[-0.38397,1.39626], [-1.01229,1.39626], [-0.872665,1.36136], [-1000000,1000000], [-1.39626,0.38397], [-1.39626,1.01229], [-1.36136,0.872665], [-1000000,1000000]],
+  "sites": {
+    "pelvis": {"body": "base_Link", "pos": [0,0,0]},
+    "left_hip": {"body": "hip_L_Link", "pos": [0,0,0]},
+    "right_hip": {"body": "hip_R_Link", "pos": [0,0,0]},
+    "left_knee": {"body": "knee_L_Link", "pos": [0,0,0]},
+    "right_knee": {"body": "knee_R_Link", "pos": [0,0,0]},
+    "left_wheel": {"body": "wheel_L_Link", "pos": [0,0,0]},
+    "right_wheel": {"body": "wheel_R_Link", "pos": [0,0,0]},
+    "left_contact": {"body": "wheel_L_Link", "pos": [0,0.008,-0.127]},
+    "right_contact": {"body": "wheel_R_Link", "pos": [0,-0.008,-0.127]}
+  },
+  "wheel_radius_m": 0.127,
+  "notes": [
+    "Official MJCF/STL assets are preserved; generated robot.xml changes only meshdir, names the floating root joint, and adds IK/display sites.",
+    "left/right_wheel sites are wheel hinge centers, not human ankle frames; left/right_knee sites are actual knee joint centers.",
+    "left/right_contact are nominal local bottom markers: they rotate with the wheel and are NOT rolling contact points or reliable ground clearance. Compute clearance from collision geometry instead.",
+    "Official MJCF and Isaac USD share link offsets and joint axes, but are not numerically identical dynamics models. MJCF base includes fixed IMU mass; wheel collision axial width is 0.010m versus 0.050m in USD, and lateral collision offsets are +/-0.008m versus +/-0.00707m.",
+    "Official MJCF wheel motor ctrlrange is +/-40Nm, while the imported USD drive maxForce is 80. Other collision primitives also differ; no cross-engine contact or actuator equivalence is implied.",
+    "Mink IK playback does not validate contact forces, balance, jump actuation, self-collision avoidance, or dynamic feasibility. No Isaac assets or runtime are changed."
+  ]
+}

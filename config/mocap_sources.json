@@ -1,0 +1,26 @@
+{
+  "cmu_16_03": {
+    "description": "CMU subject 16, motion 03: high jump",
+    "fps": 120,
+    "frame_count": 410,
+    "source_page": "https://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+    "usage_terms": "https://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "SHA-256 values pin the retrieved source files; they are not vendor-signed checksums. The official HTTP downloads were used because HTTPS certificate validation was unavailable.",
+    "files": [
+      {
+        "path": "assets/mocap/CMU/16.asf",
+        "url": "http://mocap.cs.cmu.edu/subjects/16/16.asf",
+        "bytes": 7257,
+        "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb"
+      },
+      {
+        "path": "assets/mocap/CMU/16_03.amc",
+        "url": "http://mocap.cs.cmu.edu/subjects/16/16_03.amc",
+        "bytes": 327232,
+        "sha256": "2f60815066e68bd2f70a576400434e53b43af35f8a009f1342e9367ab93c03f9"
+      }
+    ]
+  }
+}

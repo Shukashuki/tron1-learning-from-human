@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "physics_dt": 0.002,
+  "settle_seconds": 1.0,
+  "recovery_seconds": 1.0,
+  "standing_seconds": 5.0,
+  "initial_clearance_m": 0.001,
+  "leg_kp": 500.0,
+  "leg_kd": 10.0,
+  "leg_torque_limit_nm": 80.0,
+  "wheel_torque_limit_nm": 12.0,
+  "ground_friction": 0.6,
+  "restitution": 0.0,
+  "joint_passive_damping": 0.0,
+  "joint_friction": 0.0,
+  "joint_armature": 0.0,
+  "fall_tilt_deg": 60.0,
+  "fall_root_height_m": 0.25,
+  "max_horizontal_distance_m": 3.0,
+  "controller": "explicit leg position/velocity PD plus fixed-leg sagittal wheel LQR; same source in both engines",
+  "purpose": "Untrained controller/reference transfer diagnostic, NOT a BeyondMimic policy or successful jump validation.",
+  "known_limitations": [
+    "Wheel LQR was derived around fixed-leg ground contact, not jumping or large leg motion.",
+    "No learned policy, inverse-dynamics feedforward, flight controller, or landing controller.",
+    "Contact solver, collision approximation, and joint-limit solvers remain engine-specific."
+  ]
+}

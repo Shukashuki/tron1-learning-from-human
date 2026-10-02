@@ -1,0 +1,447 @@
+{
+  "schema_version": 1,
+  "experiment_id": "2026-10-02-tron1-jump",
+  "date": "2026-10-02",
+  "conclusion": "Isaac deterministic single-clip jump completed; same-policy MuJoCo transfer did not complete.",
+  "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+  "upstream": {
+    "beyondmimic": {
+      "repository": "https://github.com/HybridRobotics/whole_body_tracking",
+      "revision": "cd65172032893724b445448818c34165846d847d"
+    },
+    "gmr": {
+      "repository": "https://github.com/YanjieZe/GMR",
+      "revision": "bb1bbe40774794fceb2a7c579a3464a28e68c844"
+    },
+    "robot": {
+      "repository": "https://github.com/limxdynamics/tron1-rl-isaaclab",
+      "revision": "307145edfe95f49c45fd9ccd090ab950e8884b33"
+    },
+    "motion": {
+      "dataset": "CMU motion capture",
+      "clip": "16_03",
+      "source_page": "https://mocap.cs.cmu.edu/search.php?subjectnumber=16"
+    }
+  },
+  "training": {
+    "status": "training_completed",
+    "run_id": "pilot-512x1000",
+    "gpu": "NVIDIA GeForce RTX 4090 D",
+    "gpu_count": 1,
+    "versions": {
+      "torch": "2.7.0+cu128",
+      "isaacsim": "5.1.0.0",
+      "isaaclab": "0.47.2",
+      "rsl-rl-lib": "3.0.1"
+    },
+    "seed": 42,
+    "num_environments": 512,
+    "ppo_updates": 1000,
+    "environment_steps": 12288000,
+    "elapsed_seconds_including_startup": 683.8214033283293,
+    "runner_config": {
+      "seed": 42,
+      "num_steps_per_env": 24,
+      "save_interval": 100,
+      "logger": "tensorboard",
+      "experiment_name": "tron1_wf_single_jump",
+      "obs_groups": {
+        "policy": [
+          "policy"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "policy": {
+        "class_name": "ActorCritic",
+        "init_noise_std": 0.5,
+        "noise_std_type": "log",
+        "actor_obs_normalization": true,
+        "critic_obs_normalization": true,
+        "actor_hidden_dims": [
+          256,
+          128,
+          128
+        ],
+        "critic_hidden_dims": [
+          256,
+          128,
+          128
+        ],
+        "activation": "elu"
+      },
+      "algorithm": {
+        "class_name": "PPO",
+        "value_loss_coef": 1,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "entropy_coef": 0.005,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1
+      }
+    },
+    "source_sha256": {
+      "training/tron1_tracking.py": "b6756c0d2af4efc64e0b039bfd64bae6621057be01b62b5f0d6cdc8ad647045b",
+      "scripts/train_tracking.py": "03334df5b6bf5e892adfe8279cb803823267c2d0ae224bdf5131cee27be51454"
+    },
+    "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+  },
+  "reference": {
+    "source": "GMR-retargeted CMU 16_03",
+    "fps": 50,
+    "frames": 221,
+    "sample_span_s": 4.4,
+    "episode_duration_s": 4.42,
+    "uniform_z_offset_m": 0.0066,
+    "appended_hold_s": 1,
+    "base_link_height_gain_m": 0.36414021253585815,
+    "sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2"
+  },
+  "evaluation": {
+    "deterministic_start_frame": 0,
+    "isaac_environments": 16,
+    "same_initial_state_replicas": true,
+    "isaac_completed_replicas": 16,
+    "isaac_completed_with_jump_and_landing_replicas": 16,
+    "domain_randomization_enabled": false,
+    "hardware_ready": false,
+    "statistical_robustness_benchmark": false,
+    "actor_export_max_abs_error": 5.364418029785156e-7
+  },
+  "isaac_env0": {
+    "environment_index": 0,
+    "recorded_samples": 222,
+    "observed_start_s": 0,
+    "observed_end_s": 4.42,
+    "completed_full_reference": true,
+    "termination": "timeout",
+    "termination_terms": [
+      "motion_end"
+    ],
+    "base_link_initial_height_m": 0.9134200215339661,
+    "base_link_peak_height_m": 1.2651724815368652,
+    "base_link_height_gain_m": 0.35175246000289917,
+    "max_base_tilt_deg": 20.241498947143555,
+    "final_base_tilt_deg": 10.07516860961914,
+    "reference_height_rmse_m": 0.04317667707800865,
+    "contact_flight_detected": true,
+    "contact_landing_detected": true,
+    "jump_and_landing_detected": true,
+    "full_clip_with_detected_jump_and_landing": true,
+    "contact": {
+      "available": true,
+      "force_threshold_n": 5,
+      "sampling_interval_s": 0.020000000000000018,
+      "minimum_prior_support_s": 0.1,
+      "minimum_flight_s": 0.04,
+      "minimum_landing_support_s": 0.1,
+      "two_wheel_contact_fraction": 0.8288288288288288,
+      "left_contact_fraction": 0.8513513513513513,
+      "right_contact_fraction": 0.8423423423423423,
+      "flight_intervals": [
+        {
+          "takeoff_s": 1.54,
+          "no_contact_end_s": 2.06,
+          "no_contact_duration_s": 0.52,
+          "landing_s": 2.2,
+          "right_censored": false
+        }
+      ],
+      "first_takeoff_s": 1.54,
+      "first_landing_s": 2.2,
+      "max_flight_duration_s": 0.52,
+      "reason": null
+    }
+  },
+  "mujoco": {
+    "environment_index": 0,
+    "recorded_samples": 305,
+    "observed_start_s": 0,
+    "observed_end_s": 1.5199999999999896,
+    "completed_full_reference": false,
+    "termination": "early_termination",
+    "termination_terms": [
+      "ee_body_pos"
+    ],
+    "base_link_initial_height_m": 0.9134200215339661,
+    "base_link_peak_height_m": 1.019084497100862,
+    "base_link_height_gain_m": 0.10566447556689584,
+    "max_base_tilt_deg": 20.279751016170703,
+    "final_base_tilt_deg": 11.200416084462505,
+    "reference_height_rmse_m": 0.04745920526004258,
+    "contact_flight_detected": true,
+    "contact_landing_detected": false,
+    "jump_and_landing_detected": false,
+    "full_clip_with_detected_jump_and_landing": false,
+    "contact": {
+      "available": true,
+      "force_threshold_n": 5,
+      "sampling_interval_s": 0.0050000000000000044,
+      "minimum_prior_support_s": 0.1,
+      "minimum_flight_s": 0.04,
+      "minimum_landing_support_s": 0.1,
+      "two_wheel_contact_fraction": 0.7377049180327869,
+      "left_contact_fraction": 0.7868852459016393,
+      "right_contact_fraction": 0.8295081967213115,
+      "flight_intervals": [
+        {
+          "takeoff_s": 1.1849999999999967,
+          "no_contact_end_s": 1.2399999999999956,
+          "no_contact_duration_s": 0.05499999999999883,
+          "landing_s": null,
+          "right_censored": false
+        }
+      ],
+      "first_takeoff_s": 1.1849999999999967,
+      "first_landing_s": null,
+      "max_flight_duration_s": 0.05499999999999883,
+      "reason": null,
+      "force_source": "summed wheel-ground contact forces, excluding robot self-contact"
+    }
+  },
+  "common_window": {
+    "start_s": 0,
+    "end_s": 1.5199999999999896,
+    "duration_s": 1.5199999999999896,
+    "isaac_environment_index": 0,
+    "interpolation_knots": 377,
+    "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+    "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+    "base_position_rmse_m": 0.03865820374747639,
+    "base_z_rmse_m": 0.019285833842784494,
+    "base_axis_rmse_m": [
+      0.03039391149501603,
+      0.014096931368316941,
+      0.019285833842784494
+    ],
+    "leg_joint_rmse_rad": 0.0827889993457028,
+    "leg_joint_rmse_rad_by_name": {
+      "abad_L_Joint": 0.09787396936757048,
+      "abad_R_Joint": 0.06610515055946846,
+      "hip_L_Joint": 0.07282418047616518,
+      "hip_R_Joint": 0.07321040215804255,
+      "knee_L_Joint": 0.04509421868742171,
+      "knee_R_Joint": 0.12032577803831623
+    },
+    "leg_joint_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ],
+    "wheel_angles_compared": false,
+    "initial_common_base_position_difference_m": 0,
+    "initial_common_leg_joint_rmse_rad": 0
+  },
+  "observation_verification": {
+    "status": "passed",
+    "observations_checked": 3552,
+    "max_abs_error": 4.76837158203125e-7,
+    "max_abs_error_by_term": {
+      "ref_leg_q_ref_leg_dq_phase_sin_cos": 3.5762786865234375e-7,
+      "motion_anchor_pos_b": 2.4959444999694824e-7,
+      "motion_anchor_ori_b_6d_first_two_columns_row_major": 3.501772880554199e-7,
+      "base_lin_vel_b": 2.384185791015625e-7,
+      "base_ang_vel_b": 4.76837158203125e-7,
+      "leg_joint_pos_rel": 0,
+      "joint_velocities": 0,
+      "previous_clipped_actions": 0
+    },
+    "trajectory_sha256": "56be5f256a4e25cd42bdea535de224444f11cc6fe4fbd4518b274f3a9257a2a1",
+    "atol": 0.00002,
+    "rtol": 0.00002
+  },
+  "mujoco_velocity_limits": {
+    "max_abs_joint_speed_rad_s": [
+      32.25720693044254,
+      14.988090577149938,
+      17.092585929078474,
+      19.072277385980858,
+      18.770616769299735,
+      29.549703824697552,
+      109.61302137288416,
+      32.80066741163881
+    ],
+    "isaac_velocity_limit_rad_s": [
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      100,
+      100
+    ],
+    "velocity_limit_exceedance_fraction_by_joint": [
+      0.01639344262295082,
+      0,
+      0.009836065573770493,
+      0.01639344262295082,
+      0.01639344262295082,
+      0.04590163934426229,
+      0.006557377049180328,
+      0
+    ]
+  },
+  "contract": {
+    "policy_fps": 50,
+    "physics_dt": 0.005,
+    "decimation": 4,
+    "actor_dim": 51,
+    "critic_dim": 120,
+    "action_dim": 8,
+    "leg_joint_names": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ],
+    "wheel_joint_names": [
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "observed_joint_velocity_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint",
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "body_names": [
+      "base_Link",
+      "abad_L_Link",
+      "abad_R_Link",
+      "hip_L_Link",
+      "hip_R_Link",
+      "knee_L_Link",
+      "knee_R_Link",
+      "wheel_L_Link",
+      "wheel_R_Link"
+    ],
+    "orientation_body_names": [
+      "base_Link",
+      "abad_L_Link",
+      "abad_R_Link",
+      "hip_L_Link",
+      "hip_R_Link",
+      "knee_L_Link",
+      "knee_R_Link"
+    ],
+    "actor_terms": [
+      [
+        "ref_leg_q_ref_leg_dq_phase_sin_cos",
+        14
+      ],
+      [
+        "motion_anchor_pos_b",
+        3
+      ],
+      [
+        "motion_anchor_ori_b_6d_first_two_columns_row_major",
+        6
+      ],
+      [
+        "base_lin_vel_b",
+        3
+      ],
+      [
+        "base_ang_vel_b",
+        3
+      ],
+      [
+        "leg_joint_pos_rel",
+        6
+      ],
+      [
+        "joint_velocities",
+        8
+      ],
+      [
+        "previous_clipped_actions",
+        8
+      ]
+    ],
+    "raw_action_clip": [
+      -1,
+      1
+    ],
+    "leg_position_scale": 1,
+    "leg_position_offset": "reference_frame_0_joint_pos",
+    "wheel_torque_scale_nm": 12,
+    "leg_kp": 500,
+    "leg_kd": 10,
+    "leg_torque_limit_nm": 80,
+    "wheel_torque_limit_nm": 12,
+    "quaternion_order": "wxyz",
+    "root_prescribed_during_steps": false,
+    "wheel_orientation_tracking": false,
+    "wheel_angle_observation": false,
+    "reference_state_initialization_training_only": true,
+    "training_full_clip_start_fraction": 0.2,
+    "deterministic_evaluation_start_frame": 0,
+    "motion_end_hidden_teleport": false,
+    "domain_randomization": "disabled for initial pilot",
+    "actuator_limits_provenance": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+    "hardware_ready": false
+  },
+  "provenance": {
+    "reference_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+    "actor_sha256": "7410c1925ba35bb0d974aa987ae37ddece3928ef4819e91d5c452d5ac95e38e9",
+    "isaac_trajectory_sha256": "56be5f256a4e25cd42bdea535de224444f11cc6fe4fbd4518b274f3a9257a2a1",
+    "mujoco_trajectory_sha256": "e3bd24dc2369b59d1e0a9e764895c3acf9090f513ec11ac3dd44c136b6a0f105",
+    "isaac_report_sha256": "1644c4ec96abbd6bd9c73b56b7674d6b9f7ebcba194b6371e53b42e43ec66a8f",
+    "mujoco_report_sha256": "ae340660b87c2cfeb58c4c185351904ecc147091fd2b7281a0a6d99496c0abde"
+  },
+  "artifacts": {
+    "video": {
+      "file": "tracking_comparison.mp4",
+      "sha256": "a091d69b0496d3a6755307147c5bec373760d489364351010013be58ddafda36",
+      "playback_speed": 0.5,
+      "rendering": "Recorded PhysX poses and kinematic GMR reference rendered with MuJoCo meshes; no MuJoCo physics replay in the panels. The orange curve is a separate actual MuJoCo policy rollout."
+    },
+    "overview": {
+      "file": "overview.png",
+      "sha256": "7045e9f320292c01c4edc728e7f99b1f447ff7be8362453fddfb6ec07cbfefa7"
+    },
+    "checkpoint": {
+      "file": "model_final.pt",
+      "published_in_git": false,
+      "sha256": "833efc86a011ea41e0cf6cd27bc05249c2f202ec6fb9b825ba7b4520d9e93312"
+    },
+    "actor": {
+      "file": "actor_normalized.pt",
+      "published_in_git": false,
+      "sha256": "7410c1925ba35bb0d974aa987ae37ddece3928ef4819e91d5c452d5ac95e38e9"
+    },
+    "raw_motion_and_trajectories": {
+      "published_in_git": false
+    }
+  },
+  "limitations": [
+    "Common-window errors compare the two engines, not either engine against the reference.",
+    "Comparison stops at the earlier episode endpoint; no frozen or reset tail is included in RMSE.",
+    "Isaac environment0 is used. Repeated same-initial-state deterministic environments are not independent robustness trials or a statistical success probability.",
+    "Full-reference survival, measured height gain, flight, landing and stable recovery are distinct outcomes; none alone proves a successful safe jump.",
+    "Contact events retain each evaluator's original sampling rate and definition: Isaac wheel net forces may include self-contact; MuJoCo wheel-ground forces exclude it.",
+    "Reference-height errors and full-episode extrema cover each run's own observed duration, unlike the shared-window sim2sim RMSE.",
+    "Contact solvers and joint velocity limits remain simulator-specific; this is not hardware validation.",
+    "MuJoCo early termination is a measured failure of this transfer, not evidence that the retargeted reference is impossible.",
+    "The observed joint-speed-limit mismatch is not established as the sole cause of the sim2sim failure.",
+    "Robot meshes, raw motion capture, reference/rollout NPZ files and checkpoints are not included in this Git result snapshot."
+  ],
+  "data_acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217."
+}

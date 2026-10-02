@@ -1,0 +1,6 @@
+# Separate motion/IK environment. Do NOT install into Isaac's bundled Python.
+-r requirements-motion.txt
+mink==1.2.0
+mujoco==3.8.1
+qpsolvers==4.12.0
+daqp==0.8.7

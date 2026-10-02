@@ -1,0 +1,8 @@
+.venv*/
+__pycache__/
+*.pyc
+third_party/
+assets/robots/
+assets/mocap/
+outputs/
+.pytest_cache/

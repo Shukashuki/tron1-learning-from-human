@@ -1,0 +1,2 @@
+# For preparing USD files without starting Isaac Sim. Do not install in Isaac's Python.
+usd-core==25.5.1
