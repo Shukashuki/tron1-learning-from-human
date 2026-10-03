@@ -26,6 +26,40 @@ def anchored_targets(human, robot_initial, scale):
     return robot_initial[None] + scale * (human - human[:1])
 
 
+def root_rotating_targets(human, human_root, robot_initial, robot_root_initial,
+                          scale, root_quats_wxyz):
+    """Transport initial morphology offsets with the relative root rotation.
+
+    p_target = p_robot_root + s * (p_human - p_human_root) + R_relative * c,
+    c = p_robot_initial - p_robot_root_initial - s * (p_human_0 - p_human_root_0).
+    All inputs use the same heading-aligned world frame. Translation, source
+    timing and pelvis rise remain unchanged; this is not framewise grounding.
+    Unlike fixed-world anchoring, a rigid yaw of the entire human also rotates
+    the complete robot landmark arrangement. Offset transport is a retargeting
+    choice, not evidence of contact or angular-momentum feasibility.
+    """
+    human, human_root, robot_initial, robot_root_initial, quats = (
+        np.asarray(value, dtype=float) for value in
+        (human, human_root, robot_initial, robot_root_initial, root_quats_wxyz))
+    if human.ndim != 3 or human.shape[-1] != 3 or len(human) < 1:
+        raise ValueError("Human landmarks must have shape (frames, landmarks, 3)")
+    frames, landmarks, _ = human.shape
+    if (human_root.shape != (frames, 3) or robot_initial.shape != (landmarks, 3)
+            or robot_root_initial.shape != (3,) or quats.shape != (frames, 4)):
+        raise ValueError("Root, robot landmarks and quaternions must align with human frames")
+    if (not np.isfinite(scale) or scale <= 0
+            or not all(np.isfinite(v).all() for v in
+                       (human, human_root, robot_initial, robot_root_initial, quats))
+            or not np.allclose(np.linalg.norm(quats, axis=1), 1., atol=1e-8)):
+        raise ValueError("Mapping requires finite arrays, positive scale and unit quaternions")
+    rotation = Rotation.from_quat(quats[:, [1, 2, 3, 0]]).as_matrix()
+    relative_rotation = rotation @ rotation[0].T
+    offset = robot_initial - robot_root_initial - scale * (human[0] - human_root[0])
+    root_target = anchored_targets(human_root, robot_root_initial, scale)
+    return (root_target[:, None] + scale * (human - human_root[:, None])
+            + np.einsum("fij,kj->fki", relative_rotation, offset))
+
+
 def calibrated_root_rotations(quats_wxyz):
     """Remove ASF local axes and the initial robot mounting offset, not motion."""
     asf_to_world = np.array([[0., 0., 1.], [1., 0., 0.], [0., 1., 0.]])
@@ -113,7 +147,16 @@ def main():
     scale = float(np.mean(robot_lengths) / np.mean(human_lengths))
     if not .3 < scale < 2:
         raise ValueError(f"Implausible scale {scale}")
-    target_positions = anchored_targets(source_ankles, initial_wheels, scale)
+    offset_mode = settings.get("landmark_offset_mode", "fixed_world")
+    if offset_mode == "fixed_world":
+        target_positions = anchored_targets(source_ankles, initial_wheels, scale)
+        target_mapping = "p_target(t)=p_robot(0)+s*R_heading*(p_human(t)-p_human(0)); one constant world offset per ankle landmark"
+    elif offset_mode == "root_rotating":
+        target_positions = root_rotating_targets(
+            source_ankles, human[:, human_index["root"]], initial_wheels, seed[:3], scale, root_quat)
+        target_mapping = "p_target(t)=p_robot_root(t)+s*(p_human(t)-p_human_root(t))+R_robot(t)*c; initial per-landmark morphology offset c rotates with calibrated root; no grounding/retiming"
+    else:
+        raise ValueError(f"Unknown landmark_offset_mode: {offset_mode!r}")
     root_position = anchored_targets(human[:, human_index["root"]], seed[:3], scale)
     human_display = seed[None, None, :3] + scale * (human - human[:1, human_index["root"]:human_index["root"] + 1])
     target_tasks = [mink.FrameTask(n, "site", position_cost=settings["wheel_position_cost"],
@@ -146,7 +189,10 @@ def main():
             target = (1 - alpha) * target_positions[f - 1] + alpha * target_positions[f]
             q = configuration.q.copy()
             q[:3] = (1 - alpha) * root_position[f - 1] + alpha * root_position[f]
-            q[3:7] = orientation_at(times[f - 1] + alpha / fps).as_quat()[[3, 0, 1, 2]]
+            # Arithmetic on the last substep can exceed the final source time
+            # by one ULP; do not ask SLERP to extrapolate that endpoint.
+            sample_time = np.clip(times[f - 1] + alpha / fps, times[0], times[-1])
+            q[3:7] = orientation_at(sample_time).as_quat()[[3, 0, 1, 2]]
             configuration.update(q)
             for task, name, point in zip(target_tasks, target_names, target):
                 # Match the CURRENT frame orientation, making SE(3) rotational
@@ -213,7 +259,7 @@ def main():
         "uniform_human_scale": scale, "robot_leg_chain_lengths_m": robot_lengths,
         "human_leg_chain_lengths_m": human_lengths, "initial_heading_alignment": heading.tolist(),
         "initial_root_position_m": seed[:3].tolist(), "initial_wheel_position_m": initial_wheels.tolist(),
-        "target_mapping": "p_target(t)=p_robot(0)+s*R_heading*(p_human(t)-p_human(0)); one constant offset per ankle landmark",
+        "landmark_offset_mode": offset_mode, "target_mapping": target_mapping,
         "root_rotation_mapping": "R_robot(t)=R_heading*R_human(t)*R_human(0)^T*R_heading^T; initial mounting calibrated to identity",
         "wheel_errors": {n: summarize_errors(errors[:, i]) for i, n in enumerate(target_names)},
         "all_wheel_errors": summarize_errors(errors), "max_joint_limit_violation_rad": max_violation,

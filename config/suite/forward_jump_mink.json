@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source": "outputs/motion-suite-20261003/forward_jump/human/human_motion.npz",
+  "model": "assets/robots/WF_TRON1A/mujoco/robot.xml",
+  "solver": "daqp",
+  "substeps": 4,
+  "wheel_position_cost": 1,
+  "posture_cost": 0.001,
+  "damping": 0.000001,
+  "preview_joint_speed_limit_rad_s": 8,
+  "speed_limit_note": "Preview regularization, not a manufacturer-rated or dynamically feasible speed.",
+  "seed_joint_positions_rad": {},
+  "target_sites": [
+    "left_wheel",
+    "right_wheel"
+  ],
+  "source_nodes": [
+    "ltibia",
+    "rtibia"
+  ],
+  "mapping": "Initial-pose-anchored ankle displacement to wheel centers; one uniform scale from robot hip-knee-wheel chain length / human hip-knee-ankle chain length.",
+  "root": "Prescribed scaled global pelvis translation and initial-pose-calibrated relative pelvis rotation; frozen inside each IK QP.",
+  "knees": "Not human-knee tracking: TRON1 bends backward, unlike the human. Warm start plus a small neutral posture cost select the robot branch.",
+  "wheels": "Spin frozen at zero. No human ankle orientation, rolling constraint, force, or dynamics imposed.",
+  "landmark_offset_mode": "fixed_world"
+}

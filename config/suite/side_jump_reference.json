@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task": "side_jump",
+  "source_clip": "141_05",
+  "source_asf": "assets/mocap/CMU/141.asf",
+  "source_amc": "assets/mocap/CMU/141_05.amc",
+  "source_fps": 120,
+  "human_output": "outputs/motion-suite-20261003/side_jump/human",
+  "mink_config": "config/suite/side_jump_mink.json",
+  "mink_output": "outputs/motion-suite-20261003/side_jump/mink",
+  "gmr_config": "config/suite/side_jump_gmr.json",
+  "gmr_output": "outputs/motion-suite-20261003/side_jump/gmr",
+  "export": {
+    "source": "outputs/motion-suite-20261003/side_jump/gmr/robot_reference.npz",
+    "output": "outputs/motion-suite-20261003/side_jump/tracking/motion.npz",
+    "output_fps": 50,
+    "append_hold_s": 1,
+    "prepend_hold_s": 0,
+    "z_offset_m": 0.001
+  },
+  "z_offset_policy": "Only 1 mm initial clearance; unsafe midclip penetration intentionally retained and flagged.",
+  "reference_validation": "outputs/motion-suite-20261003/side_jump/reference_validation.json",
+  "status": "diagnostic_reference_quality_failure",
+  "source": {
+    "catalog_url": "http://mocap.cs.cmu.edu/search.php?subjectnumber=141",
+    "asf_url": "http://mocap.cs.cmu.edu/subjects/141/141.asf",
+    "amc_url": "http://mocap.cs.cmu.edu/subjects/141/141_05.amc",
+    "fps": 120,
+    "asf_sha256": "e32993b8079c0914ed4d865ad53f7b9646398808855233e6f650d4f4417df2bb",
+    "amc_sha256": "d5a8665dfe131128480668cb10d473244c812274172164ad51492cfa524b76f2",
+    "fk_max_bone_length_error_m": 4.996003610813204e-16,
+    "catalog_fps_verification": "Official HTTP subject 141 table: trial 5 Jump Sideways, AMC 141_05.amc, fps column 120; retrieved 2026-10-03."
+  },
+  "python_environment_used": "Python 3.13, Mink 1.2.0, MuJoCo 3.8.1 (kinematic retargeting only)",
+  "physics_validated": false
+}

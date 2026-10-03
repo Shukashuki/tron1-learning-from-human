@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "budget": {
+    "num_envs": 2048,
+    "iterations_per_motion": 600,
+    "seed": 42,
+    "env_steps_per_motion": 29491200,
+    "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+    "resume_iteration": 2199,
+    "domain_randomization": "motor-v1: wheel resistance, motor no-load speed, motor torque capacity",
+    "selection_rule": "Predesignated final checkpoint; no evaluation-based checkpoint selection; no retraining after results.",
+    "physics_hz": 200,
+    "policy_hz": 50,
+    "evaluations_per_engine_per_task": 1,
+    "evaluation_domain": "nominal, deterministic, starts at reference frame zero including its nonzero initial velocities",
+    "common_reference_append_hold_s": 1,
+    "not_claimed": ["training from scratch", "single policy for all six skills", "held-out domain robustness success rate", "hardware readiness"]
+  },
+  "tasks": [
+    {
+      "task": "forward_jump",
+      "source": {"clip": "16_05", "description": "forward jump", "manifest_key": "cmu_16_05"},
+      "reference_path": "outputs/motion-suite-20261003/forward_jump/tracking/motion.npz",
+      "reference_recipe": "config/suite/forward_jump_reference.json",
+      "raw_skill_intent": "Forward displacement with flight and stable landing",
+      "caveats": ["Uniform morphology scaling and +5.8 mm global vertical clearance; no retiming.", "Starts from reference frame zero with its recorded nonzero velocity; no standstill-to-jump transition tested."]
+    },
+    {
+      "task": "turn_jump",
+      "source": {"clip": "83_51", "description": "hop turn 90 degrees left in air", "manifest_key": "cmu_83_51"},
+      "reference_path": "outputs/motion-suite-20261003/turn_jump/tracking/motion.npz",
+      "reference_recipe": "config/suite/turn_jump_reference.json",
+      "raw_skill_intent": "Original source: 90-degree turn in air; suite gate only tests whole-episode yaw progress plus a separate flight event",
+      "caveats": ["A suite pass DOES NOT establish a 90-degree airborne turn; much of the observed turn happens on the ground.", "Root-rotating landmark offsets, uniform morphology scaling and +8.1 mm global vertical clearance; no retiming.", "Starts from reference frame zero including its nonzero velocity."]
+    },
+    {
+      "task": "side_jump",
+      "source": {"clip": "141_05", "description": "Jump Sideways", "manifest_key": "cmu_141_05"},
+      "reference_path": "outputs/motion-suite-20261003/side_jump/tracking/motion.npz",
+      "reference_recipe": "config/suite/side_jump_reference.json",
+      "raw_skill_intent": "Lateral jump excursion and return, with stable landing",
+      "reference_quality": "diagnostic_reference_quality_failure",
+      "caveats": ["Reference has 48.25 mm maximum robot-ground penetration and 120 Hz peak leg speed 25.21 rad/s; these are quality warnings, not a proof of dynamic impossibility.", "Only +1 mm initial clearance; no per-frame grounding, global 5 cm lift or retiming to conceal the reference defects.", "Net lateral displacement is almost zero; gate also requires substantial lateral excursion."]
+    },
+    {
+      "task": "rolling_stop",
+      "source": {"clip": "16_08", "description": "run/jog, sudden stop", "manifest_key": "cmu_16_08"},
+      "reference_path": "outputs/motion-suite-20261003/rolling_stop/motion.npz",
+      "reference_recipe": {"script": "scripts/prepare_wheel_skill_references.py", "skill": "rolling_stop", "time_scale": 2, "root_height_m": 0.89, "translation_scale": 0.35, "rolling_height_scale": 0.15, "pitch_scale": 0.35, "smoothing_source_s": 0.1},
+      "raw_skill_intent": "Human-inspired rolling-to-stop task, NOT raw human running imitation",
+      "caveats": ["Starts already rolling (reference initial forward velocity about 0.311 m/s); acceleration from standstill is not tested.", "Duration doubled, travel scaled by 0.35, vertical change scaled by 0.15, pitch by 0.35; alternating footsteps replaced with symmetric wheel support.", "Reference wheel spin is kinematically reconstructed but masked as a training target; policy wheel torque remains learned."]
+    },
+    {
+      "task": "crouch",
+      "source": {"clip": "134_01", "description": "Skateboard Motions: Duck Under", "manifest_key": "cmu_134_01"},
+      "reference_path": "outputs/motion-suite-20261003/crouch/motion.npz",
+      "reference_recipe": {"script": "scripts/prepare_wheel_skill_references.py", "skill": "crouch", "first_frame": 160, "last_frame": 330, "time_scale": 2, "root_height_m": 0.89, "crouch_depth_m": 0.18, "pitch_scale": 0.35, "smoothing_source_s": 0.1},
+      "raw_skill_intent": "Human-inspired 18 cm stationary crouch and recovery, NOT unmodified skateboard duck-under",
+      "caveats": ["Source frames 160-330, duration doubled, observed human lowering normalized to an explicit robot depth of 18 cm.", "Horizontal travel, roll and yaw removed; small fore-aft wheel rolling maintains static COM support during retargeting.", "No overhead obstacle or collision-clearance test was included."]
+    },
+    {
+      "task": "step_up",
+      "source": {"clip": "83_03", "description": "large step to a short ledge", "manifest_key": "cmu_83_03"},
+      "reference_path": "outputs/motion-suite-20261003/step_up/motion.npz",
+      "reference_recipe": {"script": "scripts/prepare_step_reference.py", "terrain_path": "outputs/motion-suite-20261003/step_up/prepared/terrain.json", "terrain_sha256": "04de6a94ad9803992e977e2505d9ad4253c09a4d74f9227d2262445f13651088", "terrain_top_height_m": 0.11639590233786186, "export_z_offset_m": 0.008565039259350954},
+      "raw_skill_intent": "Climb a real static ledge and finish with both wheels supported on its top",
+      "caveats": ["Ledge height estimated from terminal foot support, not pelvis; leading edge and depth are estimated, not recorded CMU scene ground truth.", "Identical metric static box specification is used by Isaac training/evaluation and MuJoCo deployment; live collider readback required.", "Only one ledge geometry and one nominal frame-zero rollout per engine were tested."]
+    }
+  ],
+  "limitations": [
+    "Each task is a separate policy fine-tuned from the same previous jump DR checkpoint.",
+    "A completed training process or surviving until motion_end is not task success.",
+    "Behavior gates are fixed before outcomes; additional runtime scene audits only strengthen provenance.",
+    "Isaac wheel forces are net-force proxies and non-wheel ground-only force evidence is incomplete.",
+    "Videos reconstruct recorded physical rollout poses in a common renderer; they are not additional physical simulations.",
+    "Raw CMU assets, robot assets, full trajectories, logs and checkpoints are excluded from Git."
+  ]
+}

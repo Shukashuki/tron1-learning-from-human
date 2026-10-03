@@ -1,0 +1,2671 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "scope": "Six separately fine-tuned policies; one nominal frame-zero episode per engine per task",
+  "config_sha256": "352449150c44bdb3a3e1111417f553856a26b1b440e62ce2426c99058375b22a",
+  "publisher_sha256": "bfc3490955a967d53954145133cf9961641e57b7a35a820bf384870547de9cce",
+  "expected_budget": {
+    "num_envs": 2048,
+    "iterations_per_motion": 600,
+    "seed": 42,
+    "env_steps_per_motion": 29491200,
+    "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+    "resume_iteration": 2199,
+    "domain_randomization": "motor-v1: wheel resistance, motor no-load speed, motor torque capacity",
+    "selection_rule": "Predesignated final checkpoint; no evaluation-based checkpoint selection; no retraining after results.",
+    "physics_hz": 200,
+    "policy_hz": 50,
+    "evaluations_per_engine_per_task": 1,
+    "evaluation_domain": "nominal, deterministic, starts at reference frame zero including its nonzero initial velocities",
+    "common_reference_append_hold_s": 1,
+    "not_claimed": [
+      "training from scratch",
+      "single policy for all six skills",
+      "held-out domain robustness success rate",
+      "hardware readiness"
+    ]
+  },
+  "budget_pass_count": 6,
+  "behavior_pass_count": 4,
+  "task_count": 6,
+  "statistical_robustness_benchmark": false,
+  "safety_verified": false,
+  "hardware_ready": false,
+  "limitations": [
+    "Each task is a separate policy fine-tuned from the same previous jump DR checkpoint.",
+    "A completed training process or surviving until motion_end is not task success.",
+    "Behavior gates are fixed before outcomes; additional runtime scene audits only strengthen provenance.",
+    "Isaac wheel forces are net-force proxies and non-wheel ground-only force evidence is incomplete.",
+    "Videos reconstruct recorded physical rollout poses in a common renderer; they are not additional physical simulations.",
+    "Raw CMU assets, robot assets, full trajectories, logs and checkpoints are excluded from Git."
+  ],
+  "publication": "Source-hash-linked compact snapshot. No raw CMU motion, robot assets, checkpoints, actor weights, full trajectories or logs redistributed. Third-party licenses remain applicable.",
+  "tasks": [
+    {
+      "task": "forward_jump",
+      "source": {
+        "clip": "16_05",
+        "description": "forward jump",
+        "manifest_key": "cmu_16_05",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+          "fps": 120,
+          "frame_count": 295,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/16/16.asf",
+            "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb",
+            "bytes": 7257
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/16/16_05.amc",
+            "sha256": "6467f78aad0529d2b9eb6f2f2633b518c299da66959a2171ec73ba40e017787f",
+            "bytes": 236161
+          }
+        ]
+      },
+      "raw_skill_intent": "Forward displacement with flight and stable landing",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "Uniform morphology scaling and +5.8 mm global vertical clearance; no retiming.",
+        "Starts from reference frame zero with its recorded nonzero velocity; no standstill-to-jump transition tested."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": true,
+      "verdict": "pass",
+      "failed_checks": [],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 3.4599999999999485,
+        "duration_s": 3.4599999999999485,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 862,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.01686193983554988,
+        "base_z_rmse_m": 0.005768933397687645,
+        "base_axis_rmse_m": [
+          0.011777503464649973,
+          0.010598812886871147,
+          0.005768933397687645
+        ],
+        "leg_joint_rmse_rad": 0.03066753145865439,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.014092326383577,
+          "abad_R_Joint": 0.01325183590023823,
+          "hip_L_Joint": 0.059523766222430746,
+          "hip_R_Joint": 0.011178657715733573,
+          "knee_L_Joint": 0.03585042021614369,
+          "knee_R_Joint": 0.01776193496427221
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.02916791369083251,
+            "final_height_error_m": 0.023990213871002197,
+            "final_heading_error_deg": 1.7675798664888396,
+            "root_rmse_m": 0.08015246509380668,
+            "root_rmse_window_s": [
+              0.0,
+              3.46
+            ],
+            "tail_max_tilt_deg": 9.615866661071777,
+            "tail_mean_planar_speed_m_s": 0.043277372838929296,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.13453155755996704,
+            "max_planar_speed_m_s": 1.1295294389128674,
+            "flight_intervals": [
+              {
+                "takeoff_s": 1.1400000000000001,
+                "landing_s": 1.5,
+                "no_contact_duration_s": 0.3599999999999999
+              }
+            ],
+            "net_displacement_progress_fraction": 0.9800799491470824
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.04625667535587116,
+            "final_height_error_m": 0.022872551324533696,
+            "final_heading_error_deg": 2.0338561212175614,
+            "root_rmse_m": 0.08039292886803165,
+            "root_rmse_window_s": [
+              0.0,
+              3.4599999999999485
+            ],
+            "tail_max_tilt_deg": 9.456149876795173,
+            "tail_mean_planar_speed_m_s": 0.049151204138285325,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.14771516798564144,
+            "max_planar_speed_m_s": 1.4932038346841707,
+            "flight_intervals": [
+              {
+                "takeoff_s": 1.1399999999999977,
+                "landing_s": 1.689999999999986,
+                "no_contact_duration_s": 0.3649999999999922
+              }
+            ],
+            "net_displacement_progress_fraction": 0.9547996308754738
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 173,
+        "fps": 50.0,
+        "sample_span_s": 3.44,
+        "action_duration_s": 3.46,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          -0.10015368461608887,
+          0.040001872926950455,
+          -0.01667376235127449
+        ],
+        "root_angular_velocity_rad_s": [
+          0.21125711500644684,
+          0.4262138605117798,
+          0.5496844053268433
+        ],
+        "joint_velocity_rad_s": [
+          -0.24040694534778595,
+          -0.24166624248027802,
+          -0.9748448133468628,
+          0.4589279592037201,
+          -0.22648994624614716,
+          -0.09082808345556259,
+          3.224350027731702e-20,
+          0.0
+        ]
+      },
+      "reference_recipe": "config/suite/forward_jump_reference.json",
+      "reference_quality": null,
+      "hashes": {
+        "assessment_sha256": "92c85711ef9a40d0ad4983c9c0ad6baa142ec9d727fd9370618d1361416362fe",
+        "manifest_sha256": "95ca8530f28f5dc68eb9aa4fdeb35ee8322d39a0f804b6ce0fbe800e4c4ab2d5",
+        "status_sha256": "89595fb5e26ffb41b26359424d79bb2fb8f0e680d87741a36800a4baf4d5eba1",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "b605f191ed4020e5ad378d74ee1ba90147cced12e84cd0688e719d3703247066",
+        "checkpoint_sha256": "bd5779ff00bee5c9ac617cc2461d4ec5869812efde1da733208d65d8c244526e",
+        "isaac_report_sha256": "2fba1300734006881fdcce6df725e83c84d5e5dd68a30a8bcd83a112108d744a",
+        "contract_sha256": "66318f47ac092d23d98f8109eb2128f2a20fe92efc0373812333d5bb7bc7f2cb",
+        "actor_sha256": "fd08f174509de93e513f0f5345056d6b1782c95580102824bde54f09a1ca2cbb",
+        "isaac_trajectory_sha256": "0f6fa4de3e93315978c7998507736e5cdc1e0f5697757d09247b0b9cb38d09f1",
+        "mujoco_report_sha256": "79fd1766601349022bf1159fb72bad6836eca8c6d4661867b520e201fea489d4",
+        "mujoco_trajectory_sha256": "d03699a8c9e2038a67fd2e0443066858ed9301d921613126d46635e657062b17",
+        "render_sha256": "dc9b854fefb7e92a19f57d46b1403be3b91fac59c842edd2e2df28cb8c74f72d",
+        "video_sha256": "6d2ba54541c2a2a6cc9f48a234b3d4a40b26f19ff3226ebf9886cde76a6f7e32",
+        "overview_sha256": "198a1980bdcc2c6525677a5db3613182e9cd81f964f4e48fa083fe4970285a18",
+        "reference_sha256": "872a4832e91e7f638ecff9422869277a728eb11ed7d51b86c4291faf7d1abb12",
+        "published_assessment_sha256": "481b9be6ea4b63494dfcd1c51fb197c78ff838670362faaa40d68faf8707f702"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "53250be13301778ef313379d8c1989e1357b8424911d6e324f3d6d9e1483d3a9"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 406,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.200727462768555,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.200727462768555,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750018119812012,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.500036239624023,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.2999940514564514
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 174,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 3.4599999999999485,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": null,
+          "mujoco": null
+        },
+        "training_runtime_audit": null,
+        "isaac_runtime_audit": null,
+        "mujoco_runtime_audit": null
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "95442cfd26e16444c7d4e2f8123aa1df98dc0031522d10ec2d423109e024b944",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "forward_jump/assessment.json",
+        "video": "forward_jump/tracking_comparison.mp4",
+        "overview": "forward_jump/overview.png"
+      }
+    },
+    {
+      "task": "turn_jump",
+      "source": {
+        "clip": "83_51",
+        "description": "hop turn 90 degrees left in air",
+        "manifest_key": "cmu_83_51",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+          "fps": 120,
+          "frame_count": 591,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/83/83.asf",
+            "sha256": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093",
+            "bytes": 7273
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/83/83_51.amc",
+            "sha256": "9505c7ac643d3beb53d51a4a5044d43a0fd391ddfff05ce9122abcc3a252d200",
+            "bytes": 474476
+          }
+        ]
+      },
+      "raw_skill_intent": "Original source: 90-degree turn in air; suite gate only tests whole-episode yaw progress plus a separate flight event",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "A suite pass DOES NOT establish a 90-degree airborne turn; much of the observed turn happens on the ground.",
+        "Root-rotating landmark offsets, uniform morphology scaling and +8.1 mm global vertical clearance; no retiming.",
+        "Starts from reference frame zero including its nonzero velocity."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": true,
+      "verdict": "pass",
+      "failed_checks": [],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 5.919999999999896,
+        "duration_s": 5.919999999999896,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 1477,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.020166777544403033,
+        "base_z_rmse_m": 0.0025459405280885312,
+        "base_axis_rmse_m": [
+          0.017740581860247434,
+          0.009246018527600645,
+          0.0025459405280885312
+        ],
+        "leg_joint_rmse_rad": 0.0153629832844525,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.018024168330941566,
+          "abad_R_Joint": 0.007423097282732652,
+          "hip_L_Joint": 0.013844398325732062,
+          "hip_R_Joint": 0.012499499870244967,
+          "knee_L_Joint": 0.01612266556213233,
+          "knee_R_Joint": 0.02069563500506851
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.029598742408602854,
+            "final_height_error_m": 0.0025091171264648438,
+            "final_heading_error_deg": 0.7197954115255425,
+            "root_rmse_m": 0.050101554192340574,
+            "root_rmse_window_s": [
+              0.0,
+              5.92
+            ],
+            "tail_max_tilt_deg": 1.563228964805603,
+            "tail_mean_planar_speed_m_s": 0.011927603278309107,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.1277828812599182,
+            "max_planar_speed_m_s": 0.9847611188888541,
+            "flight_intervals": [
+              {
+                "takeoff_s": 2.62,
+                "landing_s": 2.94,
+                "no_contact_duration_s": 0.2999999999999998
+              }
+            ],
+            "yaw_progress_fraction": 1.008246367722777
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.019638706987516973,
+            "final_height_error_m": 0.00027306292088991047,
+            "final_heading_error_deg": 1.621436098431582,
+            "root_rmse_m": 0.051144537762390065,
+            "root_rmse_window_s": [
+              0.0,
+              5.919999999999896
+            ],
+            "tail_max_tilt_deg": 1.617106478344864,
+            "tail_mean_planar_speed_m_s": 0.009864345890396775,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.12281466604973956,
+            "max_planar_speed_m_s": 1.1555869042010445,
+            "flight_intervals": [
+              {
+                "takeoff_s": 2.6149999999999665,
+                "landing_s": 3.254999999999953,
+                "no_contact_duration_s": 0.3049999999999935
+              }
+            ],
+            "yaw_progress_fraction": 1.0185760538238406
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 296,
+        "fps": 50.0,
+        "sample_span_s": 5.9,
+        "action_duration_s": 5.92,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          -0.24554571509361267,
+          -0.031382642686367035,
+          -0.16625875234603882
+        ],
+        "root_angular_velocity_rad_s": [
+          -0.2528156638145447,
+          1.4115731716156006,
+          -0.3027879595756531
+        ],
+        "joint_velocity_rad_s": [
+          0.30652010440826416,
+          0.21195803582668304,
+          -2.125643730163574,
+          2.1735520362854004,
+          -0.6842896938323975,
+          0.5723465085029602,
+          -2.2715250422171308e-20,
+          -5.961649002208792e-20
+        ]
+      },
+      "reference_recipe": "config/suite/turn_jump_reference.json",
+      "reference_quality": null,
+      "hashes": {
+        "assessment_sha256": "f557767f521ce3cbbabc4970767c0f9ba5d69f21d91c3f449f146d6fd1372e62",
+        "manifest_sha256": "04a1bf53e80035257830f5ca9e83742f07fa9915b24c660e02b4e6223f069211",
+        "status_sha256": "5cf9d39ef1056ae0921a702266d59bebe4419e0279a3c86e2300df7d2161c88c",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "9fd4fcc69a4d467bb37accb6c63efae4e0d2895f33ae22bafb88881c698e20aa",
+        "checkpoint_sha256": "e2b83d587b36e315967669cd9cf9d1b6dacdc2cfbece2eb88c2d20a2d208bd12",
+        "isaac_report_sha256": "fcd8295acfebde4d83914be7560277c1d69484475e5b4ef91d6d4384c7ca5fa1",
+        "contract_sha256": "52a818fc33aad954dc3eac447bc37d073e2b0d84a6c8d4ffc290139dab04ae18",
+        "actor_sha256": "7ab4a6794b60eb032b642af53be63317c9d292d03c49bfb689328a454afebb8f",
+        "isaac_trajectory_sha256": "383f54ac02b43c8b6e79fa01d0d84de060c97003ba7b752e7474b50f7b8969e2",
+        "mujoco_report_sha256": "c58b1e936c8ab5c4447f07ac434bf7b83d9fb2f9f01393a62d2fcd4de1d1f099",
+        "mujoco_trajectory_sha256": "958ec121f9d29fae304e01e631838e6ea335cd462b9639d78395e545c8dcf8a1",
+        "render_sha256": "5994dfa41c67e074aaa42da60131c481381d32db315d38a3fa2498a64bdc46e6",
+        "video_sha256": "933de3dee7d150793cc21d431b84cae26dd90e377fa6d60b66642dd39c4a075c",
+        "overview_sha256": "7d28003178b70b94dcaca53d8075d94dbc3c6c3f8f3740e5311d09f70363a5b3",
+        "reference_sha256": "92d15ea78145d7c2c3c47071bbb2662b68e9b7aa370d84bc9ef81dd2c2157288",
+        "published_assessment_sha256": "431654d4afa0ebf2e9b446b490cee4fd9698ec4eb99f6404d26f8793ab0f61d0"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "53250be13301778ef313379d8c1989e1357b8424911d6e324f3d6d9e1483d3a9"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 415,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.200932502746582,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.200932502746582,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750027656555176,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.50005531311035,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.2999725639820099
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 297,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 5.919999999999896,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": null,
+          "mujoco": null
+        },
+        "training_runtime_audit": null,
+        "isaac_runtime_audit": null,
+        "mujoco_runtime_audit": null
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "95442cfd26e16444c7d4e2f8123aa1df98dc0031522d10ec2d423109e024b944",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "turn_jump/assessment.json",
+        "video": "turn_jump/tracking_comparison.mp4",
+        "overview": "turn_jump/overview.png"
+      },
+      "supplemental_yaw_diagnostics": {
+        "isaac": {
+          "status": "posthoc descriptive only; not used to change the verdict",
+          "initial_yaw_deg": 0.0,
+          "total_yaw_change_deg": 88.00614929199219,
+          "flights": [
+            {
+              "takeoff_s": 2.62,
+              "no_contact_end_s": 2.92,
+              "yaw_before_takeoff_deg": 28.860477447509766,
+              "airborne_yaw_change_deg": 33.31882858276367
+            }
+          ],
+          "does_not_certify_90_degree_airborne_turn": true
+        },
+        "mujoco": {
+          "status": "posthoc descriptive only; not used to change the verdict",
+          "initial_yaw_deg": 0.0,
+          "total_yaw_change_deg": 88.9077948594416,
+          "flights": [
+            {
+              "takeoff_s": 2.6149999999999665,
+              "no_contact_end_s": 2.91999999999996,
+              "yaw_before_takeoff_deg": 29.542777758140964,
+              "airborne_yaw_change_deg": 38.90088141071163
+            }
+          ],
+          "does_not_certify_90_degree_airborne_turn": true
+        }
+      }
+    },
+    {
+      "task": "side_jump",
+      "source": {
+        "clip": "141_05",
+        "description": "Jump Sideways",
+        "manifest_key": "cmu_141_05",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=141",
+          "fps": 120,
+          "frame_count": 230,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/141/141.asf",
+            "sha256": "e32993b8079c0914ed4d865ad53f7b9646398808855233e6f650d4f4417df2bb",
+            "bytes": 7269
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/141/141_05.amc",
+            "sha256": "d5a8665dfe131128480668cb10d473244c812274172164ad51492cfa524b76f2",
+            "bytes": 183926
+          }
+        ]
+      },
+      "raw_skill_intent": "Lateral jump excursion and return, with stable landing",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "Reference has 48.25 mm maximum robot-ground penetration and 120 Hz peak leg speed 25.21 rad/s; these are quality warnings, not a proof of dynamic impossibility.",
+        "Only +1 mm initial clearance; no per-frame grounding, global 5 cm lift or retiming to conceal the reference defects.",
+        "Net lateral displacement is almost zero; gate also requires substantial lateral excursion."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": false,
+      "verdict": "fail",
+      "failed_checks": [
+        "isaac.full_motion_root_rmse",
+        "isaac.minimum_actual_rise",
+        "isaac.intended_side_excursion_progress",
+        "mujoco.full_motion_root_rmse",
+        "mujoco.minimum_actual_rise",
+        "mujoco.intended_side_excursion_progress"
+      ],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 2.91999999999996,
+        "duration_s": 2.91999999999996,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 727,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.011095003185834883,
+        "base_z_rmse_m": 0.0026234854550634943,
+        "base_axis_rmse_m": [
+          0.0019982430920081383,
+          0.010593556735393372,
+          0.0026234854550634943
+        ],
+        "leg_joint_rmse_rad": 0.013089510594979085,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.007079999630523614,
+          "abad_R_Joint": 0.009881374744479678,
+          "hip_L_Joint": 0.015123465381858237,
+          "hip_R_Joint": 0.013032401617554484,
+          "knee_L_Joint": 0.015931238593752364,
+          "knee_R_Joint": 0.015095585575882682
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "fail",
+          "failed_checks": [
+            "full_motion_root_rmse",
+            "minimum_actual_rise",
+            "intended_side_excursion_progress"
+          ],
+          "metrics": {
+            "final_root_error_m": 0.04951778323782787,
+            "final_height_error_m": 0.0279158353805542,
+            "final_heading_error_deg": 0.6819384706247099,
+            "root_rmse_m": 0.16159322668117504,
+            "root_rmse_window_s": [
+              0.0,
+              2.92
+            ],
+            "tail_max_tilt_deg": 3.6795623302459717,
+            "tail_mean_planar_speed_m_s": 0.05824447644408792,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.01985996961593628,
+            "max_planar_speed_m_s": 0.8041361346840852,
+            "flight_intervals": [
+              {
+                "takeoff_s": 0.52,
+                "landing_s": 1.72,
+                "no_contact_duration_s": 0.07999999999999996
+              },
+              {
+                "takeoff_s": 0.74,
+                "landing_s": 1.72,
+                "no_contact_duration_s": 0.16000000000000003
+              },
+              {
+                "takeoff_s": 1.24,
+                "landing_s": 1.72,
+                "no_contact_duration_s": 0.10000000000000009
+              },
+              {
+                "takeoff_s": 1.36,
+                "landing_s": 1.72,
+                "no_contact_duration_s": 0.07999999999999985
+              }
+            ],
+            "net_displacement_progress_fraction": 1.056091844361092,
+            "side_excursion_progress_fraction": 0.2484805160400787
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "fail",
+          "failed_checks": [
+            "full_motion_root_rmse",
+            "minimum_actual_rise",
+            "intended_side_excursion_progress"
+          ],
+          "metrics": {
+            "final_root_error_m": 0.039707462323975797,
+            "final_height_error_m": 0.028608798819882653,
+            "final_heading_error_deg": 0.44983873412258035,
+            "root_rmse_m": 0.15604423954970126,
+            "root_rmse_window_s": [
+              0.0,
+              2.91999999999996
+            ],
+            "tail_max_tilt_deg": 3.92846068208352,
+            "tail_mean_planar_speed_m_s": 0.05543999181298499,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.021079143112563425,
+            "max_planar_speed_m_s": 1.187607465513069,
+            "flight_intervals": [
+              {
+                "takeoff_s": 0.5050000000000003,
+                "landing_s": 1.734999999999985,
+                "no_contact_duration_s": 0.09000000000000008
+              },
+              {
+                "takeoff_s": 0.7200000000000005,
+                "landing_s": 1.734999999999985,
+                "no_contact_duration_s": 0.17500000000000016
+              },
+              {
+                "takeoff_s": 1.2399999999999956,
+                "landing_s": 1.734999999999985,
+                "no_contact_duration_s": 0.09499999999999797
+              }
+            ],
+            "net_displacement_progress_fraction": 1.0261263146934196,
+            "side_excursion_progress_fraction": 0.28071038507169793
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 146,
+        "fps": 50.0,
+        "sample_span_s": 2.9,
+        "action_duration_s": 2.92,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          0.13382571935653687,
+          0.07411665469408035,
+          0.07585671544075012
+        ],
+        "root_angular_velocity_rad_s": [
+          -0.09461072087287903,
+          -0.21643440425395966,
+          0.484310507774353
+        ],
+        "joint_velocity_rad_s": [
+          0.12299094349145889,
+          0.22305487096309662,
+          0.0036148810759186745,
+          -1.1236817836761475,
+          -0.41926974058151245,
+          -0.886439323425293,
+          -1.3775871091336951e-19,
+          -2.3306371136242748e-20
+        ]
+      },
+      "reference_recipe": "config/suite/side_jump_reference.json",
+      "reference_quality": "diagnostic_reference_quality_failure",
+      "hashes": {
+        "assessment_sha256": "a1486a2a69e71ef7973a3df1f14ad5f679f49e231604fdeff779ea1500f45b50",
+        "manifest_sha256": "68fe67427d7d48c822bbf47eeb3902e9d1c5fa5eab3aef38660bc4d64b9dbb32",
+        "status_sha256": "6ce7752d7fe0f2c5de88f88c2b3dcae7305f284d19a6e81b316664f00956e584",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "91af7f08dfd0d0c1410bf93e829a6e4351e0921128c3ccee2c163a8740154534",
+        "checkpoint_sha256": "140b109c320d66b3978d5ec6d6af19ec2940a1579a3a8de9fda3162fd6915a51",
+        "isaac_report_sha256": "28c8d9e26c2688886a05edb36c8509b504a7b2f9e83cfdaa847d646fe2381084",
+        "contract_sha256": "91fa8bed762c19b5ca5710e4a73998081ab0f651d17c98a0fffbde83e79fc794",
+        "actor_sha256": "7cec8e3e2972888c79922584b679c3899283880e99851ede64e14d10f7464e11",
+        "isaac_trajectory_sha256": "696402ff013c1780435066971fdf11449b2ffebfe7338a202a71c64cb55b060f",
+        "mujoco_report_sha256": "ee3380f80f8856819720d9176058f71a1639f924d70be92ba0505f8d719aaa06",
+        "mujoco_trajectory_sha256": "5ae8f829cc2ca94489898c60777fa3e46f346d8154e14203cf2f0834110ebde0",
+        "render_sha256": "d65658366e63f6090b10a854252e443f68f3da6c7395eaeb99b4a4d569124447",
+        "video_sha256": "eb9f6956118e9bdf9b44dceebc79849c63ee80c9a4ebfae8afd53f17b9d231bc",
+        "overview_sha256": "ce7280fe0a80f200bc61cbc391fe45df5fb168a81164c9a33727b31c816b0943",
+        "reference_sha256": "40751fc76493bc5239a56e17fa72e8a14ca57347df550ae81d874be9aaf3656e",
+        "published_assessment_sha256": "6457245575e770e994104d2c97dbdf6fcb9944efdb66d451bc747671ca336b7e"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "53250be13301778ef313379d8c1989e1357b8424911d6e324f3d6d9e1483d3a9"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 384,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.201383590698242,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.201383590698242,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750226020812988,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.500452041625977,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.29998326301574707
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 147,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 2.91999999999996,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": null,
+          "mujoco": null
+        },
+        "training_runtime_audit": null,
+        "isaac_runtime_audit": null,
+        "mujoco_runtime_audit": null
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "95442cfd26e16444c7d4e2f8123aa1df98dc0031522d10ec2d423109e024b944",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "side_jump/assessment.json",
+        "video": "side_jump/tracking_comparison.mp4",
+        "overview": "side_jump/overview.png"
+      }
+    },
+    {
+      "task": "rolling_stop",
+      "source": {
+        "clip": "16_08",
+        "description": "run/jog, sudden stop",
+        "manifest_key": "cmu_16_08",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+          "fps": 120,
+          "frame_count": 239,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/16/16.asf",
+            "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb",
+            "bytes": 7257
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/16/16_08.amc",
+            "sha256": "07fb225c178eda7d232cbe41e975461f8214c3c9f44adf7edff5da25f51b9ec6",
+            "bytes": 191378
+          }
+        ]
+      },
+      "raw_skill_intent": "Human-inspired rolling-to-stop task, NOT raw human running imitation",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "Starts already rolling (reference initial forward velocity about 0.311 m/s); acceleration from standstill is not tested.",
+        "Duration doubled, travel scaled by 0.35, vertical change scaled by 0.15, pitch by 0.35; alternating footsteps replaced with symmetric wheel support.",
+        "Reference wheel spin is kinematically reconstructed but masked as a training target; policy wheel torque remains learned."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": true,
+      "verdict": "pass",
+      "failed_checks": [],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 4.979999999999916,
+        "duration_s": 4.979999999999916,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 1242,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.010953269856834974,
+        "base_z_rmse_m": 0.0006282550403034916,
+        "base_axis_rmse_m": [
+          0.010798338253822693,
+          0.0017249078575426533,
+          0.0006282550403034916
+        ],
+        "leg_joint_rmse_rad": 0.006710863424243571,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.007746439649633186,
+          "abad_R_Joint": 0.012462407427513969,
+          "hip_L_Joint": 0.005403185711337304,
+          "hip_R_Joint": 0.0023586609077808876,
+          "knee_L_Joint": 0.003322088724844751,
+          "knee_R_Joint": 0.003016824597735584
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.010362060184833816,
+            "final_height_error_m": 0.005583584308624268,
+            "final_heading_error_deg": 0.34851640549585083,
+            "root_rmse_m": 0.049489020681952614,
+            "root_rmse_window_s": [
+              0.0,
+              4.98
+            ],
+            "tail_max_tilt_deg": 1.6936194896697998,
+            "tail_mean_planar_speed_m_s": 0.04383316020539496,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.011380016803741455,
+            "max_planar_speed_m_s": 0.5200409796088987,
+            "flight_intervals": [],
+            "net_displacement_progress_fraction": 1.0058395680765533,
+            "reference_peak_planar_speed_m_s": 0.5828589200973522
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.011909793776113068,
+            "final_height_error_m": 0.005644961457507036,
+            "final_heading_error_deg": 0.47893476781566197,
+            "root_rmse_m": 0.04782169991545403,
+            "root_rmse_window_s": [
+              0.0,
+              4.979999999999916
+            ],
+            "tail_max_tilt_deg": 1.8569045209560338,
+            "tail_mean_planar_speed_m_s": 0.0355895782694377,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.010914339295201358,
+            "max_planar_speed_m_s": 0.5149706601903147,
+            "flight_intervals": [],
+            "net_displacement_progress_fraction": 0.99668968517908,
+            "reference_peak_planar_speed_m_s": 0.5828589200973522
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 249,
+        "fps": 50.0,
+        "sample_span_s": 4.96,
+        "action_duration_s": 4.98,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          0.3110651969909668,
+          0.0,
+          0.00371428276412189
+        ],
+        "root_angular_velocity_rad_s": [
+          0.0,
+          0.037320397794246674,
+          0.0
+        ],
+        "joint_velocity_rad_s": [
+          0.0,
+          0.0,
+          -0.06090864911675453,
+          0.06090864911675453,
+          -0.03883346542716026,
+          0.03883346542716026,
+          2.458584785461426,
+          2.458584785461426
+        ]
+      },
+      "reference_recipe": {
+        "script": "scripts/prepare_wheel_skill_references.py",
+        "skill": "rolling_stop",
+        "time_scale": 2,
+        "root_height_m": 0.89,
+        "translation_scale": 0.35,
+        "rolling_height_scale": 0.15,
+        "pitch_scale": 0.35,
+        "smoothing_source_s": 0.1
+      },
+      "reference_quality": null,
+      "hashes": {
+        "assessment_sha256": "79657501eb62404a0d6c9b08b05ca627bbc98ee79f807e72500a9e26621de55a",
+        "manifest_sha256": "f84abc3f3f6ab5fc9b6b7b02a95ac71c99d5b2a19d11383416c9fdc96606a75f",
+        "status_sha256": "b360d611a62f2784eec9df51777919f27b941922ab067597649695e7f02d15c5",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "9095b5692fd5bbea2613c766cc45b4079465870599f1d5ac9cf7f74c5a5843ae",
+        "checkpoint_sha256": "2b3c18f2f02288377858cf58538a609f32279bf14fba4a00793fb9eb0abe3c39",
+        "isaac_report_sha256": "7632cf38296334474c074382d5685cf08e32ae5885d7a0fd003b31ac4ef81f0e",
+        "contract_sha256": "fe0b3e95815e1ab6313db817e0977d066c88ceb4469508a51a259fe69ffe6fbd",
+        "actor_sha256": "bf9ebe3dc9e9f5869cb68cf5488bb9a82440ab165be9379a0854b39d808c6631",
+        "isaac_trajectory_sha256": "5e23072b4cf00002d056cb11f7332b87337ecc08b43e7ca51704cde6fdf9853d",
+        "mujoco_report_sha256": "d1819384225fa5837966969c2b722e02fadb1dd3f6e09dbaac5e79f4e9e83360",
+        "mujoco_trajectory_sha256": "c435fbc81dbfaa7877e26b81dca1f70b5b0561b192814c7d8b3859156e081712",
+        "render_sha256": "5b6130a9f789b5514927734d804d883dedef45d36bd2b301d7deaecf051f368b",
+        "video_sha256": "16c007257a068e2af3d11e708a49f3cbfc40e0930d6846397a4cf8d371eaaac5",
+        "overview_sha256": "c854a995966d459ff7be8790b7ee90fde207e44d764da220b9aeae8ff877becf",
+        "reference_sha256": "2e385f9f34d4ee2851c2df20ac3a0ca27bf19534ff0704da3c6c003651ae0e84",
+        "published_assessment_sha256": "9795cc77b777af4782e325c0b7b1860830e9b79fad547cd577db340089178b5f"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "53250be13301778ef313379d8c1989e1357b8424911d6e324f3d6d9e1483d3a9"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 415,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.200008392333984,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.200008392333984,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750024795532227,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.500049591064453,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.29999589920043945
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 251,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 4.979999999999916,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": null,
+          "mujoco": null
+        },
+        "training_runtime_audit": null,
+        "isaac_runtime_audit": null,
+        "mujoco_runtime_audit": null
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "95442cfd26e16444c7d4e2f8123aa1df98dc0031522d10ec2d423109e024b944",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "rolling_stop/assessment.json",
+        "video": "rolling_stop/tracking_comparison.mp4",
+        "overview": "rolling_stop/overview.png"
+      }
+    },
+    {
+      "task": "crouch",
+      "source": {
+        "clip": "134_01",
+        "description": "Skateboard Motions: Duck Under",
+        "manifest_key": "cmu_134_01",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=134",
+          "fps": 120,
+          "frame_count": 357,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/134/134.asf",
+            "sha256": "0c60335a79e23b38cbba8d9f6d20eab53ba37bd528577d1ac0715a4530470a84",
+            "bytes": 7260
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/134/134_01.amc",
+            "sha256": "f85ebf5f726dadbf6a9e85005e4651dc0d033da157041bd1046a60f407c1a54b",
+            "bytes": 286048
+          }
+        ]
+      },
+      "raw_skill_intent": "Human-inspired 18 cm stationary crouch and recovery, NOT unmodified skateboard duck-under",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "Source frames 160-330, duration doubled, observed human lowering normalized to an explicit robot depth of 18 cm.",
+        "Horizontal travel, roll and yaw removed; small fore-aft wheel rolling maintains static COM support during retargeting.",
+        "No overhead obstacle or collision-clearance test was included."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": true,
+      "verdict": "pass",
+      "failed_checks": [],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 3.8399999999999403,
+        "duration_s": 3.8399999999999403,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 957,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.002583352959824322,
+        "base_z_rmse_m": 0.0006273207510005609,
+        "base_axis_rmse_m": [
+          0.0019974559300664474,
+          0.0015133905635491328,
+          0.0006273207510005609
+        ],
+        "leg_joint_rmse_rad": 0.0036349033651105274,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.004166565406079787,
+          "abad_R_Joint": 0.005832966939152072,
+          "hip_L_Joint": 0.003016201379753927,
+          "hip_R_Joint": 0.0025327159936573253,
+          "knee_L_Joint": 0.002341098230818107,
+          "knee_R_Joint": 0.002626500000318359
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.005392164984463537,
+            "final_height_error_m": 0.0017840862274169922,
+            "final_heading_error_deg": 0.4015636833345631,
+            "root_rmse_m": 0.009981371169598489,
+            "root_rmse_window_s": [
+              0.0,
+              3.84
+            ],
+            "tail_max_tilt_deg": 0.5961046814918518,
+            "tail_mean_planar_speed_m_s": 0.007819048856617883,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.0059604644775390625,
+            "max_planar_speed_m_s": 0.07797808502800763,
+            "flight_intervals": [],
+            "crouch_depth_m": 0.1636369824409485,
+            "reference_crouch_depth_m": 0.18000000715255737
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "pass",
+          "failed_checks": [],
+          "metrics": {
+            "final_root_error_m": 0.006003545270663206,
+            "final_height_error_m": 0.0018890119242923609,
+            "final_heading_error_deg": 0.043417481510287265,
+            "root_rmse_m": 0.010729907373539425,
+            "root_rmse_window_s": [
+              0.0,
+              3.8399999999999403
+            ],
+            "tail_max_tilt_deg": 0.6492806413780366,
+            "tail_mean_planar_speed_m_s": 0.013958897444975298,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.006021814295086858,
+            "max_planar_speed_m_s": 0.0855641691777245,
+            "flight_intervals": [],
+            "crouch_depth_m": 0.1642333170739141,
+            "reference_crouch_depth_m": 0.18000000715255737
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 192,
+        "fps": 50.0,
+        "sample_span_s": 3.82,
+        "action_duration_s": 3.84,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          -2.3491904357797466e-05,
+          0.0,
+          -0.0001314055552938953
+        ],
+        "root_angular_velocity_rad_s": [
+          0.0,
+          0.00014326079690363258,
+          0.0
+        ],
+        "joint_velocity_rad_s": [
+          0.0,
+          0.0,
+          0.00021660621860064566,
+          -0.00021660621860064566,
+          0.0007450013072229922,
+          -0.0007450013072229922,
+          0.0004159969976171851,
+          0.0004159969976171851
+        ]
+      },
+      "reference_recipe": {
+        "script": "scripts/prepare_wheel_skill_references.py",
+        "skill": "crouch",
+        "first_frame": 160,
+        "last_frame": 330,
+        "time_scale": 2,
+        "root_height_m": 0.89,
+        "crouch_depth_m": 0.18,
+        "pitch_scale": 0.35,
+        "smoothing_source_s": 0.1
+      },
+      "reference_quality": null,
+      "hashes": {
+        "assessment_sha256": "7b9e0a3d04b45b926173cb8702160d5b81d4c00cbaaaea78212fcdf150b2790f",
+        "manifest_sha256": "be3125d4fb78f4b6ec59214987d96bfd92ab7ab0d454aeeb0a7ed9c48db13c50",
+        "status_sha256": "dea9a85a894a77ce6e456494bf4e0a38cb72ccdf70b9101bd1b0ff96ce9896f1",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "0e8f4121e198fd5e0bc1629932a8317734282183d26e76d80aa681ad5f093f71",
+        "checkpoint_sha256": "8a625eced6107e47e4c1df3d98ee114430aa90c514f50b16351a50343041cfd7",
+        "isaac_report_sha256": "507c325dbb35f21505d2e7f2ee5de40a69f42bf5504e692147b4d8e53a15ddd9",
+        "contract_sha256": "fa5851af16b69c40b46f9962a992006b3aeaf187ceae2495f2c2aed0445b80fd",
+        "actor_sha256": "8ba7ace684949972a3711caa5dda33d51f449d81357bbce3c44ab779a0206cbc",
+        "isaac_trajectory_sha256": "82aefb193768c2c39fd68c90e8fd27017e9ba99e247d8e0de3992b5f587918f3",
+        "mujoco_report_sha256": "eeb026025e3fce790d48ce89ce5cb841c1adfdd48b7e327bcbcaf78a063b1718",
+        "mujoco_trajectory_sha256": "6be4bd013b31e792ac251fa71353faa4084037397fb6fcdefb249d739639a254",
+        "render_sha256": "c13053a7db72b1ed9018621f76bf7c09dfa1060ee4e94d550b937c49b4d2df04",
+        "video_sha256": "c68889af7715236ece122ac825c402c19cd82b100c7fbb85e68217a06d1bfbdd",
+        "overview_sha256": "71250fb875c2b9d20e903135808633b762dea425d4f5cf165db95ed4d1ed05d1",
+        "reference_sha256": "1a21dac37b2e9b1c88aef8533cb81fa5b982a80c789595dad5ff01aa6a3afbcb",
+        "published_assessment_sha256": "d9ca5e6461443399b1d4cdffd9ddcb6ef02d11e31964fd6b45fdd727fb054583"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "53250be13301778ef313379d8c1989e1357b8424911d6e324f3d6d9e1483d3a9"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 402,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.20094108581543,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.20094108581543,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750916481018066,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.501832962036133,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.29968416690826416
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 193,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 3.8399999999999403,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": null,
+          "mujoco": null
+        },
+        "training_runtime_audit": null,
+        "isaac_runtime_audit": null,
+        "mujoco_runtime_audit": null
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "95442cfd26e16444c7d4e2f8123aa1df98dc0031522d10ec2d423109e024b944",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "crouch/assessment.json",
+        "video": "crouch/tracking_comparison.mp4",
+        "overview": "crouch/overview.png"
+      }
+    },
+    {
+      "task": "step_up",
+      "source": {
+        "clip": "83_03",
+        "description": "large step to a short ledge",
+        "manifest_key": "cmu_83_03",
+        "attribution": {
+          "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+          "fps": 120,
+          "frame_count": 669,
+          "usage_terms": "http://mocap.cs.cmu.edu/",
+          "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+          "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+          "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums."
+        },
+        "files": [
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/83/83.asf",
+            "sha256": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093",
+            "bytes": 7273
+          },
+          {
+            "url": "http://mocap.cs.cmu.edu/subjects/83/83_03.amc",
+            "sha256": "4a2e3d8cdde1fb07c93c98012519c46fd7f54764ead45f47ffa8ebd87d6d32b1",
+            "bytes": 539005
+          }
+        ]
+      },
+      "raw_skill_intent": "Climb a real static ledge and finish with both wheels supported on its top",
+      "raw_skill_intent_certified": false,
+      "raw_skill_intent_note": "Only the explicitly listed behavior gates were assessed; source labels are not additional success claims.",
+      "caveats": [
+        "Ledge height estimated from terminal foot support, not pelvis; leading edge and depth are estimated, not recorded CMU scene ground truth.",
+        "Identical metric static box specification is used by Isaac training/evaluation and MuJoCo deployment; live collider readback required.",
+        "Only one ledge geometry and one nominal frame-zero rollout per engine were tested."
+      ],
+      "budget": {
+        "pass": true,
+        "checks": {
+          "num_envs": true,
+          "iterations_per_motion": true,
+          "seed": true,
+          "env_steps_per_motion": true,
+          "resume_sha256": true,
+          "physics_hz": true,
+          "policy_hz": true,
+          "status_completed": true,
+          "status_envs_match": true,
+          "status_iterations_match": true,
+          "counted_steps_match": true,
+          "random_audit_enabled": true,
+          "draw_readback_verified": true,
+          "draw_hidden_from_actor": true,
+          "dc_cache_verified": true,
+          "dr_profile_matches": true,
+          "reset_counts_cover_all_envs": true,
+          "final_iteration_matches": true
+        },
+        "actual": {
+          "num_envs": 2048,
+          "iterations_per_motion": 600,
+          "seed": 42,
+          "env_steps_per_motion": 29491200,
+          "resume_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+          "last_iteration": 2798,
+          "physics_hz": 200.0,
+          "policy_hz": 50.0,
+          "num_steps_per_env": 24,
+          "expected_last_iteration": 2798
+        },
+        "is_behavior_success": false,
+        "final_iteration_offset_verified": true
+      },
+      "behavior_pass": false,
+      "verdict": "fail",
+      "failed_checks": [
+        "isaac.final_root_xyz",
+        "isaac.final_root_height",
+        "isaac.full_motion_root_rmse",
+        "isaac.both_final_wheels_on_target_ledge",
+        "isaac.step_height_progress",
+        "mujoco.final_root_xyz",
+        "mujoco.final_root_height",
+        "mujoco.full_motion_root_rmse",
+        "mujoco.both_final_wheels_on_target_ledge",
+        "mujoco.step_height_progress"
+      ],
+      "common_window": {
+        "start_s": 0.0,
+        "end_s": 6.579999999999882,
+        "duration_s": 6.579999999999882,
+        "isaac_environment_index": 0,
+        "interpolation_knots": 1642,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+        "base_position_rmse_m": 0.12025170901259542,
+        "base_z_rmse_m": 0.0238996895264767,
+        "base_axis_rmse_m": [
+          0.11278626488072949,
+          0.034183867763052614,
+          0.0238996895264767
+        ],
+        "leg_joint_rmse_rad": 0.10576626388841114,
+        "leg_joint_rmse_rad_by_name": {
+          "abad_L_Joint": 0.12040746343445954,
+          "abad_R_Joint": 0.03127351336191921,
+          "hip_L_Joint": 0.038236259400243236,
+          "hip_R_Joint": 0.02764380424535639,
+          "knee_L_Joint": 0.1316624651112471,
+          "knee_R_Joint": 0.17911401231481205
+        },
+        "leg_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_angles_compared": false,
+        "initial_common_base_position_difference_m": 0.0,
+        "initial_common_leg_joint_rmse_rad": 0.0
+      },
+      "engines": {
+        "isaac": {
+          "verdict": "fail",
+          "failed_checks": [
+            "final_root_xyz",
+            "final_root_height",
+            "full_motion_root_rmse",
+            "both_final_wheels_on_target_ledge",
+            "step_height_progress"
+          ],
+          "metrics": {
+            "final_root_error_m": 0.20838642612547803,
+            "final_height_error_m": 0.07440459728240967,
+            "final_heading_error_deg": 3.7751765743387327,
+            "root_rmse_m": 0.2057304213112517,
+            "root_rmse_window_s": [
+              0.0,
+              6.58
+            ],
+            "tail_max_tilt_deg": 12.088109970092773,
+            "tail_mean_planar_speed_m_s": 0.08937957673333585,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.038958966732025146,
+            "max_planar_speed_m_s": 0.7892722263932221,
+            "flight_intervals": [],
+            "target_ledge": {
+              "name": "step_ledge",
+              "center": [
+                0.6331934446469314,
+                -0.22680471530397434,
+                0.05819795116893093
+              ],
+              "size": [
+                0.6317545866499187,
+                0.6320867389830788,
+                0.11639590233786186
+              ],
+              "friction": 0.6
+            }
+          },
+          "complete_contact_evidence": false,
+          "contact_force_source": "wheel_contact_force_w_n",
+          "nonwheel_contact_evidence_available": false
+        },
+        "mujoco": {
+          "verdict": "fail",
+          "failed_checks": [
+            "final_root_xyz",
+            "final_root_height",
+            "full_motion_root_rmse",
+            "both_final_wheels_on_target_ledge",
+            "step_height_progress"
+          ],
+          "metrics": {
+            "final_root_error_m": 0.4107982930109194,
+            "final_height_error_m": 0.10797672831083749,
+            "final_heading_error_deg": 2.5379646979356343,
+            "root_rmse_m": 0.2668957739982274,
+            "root_rmse_window_s": [
+              0.0,
+              6.579999999999882
+            ],
+            "tail_max_tilt_deg": 7.274413940540997,
+            "tail_mean_planar_speed_m_s": 0.051171997427502454,
+            "tail_two_wheel_support_fraction": 1.0,
+            "root_rise_m": 0.005386835703597326,
+            "max_planar_speed_m_s": 0.8647861728805157,
+            "flight_intervals": [],
+            "target_ledge": {
+              "name": "step_ledge",
+              "center": [
+                0.6331934446469314,
+                -0.22680471530397434,
+                0.05819795116893093
+              ],
+              "size": [
+                0.6317545866499187,
+                0.6320867389830788,
+                0.11639590233786186
+              ],
+              "friction": 0.6
+            }
+          },
+          "complete_contact_evidence": true,
+          "contact_force_source": "wheel_ground_contact_force_w_n",
+          "nonwheel_contact_evidence_available": true
+        }
+      },
+      "reference": {
+        "frames": 329,
+        "fps": 50.0,
+        "sample_span_s": 6.56,
+        "action_duration_s": 6.58,
+        "initialization": "reference frame zero including reference velocities; not a standstill transition",
+        "root_com_linear_velocity_m_s": [
+          0.19700871407985687,
+          -0.21579110622406006,
+          0.01957729272544384
+        ],
+        "root_angular_velocity_rad_s": [
+          -1.7719210386276245,
+          -1.8795268535614014,
+          0.6263932585716248
+        ],
+        "joint_velocity_rad_s": [
+          2.8078980445861816,
+          2.869926691055298,
+          2.496898651123047,
+          -2.7441203594207764,
+          -0.05046885460615158,
+          0.05451502278447151,
+          -2.467745329380815e-21,
+          5.027956768886058e-21
+        ]
+      },
+      "reference_recipe": {
+        "script": "scripts/prepare_step_reference.py",
+        "terrain_path": "outputs/motion-suite-20261003/step_up/prepared/terrain.json",
+        "terrain_sha256": "04de6a94ad9803992e977e2505d9ad4253c09a4d74f9227d2262445f13651088",
+        "terrain_top_height_m": 0.11639590233786186,
+        "export_z_offset_m": 0.008565039259350954
+      },
+      "reference_quality": null,
+      "hashes": {
+        "assessment_sha256": "ee7d14b9b20ca0004badadc73c602c1a2a7117913af7f5fc4495b0f25c7e5ba7",
+        "manifest_sha256": "4717427ce0d4b8a44f344bc527590eb9c577a12cbe755495575409832138e386",
+        "status_sha256": "5dc15d26fd65a444c342b5a241638c4031cd4325f20b9984b63db0e62290394e",
+        "runner_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+        "audit_sha256": "9f0ce393df67628a2b25c4a6773ec7d530ca5a0c3cffbbe5d4cd778bb6afb584",
+        "checkpoint_sha256": "7a6fd50fb3f5923af5850fdb2959b99ca0ed28c565e7ba59051453071637cd6c",
+        "isaac_report_sha256": "e5790702dba35c481f769eb72c0d46f41a012a708898c43ac7685b60f763da15",
+        "contract_sha256": "ad6f036905fb1cc8762ba7ece8e80b5e307fb4fb3ef6371c81ff8cb6c93abd60",
+        "actor_sha256": "21a3f4c8af1c591f2bc2c4c7e911e92f8c593e895ac0cc360012517751f94805",
+        "isaac_trajectory_sha256": "2deb3b47875ccd0ea63cfefd79dad3a0839cd94f82c4749214c04ac21210c3a4",
+        "mujoco_report_sha256": "e9e60ed89219418aa192cd135e503f44bbfe160cc7ed86e4d0d94db061eb1c2a",
+        "mujoco_trajectory_sha256": "ffce919364f14a9389b0a6b18aabc7b00f2adeefeb5b1c24afdcf1fd5713f895",
+        "render_sha256": "e1f196bcccdd1f69b7e6706860109446f2a89ae17b1c795ccb7e5cddea2896c9",
+        "video_sha256": "127ab183acaf9e835fe9a12bea4459df492e85fe4d14a3cdd83589570dd62294",
+        "overview_sha256": "54c78dee7fcc5de5fcd708ca1f8ede26edf972bbbf658d4e20abce74cfba6dcd",
+        "reference_sha256": "74b2749b8ee717af4817e59bdabbff02401e03665d1f06bc10b27dddedb7d3a2",
+        "terrain_implementation_provenance_sha256": "9c601a0abf0566f85388bd34410e1790ddd417539d1b2b47fee0b09d77acf2a1",
+        "published_assessment_sha256": "39ac8f8b8270c1faaede55edca524fc81cf77fcc171d2c22790fa3abfa86d522"
+      },
+      "training_source_sha256": {
+        "training/tron1_tracking.py": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "scripts/train_tracking.py": "60c157f6b86559df1272cae800ee8045b9db13973d41ea1c9be46a61626a7ba3"
+      },
+      "training": {
+        "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+        "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+        "versions": {
+          "torch": "2.7.0+cu128",
+          "isaacsim": "5.1.0.0",
+          "isaaclab": "0.47.2",
+          "rsl-rl-lib": "3.0.1"
+        },
+        "gpu": "NVIDIA GeForce RTX 4090 D",
+        "smoke_steps_passed": 8,
+        "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+      },
+      "final_domain_randomization_audit": {
+        "enabled": true,
+        "mode": "random",
+        "profile": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "seed": 42,
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "nominal_environment_count": 410,
+        "actual_parameter_min_max": {
+          "effort_limit_nm": [
+            10.201078414916992,
+            80.0
+          ],
+          "saturation_effort_nm": [
+            10.201078414916992,
+            80.0
+          ],
+          "velocity_limit_rad_s": [
+            12.750504493713379,
+            100.0
+          ],
+          "velocity_at_effort_limit_rad_s": [
+            25.501008987426758,
+            200.0
+          ],
+          "axle_friction_nm": [
+            0.0,
+            0.29995694756507874
+          ],
+          "net_effort_guard_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_effort_limit_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_saturation_effort_nm": [
+            12.0,
+            80.0
+          ],
+          "nominal_velocity_limit_rad_s": [
+            15.0,
+            100.0
+          ]
+        },
+        "dc_overspeed_cache_verified": true,
+        "all_sampled_parameters_readback_verified": true,
+        "parameters_hidden_from_actor": true,
+        "net_effort_guard_semantics": "axle_loss_after_dc_motor_then_fixed_nominal_net_torque_clip"
+      },
+      "render": {
+        "renderer": "MuJoCo 3.9.0",
+        "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
+        "simulation_steps": 0,
+        "primary_label": "Isaac",
+        "comparison_label": "MuJoCo",
+        "video_frames": 330,
+        "video_fps": 25.0,
+        "playback_speed": 0.5,
+        "video_resolution": [
+          1400,
+          900
+        ],
+        "full_decode_verified": true,
+        "first_episode_only": true,
+        "terminal_pose_included": true,
+        "comparison_terminal_time_s": 6.579999999999882,
+        "comparison_terminal_pose_frozen_and_labeled": true
+      },
+      "terrain": {
+        "specification": {
+          "matched": true,
+          "isaac": {
+            "schema_version": 1,
+            "frame": "world_z_up_m",
+            "ground": {
+              "z": 0.0,
+              "friction": 0.6
+            },
+            "boxes": [
+              {
+                "name": "step_ledge",
+                "center": [
+                  0.6331934446469314,
+                  -0.22680471530397434,
+                  0.05819795116893093
+                ],
+                "size": [
+                  0.6317545866499187,
+                  0.6320867389830788,
+                  0.11639590233786186
+                ],
+                "friction": 0.6
+              }
+            ],
+            "provenance": {
+              "geometry_estimated": true,
+              "ground_truth_geometry": false,
+              "source_clip": "CMU 83_03",
+              "source_description": "large step to a short ledge",
+              "source_index_url": "https://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+              "source_fps_verified": 120,
+              "height_method": "mean of left/right terminal-minus-initial fifth-percentile foot/toe minimum heights, times the uniform robot/human leg-chain scale",
+              "initial_terminal_window_s": 0.5,
+              "source_initial_foot_support_m": [
+                0.00013473278635610375,
+                0.0018766537205125444
+              ],
+              "source_terminal_foot_support_m": [
+                0.1479164322282186,
+                0.14545988104795127
+              ],
+              "source_support_rise_by_foot_m": [
+                0.14778169944186248,
+                0.14358322732743872
+              ],
+              "uniform_human_scale": 0.7989698940670547,
+              "wheel_radius_m": 0.12700000405311584,
+              "robot_ledge_top_height_m": 0.11639590233786186,
+              "terminal_target_wheel_center_range_m": [
+                [
+                  0.5643161553750878,
+                  -0.36784808479551373,
+                  0.2365163636044963
+                ],
+                [
+                  0.5720707339187748,
+                  -0.08576134581243497,
+                  0.24280160934465522
+                ]
+              ],
+              "horizontal_bounds_method": "terminal wheel-center footprint, X expanded by wheel radius plus stated front/rear margin; Y expanded by side margin",
+              "front_margin_beyond_radius_m": 0.12,
+              "rear_margin_beyond_radius_m": 0.25,
+              "lateral_margin_m": 0.175,
+              "recommended_constant_reference_z_clearance_m": 0.008565039259350954,
+              "limitations": [
+                "Source contains no measured platform mesh or contact forces; front edge and depth are not uniquely identifiable.",
+                "This collider is a documented task hypothesis. It does not establish dynamic feasibility or successful stepping."
+              ],
+              "source_sha256": {
+                "asf": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093",
+                "amc": "4a2e3d8cdde1fb07c93c98012519c46fd7f54764ead45f47ffa8ebd87d6d32b1"
+              }
+            }
+          },
+          "mujoco": {
+            "schema_version": 1,
+            "frame": "world_z_up_m",
+            "ground": {
+              "z": 0.0,
+              "friction": 0.6
+            },
+            "boxes": [
+              {
+                "name": "step_ledge",
+                "center": [
+                  0.6331934446469314,
+                  -0.22680471530397434,
+                  0.05819795116893093
+                ],
+                "size": [
+                  0.6317545866499187,
+                  0.6320867389830788,
+                  0.11639590233786186
+                ],
+                "friction": 0.6
+              }
+            ],
+            "provenance": {
+              "geometry_estimated": true,
+              "ground_truth_geometry": false,
+              "source_clip": "CMU 83_03",
+              "source_description": "large step to a short ledge",
+              "source_index_url": "https://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+              "source_fps_verified": 120,
+              "height_method": "mean of left/right terminal-minus-initial fifth-percentile foot/toe minimum heights, times the uniform robot/human leg-chain scale",
+              "initial_terminal_window_s": 0.5,
+              "source_initial_foot_support_m": [
+                0.00013473278635610375,
+                0.0018766537205125444
+              ],
+              "source_terminal_foot_support_m": [
+                0.1479164322282186,
+                0.14545988104795127
+              ],
+              "source_support_rise_by_foot_m": [
+                0.14778169944186248,
+                0.14358322732743872
+              ],
+              "uniform_human_scale": 0.7989698940670547,
+              "wheel_radius_m": 0.12700000405311584,
+              "robot_ledge_top_height_m": 0.11639590233786186,
+              "terminal_target_wheel_center_range_m": [
+                [
+                  0.5643161553750878,
+                  -0.36784808479551373,
+                  0.2365163636044963
+                ],
+                [
+                  0.5720707339187748,
+                  -0.08576134581243497,
+                  0.24280160934465522
+                ]
+              ],
+              "horizontal_bounds_method": "terminal wheel-center footprint, X expanded by wheel radius plus stated front/rear margin; Y expanded by side margin",
+              "front_margin_beyond_radius_m": 0.12,
+              "rear_margin_beyond_radius_m": 0.25,
+              "lateral_margin_m": 0.175,
+              "recommended_constant_reference_z_clearance_m": 0.008565039259350954,
+              "limitations": [
+                "Source contains no measured platform mesh or contact forces; front edge and depth are not uniquely identifiable.",
+                "This collider is a documented task hypothesis. It does not establish dynamic feasibility or successful stepping."
+              ],
+              "source_sha256": {
+                "asf": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093",
+                "amc": "4a2e3d8cdde1fb07c93c98012519c46fd7f54764ead45f47ffa8ebd87d6d32b1"
+              }
+            }
+          }
+        },
+        "training_runtime_audit": {
+          "status": "passed",
+          "environment_index": 0,
+          "environment_origin_w_m": [
+            67.5,
+            -66.0,
+            0.0
+          ],
+          "box_count": 1,
+          "tolerance_m": 1e-05,
+          "method": "composed USD env0 world AABB minus actual environment origin, CollisionAPI enabled, no enabled RigidBodyAPI",
+          "boxes": [
+            {
+              "name": "step_ledge",
+              "prim_path": "/World/envs/env_0/Terrain_step_ledge",
+              "actual_environment_relative_aabb_min_m": [
+                0.317316120974823,
+                -0.5428480923485779,
+                0.0
+              ],
+              "actual_environment_relative_aabb_max_m": [
+                0.9490707455946961,
+                0.0892386555981659,
+                0.11639590561389923
+              ],
+              "expected_aabb_min_m": [
+                0.31731615132197205,
+                -0.5428480847955137,
+                0.0
+              ],
+              "expected_aabb_max_m": [
+                0.9490707379718908,
+                0.08923865418756505,
+                0.11639590233786186
+              ],
+              "max_bound_error_m": 3.034714907146352e-08,
+              "enabled_collision_prims": [
+                "/World/envs/env_0/Terrain_step_ledge/geometry/mesh"
+              ],
+              "static_collider": true
+            }
+          ]
+        },
+        "isaac_runtime_audit": {
+          "status": "passed",
+          "environment_index": 0,
+          "environment_origin_w_m": [
+            -0.0,
+            0.0,
+            0.0
+          ],
+          "box_count": 1,
+          "tolerance_m": 1e-05,
+          "method": "composed USD env0 world AABB minus actual environment origin, CollisionAPI enabled, no enabled RigidBodyAPI",
+          "boxes": [
+            {
+              "name": "step_ledge",
+              "prim_path": "/World/envs/env_0/Terrain_step_ledge",
+              "actual_environment_relative_aabb_min_m": [
+                0.3173161209748159,
+                -0.542848092348585,
+                0.0
+              ],
+              "actual_environment_relative_aabb_max_m": [
+                0.9490707455947032,
+                0.08923865559817301,
+                0.11639590561389923
+              ],
+              "expected_aabb_min_m": [
+                0.31731615132197205,
+                -0.5428480847955137,
+                0.0
+              ],
+              "expected_aabb_max_m": [
+                0.9490707379718908,
+                0.08923865418756505,
+                0.11639590233786186
+              ],
+              "max_bound_error_m": 3.034715617689088e-08,
+              "enabled_collision_prims": [
+                "/World/envs/env_0/Terrain_step_ledge/geometry/mesh"
+              ],
+              "static_collider": true
+            }
+          ]
+        },
+        "mujoco_runtime_audit": {
+          "status": "passed",
+          "box_count": 1,
+          "tolerance_m": 1e-08,
+          "method": "actual post-configuration compiled MjModel worldbody geoms: type, position, half size, rotation, friction, collision masks and condim",
+          "ground": {
+            "geom_name": "floor",
+            "geom_id": 0,
+            "body_id": 0,
+            "static_collider": true,
+            "quaternion_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "friction": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "contype": 2,
+            "conaffinity": 1,
+            "condim": 3,
+            "position_world_m": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "boxes": [
+            {
+              "geom_name": "terrain_step_ledge",
+              "geom_id": 1,
+              "body_id": 0,
+              "static_collider": true,
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "friction": [
+                0.6,
+                0.0,
+                0.0
+              ],
+              "contype": 2,
+              "conaffinity": 1,
+              "condim": 3,
+              "name": "step_ledge",
+              "position_world_m": [
+                0.633193444647,
+                -0.226804715304,
+                0.0581979511689
+              ],
+              "half_size_m": [
+                0.315877293325,
+                0.316043369492,
+                0.0581979511689
+              ],
+              "actual_aabb_min_m": [
+                0.31731615132200003,
+                -0.542848084796,
+                0.0
+              ],
+              "actual_aabb_max_m": [
+                0.949070737972,
+                0.089238654188,
+                0.1163959023378
+              ],
+              "expected_aabb_min_m": [
+                0.31731615132197205,
+                -0.5428480847955137,
+                0.0
+              ],
+              "expected_aabb_max_m": [
+                0.9490707379718908,
+                0.08923865418756505,
+                0.11639590233786186
+              ]
+            }
+          ]
+        },
+        "implementation_provenance": {
+          "schema_version": 1,
+          "method": "Retrospective read-only capture of the unmodified remote workspace module during this trial; not an original manifest field and not an independently signed measurement.",
+          "original_training_manifest_recorded_helper_hash": false,
+          "isaac_training_and_evaluation_terrain_module_sha256": "f1e66b16fe5871f46d60ed1b0b3c7133fcec0cfa64dc148b2bd65667f4685d3f",
+          "source_snapshot_relative_to_trial": "source-snapshot/tron1_terrain.remote.py",
+          "scene_specification_sha256": "04de6a94ad9803992e977e2505d9ad4253c09a4d74f9227d2262445f13651088",
+          "later_mujoco_module_difference": "Adds compiled MuJoCo collider readback only; existing Isaac spawn and XML augmentation functions are unchanged. Deployment report separately records its actual helper hash.",
+          "limitations": [
+            "Hash alone does not prove successful spawning; original Isaac train/eval reports include actual live USD collider bounds and collision/staticness audits.",
+            "Training/evaluation artifacts are retained unchanged; future runs additionally record terrain helper SHA directly in the manifest/report."
+          ]
+        }
+      },
+      "evaluation_source_sha256": {
+        "isaac": {},
+        "mujoco": {
+          "task_source_sha256": "20d7a118b19277782a2e2872a6afe9e13e4f1ffda52d112dfae7e04601fbd752",
+          "evaluator_source_sha256": "c771d28425ca6c49e62e04bc983df5f39b5e7af75c5905175ca67c5f70bae79a",
+          "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+          "terrain_module_sha256": "dec819a3c3c526fce706fb6a5a6491388298884b32bfe73a5c331b166f976ebf",
+          "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+          "model_hash_scope": "model_sha256 hashes original input MJCF bytes before in-memory visual stripping, terrain augmentation and configuration; terrain_runtime_audit verifies actual compiled geometry after configuration"
+        }
+      },
+      "complete_contact_evidence": false,
+      "safety_verified": false,
+      "hardware_ready": false,
+      "artifacts": {
+        "assessment": "step_up/assessment.json",
+        "video": "step_up/tracking_comparison.mp4",
+        "overview": "step_up/overview.png"
+      }
+    }
+  ]
+}

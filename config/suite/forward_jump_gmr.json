@@ -1,0 +1,131 @@
+{
+  "robot_root_name": "base_Link",
+  "human_root_name": "Pelvis",
+  "ground_height": 0,
+  "human_height_assumption": 1.8,
+  "use_ik_match_table1": true,
+  "use_ik_match_table2": true,
+  "human_scale_table": {
+    "Pelvis": 0.7221145082725878,
+    "LeftAnkle": 0.7221145082725878,
+    "RightAnkle": 0.7221145082725878
+  },
+  "ik_match_table1": {
+    "base_Link": [
+      "Pelvis",
+      0,
+      10,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ],
+    "wheel_L_Link": [
+      "LeftAnkle",
+      50,
+      0,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ],
+    "wheel_R_Link": [
+      "RightAnkle",
+      50,
+      0,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "ik_match_table2": {
+    "base_Link": [
+      "Pelvis",
+      10,
+      10,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ],
+    "wheel_L_Link": [
+      "LeftAnkle",
+      100,
+      0,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ],
+    "wheel_R_Link": [
+      "RightAnkle",
+      100,
+      0,
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "_adapter": {
+    "model": "assets/robots/WF_TRON1A/mujoco/robot.xml",
+    "matched_baseline": "outputs/motion-suite-20261003/forward_jump/mink/robot_reference.npz",
+    "human_source": "outputs/motion-suite-20261003/forward_jump/human/human_motion.npz",
+    "solver": "daqp",
+    "damping": 0.5,
+    "max_iter_per_stage": 10,
+    "offset_to_ground": false,
+    "wheel_spin": "zero_velocity_limit",
+    "stage_1": "Pelvis orientation and wheel-center positions; free-base translation is optimized.",
+    "stage_2": "Add pelvis position, prioritize wheel-center positions; free base remains optimized.",
+    "targets": "Identical calibrated pelvis/wheel targets and uniform scale as Mink baseline; no human knee or ankle orientation targets.",
+    "velocity_note": "Only wheel spin is constrained to zero. GMR iterative IK is not a sampled-trajectory velocity limiter; actual inter-frame leg speed is measured.",
+    "upstream_url": "https://github.com/YanjieZe/GMR",
+    "upstream_commit": "bb1bbe40774794fceb2a7c579a3464a28e68c844",
+    "upstream_core_sha256": "3a4f9fb0d13b204c8dcbb2ab62db59bce9de81b1f5911167aa73f079e0c90663",
+    "upstream_params_sha256": "3506cdd277375139770b0ced7108719145620a389a8dee85bc6c94c6bf135bef"
+  }
+}

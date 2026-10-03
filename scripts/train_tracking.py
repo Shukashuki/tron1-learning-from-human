@@ -60,6 +60,7 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--smoke-steps", type=int, default=8)
     parser.add_argument("--resume", type=Path)
+    parser.add_argument("--terrain-file", type=Path, help="Explicit matched static terrain JSON; default is the existing flat plane")
     domains = parser.add_mutually_exclusive_group()
     domains.add_argument("--domain-randomization", choices=("none", "motor-v1"), default="none")
     domains.add_argument("--domain-profile", type=Path, help="Explicit bounded domain-randomization JSON profile")
@@ -88,12 +89,23 @@ def main():
 
         profile = (validate_profile(json.loads(args.domain_profile.read_text())) if args.domain_profile else
                    default_profile(args.seed) if args.domain_randomization == "motor-v1" else None)
-        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, dr_profile=profile)
+        terrain_spec = None
+        if args.terrain_file:
+            from training.tron1_terrain import load_terrain
+            terrain_spec = load_terrain(args.terrain_file)
+        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device,
+                           dr_profile=profile, terrain_spec=terrain_spec)
         cfg.seed = args.seed
         env = ManagerBasedRLEnv(cfg=cfg)
+        terrain_audit = None
+        if terrain_spec is not None:
+            from training.tron1_terrain import terrain_runtime_audit
+            terrain_audit = terrain_runtime_audit(env, terrain_spec)
         wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
         contract = observation_action_contract()
         contract["domain_randomization"] = profile if profile else "disabled; nominal actuator parameters"
+        if terrain_spec is not None:
+            contract["terrain"] = terrain_spec
         obs, _ = wrapped.reset()
         for group, size in (("policy", contract["actor_dim"]), ("critic", contract["critic_dim"])):
             if tuple(obs[group].shape) != (args.num_envs, size):
@@ -123,6 +135,7 @@ def main():
             "asset_file": str(args.asset_path.resolve()), "asset_sha256": sha256(args.asset_path),
             "source_sha256": {str(path.relative_to(ROOT)): sha256(path) for path in
                               (ROOT / "training/tron1_tracking.py", ROOT / "training/tron1_domain_randomization.py",
+                               ROOT / "training/tron1_terrain.py",
                                Path(__file__).resolve())},
             "num_envs": args.num_envs, "iterations_requested": args.iterations,
             "seed": args.seed, "smoke_steps_passed": args.smoke_steps,
@@ -130,6 +143,10 @@ def main():
             "body_names": env.scene["robot"].body_names,
             "reference_name_mapping": env.command_manager.get_term("motion").reference_name_mapping,
             "contract": contract, "resume": str(args.resume) if args.resume else None,
+            "resume_sha256": sha256(args.resume) if args.resume else None,
+            "terrain": terrain_spec,
+            "terrain_runtime_audit": terrain_audit,
+            "terrain_file_sha256": sha256(args.terrain_file) if args.terrain_file else None,
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
             "domain_randomization_profile": profile,
             "domain_profile_file_sha256": sha256(args.domain_profile) if args.domain_profile else None,

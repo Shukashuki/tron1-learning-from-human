@@ -13,11 +13,54 @@ sys.path.insert(0, str(ROOT / "scripts"))
 AVAILABLE = all(importlib.util.find_spec(name) is not None for name in ("mink", "mujoco"))
 if AVAILABLE:
     import mujoco
-    from retarget_mink import anchored_targets, calibrated_root_rotations, finite_difference_qvel
+    from retarget_mink import (anchored_targets, calibrated_root_rotations,
+                              finite_difference_qvel, root_rotating_targets)
 
 
 @unittest.skipUnless(AVAILABLE, "Optional Mink environment not installed")
 class RetargetMappingTests(unittest.TestCase):
+    def test_rotating_offsets_equal_original_when_root_does_not_rotate(self):
+        root = np.array([[0., 0., 1.], [.1, .2, 1.3], [.3, .1, 1.05]])
+        relative = np.array([[0., .1, -.9], [0., -.1, -.9]])
+        human = root[:, None] + relative
+        human[1, 0, 0] += .03
+        initial = np.array([[.01, .15, .127], [.01, -.15, .127]])
+        actual = root_rotating_targets(human, root, initial, [0, 0, .9], .7,
+                                       np.tile([1, 0, 0, 0], (3, 1)))
+        np.testing.assert_allclose(actual, anchored_targets(human, initial, .7), atol=1e-14)
+
+    def test_rigid_yaw_rotates_complete_robot_landmark_offsets(self):
+        rotation = Rotation.from_euler("z", [[0.], [45.], [90.]], degrees=True)
+        root = np.array([[0., 0., 1.], [.1, .2, 1.3], [.3, .1, 1.05]])
+        human_relative = np.array([[.04, .1, -.9], [.04, -.1, -.9]])
+        human = root[:, None] + np.einsum("fij,kj->fki", rotation.as_matrix(), human_relative)
+        robot_root = np.array([0., 0., .9])
+        initial = np.array([[.01, .15, .127], [.01, -.15, .127]])
+        actual = root_rotating_targets(human, root, initial, robot_root, .7,
+                                       rotation.as_quat()[:, [3, 0, 1, 2]])
+        expected = (anchored_targets(root, robot_root, .7)[:, None]
+                    + np.einsum("fij,kj->fki", rotation.as_matrix(), initial - robot_root))
+        np.testing.assert_allclose(actual, expected, atol=1e-14)
+        np.testing.assert_allclose(actual[0], initial, atol=1e-14)
+        np.testing.assert_allclose(actual[1, :, 2] - actual[0, :, 2], .21, atol=1e-14)
+        self.assertGreater(np.max(np.abs(actual - anchored_targets(human, initial, .7))), .01)
+
+    def test_rotating_offsets_reject_nonfinite_and_malformed_inputs(self):
+        human = np.zeros((2, 2, 3))
+        root = np.zeros((2, 3))
+        initial = np.zeros((2, 3))
+        quats = np.tile([1., 0., 0., 0.], (2, 1))
+        for scale in (0., -1., float("nan"), float("inf")):
+            with self.subTest(scale=scale), self.assertRaises(ValueError):
+                root_rotating_targets(human, root, initial, np.zeros(3), scale, quats)
+        with self.assertRaises(ValueError):
+            root_rotating_targets(human, root[:1], initial, np.zeros(3), 1., quats)
+        with self.assertRaises(ValueError):
+            root_rotating_targets(human, root, initial, np.zeros(3), 1., quats * 2)
+        human[1, 1, 0] = float("nan")
+        with self.assertRaises(ValueError):
+            root_rotating_targets(human, root, initial, np.zeros(3), 1., quats)
+
     def test_anchoring_retains_scaled_global_vertical_motion(self):
         source = np.array([[[1., 2., .05], [2., 3., .06]],
                            [[1.1, 2.2, .55], [2.1, 3.2, .56]],

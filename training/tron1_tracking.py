@@ -365,7 +365,7 @@ class TronTrackingEnvCfg(TrackingEnvCfg):
     events: TronEventsCfg = TronEventsCfg()
 
 
-def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=False, dr_profile=None):
+def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=False, dr_profile=None, terrain_spec=None):
     """Return a registry-free ManagerBasedRLEnv config for the local motion.
 
     The entrypoint must clip all raw policy actions to [-1, 1], identically in
@@ -475,6 +475,9 @@ def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=F
     cfg.terminations.motion_end = TerminationTermCfg(
         func=motion_ended, params={"command_name": "motion"}, time_out=True,
     )
+    if terrain_spec is not None:
+        from training.tron1_terrain import apply_isaac_terrain
+        apply_isaac_terrain(cfg.scene, terrain_spec)
     return cfg
 
 

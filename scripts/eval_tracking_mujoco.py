@@ -283,16 +283,26 @@ def configure_model(model, contract):
     return changed
 
 
-def load_model(path, no_visual_mesh=False):
+def load_model(path, no_visual_mesh=False, terrain=None):
     """Optionally remove only proven non-colliding visual meshes in memory.
 
     Explicit inertials are required on every robot body, so visual removal
     cannot silently change inferred mass/inertia. Collision mesh assets remain.
     """
     import mujoco
-    if not no_visual_mesh:
+    if not no_visual_mesh and terrain is None:
         return mujoco.MjModel.from_xml_path(str(path)), 0
     root = ET.parse(path).getroot()
+    if not no_visual_mesh:
+        from training.tron1_terrain import augment_mujoco_xml
+        compiler = root.find("compiler")
+        if compiler is None:
+            compiler = ET.SubElement(root, "compiler")
+        for attribute in ("meshdir", "texturedir"):
+            directory = Path(compiler.get(attribute, "."))
+            if not directory.is_absolute():
+                compiler.set(attribute, str((Path(path).resolve().parent / directory).resolve()))
+        return mujoco.MjModel.from_xml_string(augment_mujoco_xml(ET.tostring(root, encoding="unicode"), terrain)), 0
     if any(body.find("inertial") is None for body in root.iter("body")):
         raise ValueError("Mesh-free evaluation requires explicit inertials on every body")
     defaults = {}
@@ -342,6 +352,9 @@ def load_model(path, no_visual_mesh=False):
         if compiler is not None:
             compiler.attrib.pop("meshdir", None)
     xml = ET.tostring(root, encoding="unicode")
+    if terrain is not None:
+        from training.tron1_terrain import augment_mujoco_xml
+        xml = augment_mujoco_xml(xml, terrain)
     return mujoco.MjModel.from_xml_string(xml), removed
 
 
@@ -521,8 +534,12 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
         contract = validate_contract(apply_draw_to_contract(contract, domain_parameters))
     actual_domain = validate_draw(contract.get("domain_parameters", single_draw(nominal_draws(1), 0)))
     reference = MotionReference(motion_file, contract)
-    model, removed_visual_geoms = load_model(model_path, no_visual_mesh)
+    model, removed_visual_geoms = load_model(model_path, no_visual_mesh, terrain=contract.get("terrain"))
     collision_geoms = configure_model(model, contract)
+    terrain_audit = None
+    if contract.get("terrain") is not None:
+        from training.tron1_terrain import mujoco_terrain_runtime_audit
+        terrain_audit = mujoco_terrain_runtime_audit(model, contract["terrain"])
     data = mujoco.MjData(model)
     measured = MujocoState(model, data, reference)
     state = measured.initialize()
@@ -593,6 +610,10 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
     report = {
         "status": "completed" if termination == "motion_end" else "terminated",
         "engine": "MuJoCo", "engine_version": mujoco.__version__, "termination": termination,
+        "terrain": contract.get("terrain"),
+        "terrain_runtime_audit": terrain_audit,
+        "terrain_module_sha256": sha256(ROOT / "training/tron1_terrain.py"),
+        "model_hash_scope": "model_sha256 hashes original input MJCF bytes before in-memory visual stripping, terrain augmentation and configuration; terrain_runtime_audit verifies actual compiled geometry after configuration",
         "termination_terms": terms, "completed_full_reference": termination == "motion_end",
         "physics_stepped": True, "root_state_writes": 1, "hidden_resets": 0,
         "start_reference_frame": 0, "final_reference_frame": int(ref_ids[-1]),

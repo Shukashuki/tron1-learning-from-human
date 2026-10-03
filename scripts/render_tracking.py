@@ -225,13 +225,19 @@ def main(argv=None):
         sample_fps = 50.0
         frame_times = np.arange(int(np.ceil(end_time * sample_fps)) + 1) / sample_fps
         video_fps = sample_fps * args.playback_speed
-        model = mujoco.MjModel.from_xml_path(str(args.model.resolve()))
+        terrain = evaluation.get("terrain")
+        if comparison_evaluation and comparison_evaluation.get("terrain") != terrain:
+            raise ValueError("Cannot render compared rollouts with different terrain")
+        from eval_tracking_mujoco import load_model
+        model, _ = load_model(args.model.resolve(), terrain=terrain)
+        report["terrain"] = terrain
         if model.nmesh == 0:
             raise ValueError("The visualization model has no official robot meshes")
         for clip in (actual, reference) + ((comparison,) if comparison else ()) + ((other,) if other else ()):
             named_qpos(model, clip, clip.times[0])  # eager name/schema checks
         for geom in range(model.ngeom):
-            if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH and model.geom(geom).name != "floor":
+            name = model.geom(geom).name or ""
+            if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH and name != "floor" and not name.startswith("terrain_"):
                 model.geom_rgba[geom, 3] = 0.0
         model.vis.global_.offwidth = max(model.vis.global_.offwidth, 680)
         model.vis.global_.offheight = max(model.vis.global_.offheight, 470)

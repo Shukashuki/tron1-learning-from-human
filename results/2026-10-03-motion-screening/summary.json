@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "status": "kinematic_screening_completed_not_physics_validation",
+  "date": "2026-10-03",
+  "dataset": "CMU Graphics Lab Motion Capture Database",
+  "source_manifest": "../../config/mocap_sources.json",
+  "physics_validated": false,
+  "policy_trained": false,
+  "sim2sim_evaluated": false,
+  "selection": {
+    "first_training_candidate": "16_05",
+    "reason": "Forward jump extends the existing single-jump task without introducing a large heading change or a new terrain model.",
+    "not_yet_training_ready": [
+      "Inspect and resolve millimeter-scale ground penetration without framewise re-grounding.",
+      "Check initial/final support and dynamic force/torque feasibility.",
+      "Define forward-displacement and landing/braking acceptance metrics; do not reuse a high-jump-only threshold as proof of success."
+    ],
+    "next_candidate": "83_51",
+    "next_candidate_caveat": "Large-angle yaw requires reviewing per-landmark fixed-world-offset mapping; low IK target residual does not establish faithful human geometry or angular-momentum feasibility."
+  },
+  "runtime": {
+    "kinematic_only": true,
+    "mujoco": "3.8.1",
+    "mink": "1.2.0",
+    "gmr_commit": "bb1bbe40774794fceb2a7c579a3464a28e68c844",
+    "upstream_gmr_modified": false,
+    "physics_steps": 0,
+    "remote_training_started": false
+  },
+  "clips": [
+    {
+      "id": "16_05",
+      "catalog_description": "forward jump",
+      "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+      "frames": 295,
+      "fps": 120,
+      "timestamp_span_s": 2.45,
+      "stages_completed": [
+        "ASF/AMC FK",
+        "Mink IK",
+        "GMR IK"
+      ],
+      "gmr": {
+        "uniform_human_scale": 0.7221145082725878,
+        "net_root_displacement_xyz_m": [
+          0.7587148213885302,
+          0.030303094680902084,
+          -0.005132501366427178
+        ],
+        "root_height_rise_from_initial_m": 0.1983661145536748,
+        "max_abs_root_yaw_deg": 9.993298362118017,
+        "wheel_target_rmse_m": 0.000059493952788408264,
+        "root_target_rmse_m": 0.0007144093685864505,
+        "max_interval_joint_speed_rad_s": 7.639621155326148,
+        "max_ground_penetration_m": 0.004796465925470603,
+        "frames_ground_penetration_gt_1mm": 100,
+        "max_self_penetration_m": 0,
+        "max_joint_limit_violation_rad": 0
+      }
+    },
+    {
+      "id": "16_08",
+      "catalog_description": "run/jog, sudden stop",
+      "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+      "frames": 239,
+      "fps": 120,
+      "timestamp_span_s": 1.9833333333333334,
+      "stages_completed": [
+        "ASF/AMC FK"
+      ],
+      "retargeting_deferred_reason": "A rolling-braking task must map pelvis/heading/height intent instead of copying alternating human foot placement; initial motion and changing endpoint floor residual also need review."
+    },
+    {
+      "id": "83_51",
+      "catalog_description": "hop turn 90 degrees left in air",
+      "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+      "frames": 591,
+      "fps": 120,
+      "timestamp_span_s": 4.916666666666667,
+      "stages_completed": [
+        "ASF/AMC FK",
+        "Mink IK",
+        "GMR IK"
+      ],
+      "gmr": {
+        "uniform_human_scale": 0.7989698940670549,
+        "net_root_displacement_xyz_m": [
+          0.04995054105304224,
+          0.021928982115116534,
+          -0.0026267267699795482
+        ],
+        "root_height_rise_from_initial_m": 0.19151382279492457,
+        "max_abs_root_yaw_deg": 90.49102136675573,
+        "wheel_target_rmse_m": 0.000031316503450483596,
+        "root_target_rmse_m": 0.0005787274720882721,
+        "max_interval_joint_speed_rad_s": 6.038588612595907,
+        "max_ground_penetration_m": 0.003481877697815647,
+        "frames_ground_penetration_gt_1mm": 336,
+        "max_self_penetration_m": 0,
+        "max_joint_limit_violation_rad": 0
+      }
+    }
+  ],
+  "limitations": [
+    "All robot numbers describe solved reference poses, not a policy rollout.",
+    "Wheel angles are frozen placeholders during IK, not a rolling-motion prescription.",
+    "No force, momentum, contact or rolling constraints are enforced in this IK.",
+    "No source clip was retimed or cropped; each subject has its own ASF calibration and retargeting scale.",
+    "The human floor and feet-clear diagnostics are keypoint heuristics, not measured contacts or ground-truth takeoff/landing events.",
+    "Raw mocap and robot reference arrays remain outside Git; third-party terms remain applicable."
+  ],
+  "local_artifact_root": "outputs/motion-screening-20261003"
+}

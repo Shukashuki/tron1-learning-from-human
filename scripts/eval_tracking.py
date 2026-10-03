@@ -155,6 +155,7 @@ def main():
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--num-envs", default=16, type=int)
     parser.add_argument("--seed", default=42, type=int)
+    parser.add_argument("--terrain-file", type=Path, help="Must match the terrain used for training")
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
     parser.add_argument("--domain-parameters", type=Path,
                         help="One explicit fixed actuator-domain draw JSON; never resample during evaluation")
@@ -188,6 +189,15 @@ def main():
         )
         domain_parameters = (validate_draw(json.loads(args.domain_parameters.read_text()))
                              if args.domain_parameters else None)
+        terrain_spec = None
+        if args.terrain_file:
+            from training.tron1_terrain import load_terrain
+            terrain_spec = load_terrain(args.terrain_file)
+        training_manifest_path = args.checkpoint.parent / "manifest.json"
+        if training_manifest_path.is_file():
+            trained_terrain = json.loads(training_manifest_path.read_text()).get("terrain")
+            if trained_terrain != terrain_spec:
+                raise ValueError("Evaluation terrain differs from the checkpoint training manifest")
 
         def to_numpy(tensor):
             return tensor.detach().cpu().numpy().copy()
@@ -240,9 +250,14 @@ def main():
                 super()._reset_idx(env_ids)
 
         cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, eval_mode=True,
-                           dr_profile={"mode": "fixed", "fixed_draw": domain_parameters} if domain_parameters else None)
+                           dr_profile={"mode": "fixed", "fixed_draw": domain_parameters} if domain_parameters else None,
+                           terrain_spec=terrain_spec)
         cfg.seed = args.seed
         env = TerminalCaptureEnv(cfg=cfg)
+        terrain_audit = None
+        if terrain_spec is not None:
+            from training.tron1_terrain import terrain_runtime_audit
+            terrain_audit = terrain_runtime_audit(env, terrain_spec)
         robot = env.scene["robot"]
         env.eval_wheel_body_ids = [robot.body_names.index(name) for name in WHEEL_BODY_NAMES]
         sensor = env.scene.sensors.get("contact_forces")
@@ -366,6 +381,8 @@ def main():
         summary = summarize_episodes(arrays, outcomes, reference, args.contact_threshold_n)
         contract = observation_action_contract()
         contract["domain_randomization"] = "disabled during evaluation; fixed actuator parameters"
+        if terrain_spec is not None:
+            contract["terrain"] = terrain_spec
         if domain_parameters is not None:
             contract = apply_draw_to_contract(contract, domain_parameters)
         training_manifest = args.checkpoint.parent / "manifest.json"
@@ -384,6 +401,10 @@ def main():
             raise RuntimeError(f"Evolving-observation actor export validation failed: {export_validation_max_error}")
         report = {
             "schema_version": 1, "status": "evaluated" if not active.any() else "evaluation_incomplete",
+            "terrain": terrain_spec,
+            "terrain_runtime_audit": terrain_audit,
+            "terrain_file_sha256": sha256(args.terrain_file) if args.terrain_file else None,
+            "terrain_module_sha256": sha256(ROOT / "training/tron1_terrain.py") if terrain_spec is not None else None,
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
             "domain_parameters": domain_parameters,
             "domain_parameters_file_sha256": sha256(args.domain_parameters) if args.domain_parameters else None,

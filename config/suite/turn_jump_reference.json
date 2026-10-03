@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "task": "turn_jump",
+  "source_clip": "83_51",
+  "source_asf": "assets/mocap/CMU/83.asf",
+  "source_amc": "assets/mocap/CMU/83_51.amc",
+  "source_fps": 120,
+  "human_output": "outputs/motion-suite-20261003/turn_jump/human",
+  "mink_config": "config/suite/turn_jump_mink.json",
+  "mink_output": "outputs/motion-suite-20261003/turn_jump/mink",
+  "gmr_config": "config/suite/turn_jump_gmr.json",
+  "gmr_output": "outputs/motion-suite-20261003/turn_jump/gmr",
+  "export": {
+    "source": "outputs/motion-suite-20261003/turn_jump/gmr/robot_reference.npz",
+    "output": "outputs/motion-suite-20261003/turn_jump/tracking/motion.npz",
+    "output_fps": 50,
+    "append_hold_s": 1,
+    "prepend_hold_s": 0,
+    "z_offset_m": 0.0081
+  },
+  "z_offset_policy": "One global offset above measured GMR wholeclip penetration plus >=1 mm margin; unchanged relative amplitudes, never framewise grounded.",
+  "reference_validation": "outputs/motion-suite-20261003/turn_jump/reference_validation.json",
+  "status": "kinematic_reference_ready_for_bounded_training",
+  "source": {
+    "catalog_url": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+    "asf_url": "http://mocap.cs.cmu.edu/subjects/83/83.asf",
+    "amc_url": "http://mocap.cs.cmu.edu/subjects/83/83_51.amc",
+    "fps": 120,
+    "asf_sha256": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093",
+    "amc_sha256": "9505c7ac643d3beb53d51a4a5044d43a0fd391ddfff05ce9122abcc3a252d200",
+    "fk_max_bone_length_error_m": 4.440892098500626e-16
+  },
+  "python_environment_used": "Python 3.13, Mink 1.2.0, MuJoCo 3.8.1 (kinematic retargeting only)",
+  "physics_validated": false
+}

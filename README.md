@@ -1,6 +1,29 @@
 # TRON1 Learning from Human
 
-## 最新結果：三軸 domain randomization（2026-10-03）
+## 最新結果：六動作實測（2026-10-03）
+
+六項都完成 **600 次 PPO 更新、2,048 個環境，以及同一 actor 的 Isaac／MuJoCo 評估**。
+各自從同一個既有 DR checkpoint 續訓，並非一個能切換六招的通用策略。
+**4/6 通過本輪預設行為門檻，但轉向跳只完成整段約 90°，未完成空中轉 90°；側跳、上台階失敗。**
+
+| 動作／CMU | 本輪結果（Isaac／MuJoCo） | 實際雙引擎影片 |
+|---|---|---|
+| 前跳 `16_05` | 通過；base 上升 13.45／14.77 cm，落地恢復 | [前跳](results/2026-10-03-motion-suite/forward_jump/tracking_comparison.mp4) |
+| 轉向跳 `83_51` | 通過整段轉向＋離地門檻；**空中僅轉 33.32／38.90°** | [轉向跳](results/2026-10-03-motion-suite/turn_jump/tracking_comparison.mp4) |
+| 側跳 `141_05` | **失敗**；上升僅 1.99／2.11 cm，側向 excursion 達參考 24.85／28.07% | [側跳失敗](results/2026-10-03-motion-suite/side_jump/tracking_comparison.mp4) |
+| 滾行急停 `16_08` 改編 | 通過；末 0.5 秒平均平面速度 0.044／0.036 m/s | [滾行急停](results/2026-10-03-motion-suite/rolling_stop/tracking_comparison.mp4) |
+| 蹲低 `134_01` 改編 | 通過；實際下蹲 16.36／16.42 cm，恢復站立 | [蹲低](results/2026-10-03-motion-suite/crouch/tracking_comparison.mp4) |
+| 11.64 cm 台階 `83_03` | **失敗**；兩邊均未達雙輪上台面的終態 | [上台階失敗](results/2026-10-03-motion-suite/step_up/tracking_comparison.mp4) |
+
+[完整數值、失敗項與來源](results/2026-10-03-motion-suite/summary.json) ·
+[六任務預算／參考改編設定](config/suite/motion_suite.json)
+
+每動作、每引擎只有 **1 次名義條件完整回合**，從參考第 0 幀及其初速度開始；不是一般成功率或真機驗收。
+影片以共同 renderer 畫出實際記錄姿態，沒有重新模擬或用參考播放冒充策略。
+急停、蹲低是明確的輪足任務改編；台階碰撞幾何實際存在，但尺寸是從足端高度估計，不是 CMU 實景真值。
+未依結果加訓、挑最佳 checkpoint 或放寬行為門檻；失敗與不完整接觸證據均保留。重建方式見末節。
+
+## 前一階段：三軸 domain randomization（2026-10-03）
 
 輪軸阻力、馬達無負載轉速與馬達扭矩能力的 DR 續訓已完成。
 使用預先指定的最終 checkpoint，在同一組 16 個未用於訓練的獨立參數 draw 上，
@@ -847,3 +870,131 @@ python scripts/eval_tracking_robustness.py \
 ```
 
 驗證器另匯出 `parameters/validation_XXX.json`，可直接交給兩引擎的 `--domain-parameters` 做具名重播。
+
+## 新動作初篩快照（2026-10-03，六動作訓練之前）
+
+已從 CMU 官方站小量下載 `16_05`（前跳）、`16_08`（跑後急停）、`83_51`（空中左轉 90°），
+以各 subject 對應 ASF 和目錄標示的 120 Hz 解碼；來源、大小與 SHA-256 已補入
+[來源清單](config/mocap_sources.json)。未抓取整個資料庫，原始動捕仍不納入 Git。
+
+[初篩摘要](results/2026-10-03-motion-screening/summary.json)記錄前跳與轉身跳的 Mink／GMR 結果。
+前跳 GMR reference 向前約 0.759 m、機身上升 0.198 m；轉身跳 yaw 最大約 90.49°。
+兩者輪心目標 RMSE 雖小於 0.1 mm，仍有 4.80／3.48 mm 最大穿地，沒有施加接觸力、
+角動量或滾動約束。這些是**運動學參考，不是新策略的成功動作或 sim2sim 結果**。
+
+優先候選為 `16_05` 前跳；`83_51` 需先檢查固定世界座標 landmark 偏移在大角度轉向下的適用性。
+`16_08` 暫只分析人體軌跡：輪式煞停應保留速度、航向和機身姿態意圖，不能直接照搬交替踏步。
+新任務需另訂位移、落地制動、姿態恢復驗收，不直接套用原高跳的高度門檻。
+
+本機產物位於 `outputs/motion-screening-20261003/`，各片段有 `human/`，
+前跳與轉身跳另有獨立 `mink_config.json`、`gmr_config.json`、`mink/`、`gmr/`，沒有覆寫原跳躍。
+通用人工骨架初篩入口如下（輸出目錄必須為新建或空目錄）：
+
+```bash
+python scripts/cmu_motion.py --asf assets/mocap/CMU/16.asf \
+  --amc assets/mocap/CMU/16_05.amc --fps 120 --output-dir outputs/cmu-forward-new
+python scripts/screen_cmu_motions.py \
+  --motion 16_05=outputs/cmu-forward-new/human_motion.npz \
+  --output-dir outputs/screen-forward-new
+```
+
+`--motion ID=PATH` 可重複指定多個片段，輸出 `summary.json` 和 `overview.png`。
+保留原始 timestamps／全局位移／高度，不重定時或逐幀貼地；足端離地區間僅為幾何篩選，
+不等於接觸感測器的飛行／落地標記。原 `render_mocap.py` 仍是固定 `16_03` 的 renderer，
+新動作不要用該入口冒充其來源。
+
+## 六動作訓練與同策略雙引擎實驗
+
+固定 seed=42，各動作續訓 29,491,200 environment steps，使用 final iteration 2798。
+共同 resume 為先前 motor-v1 DR final iteration 2199；完整 SHA、參考來源和所有改編見
+[suite 設定](config/suite/motion_suite.json)。訓練保留三軸 motor-v1 DR，評估則關閉噪聲與隨機抽樣，
+不把這次名義條件通過解讀為新動作的 robustness 已獲驗證。
+訓練端為 Isaac Sim 5.1／Isaac Lab 2.3／Torch 2.7.0；部署使用 MuJoCo 3.9.0／Torch 2.5.1。
+運動學參考另在 MuJoCo 3.8.1／Mink 1.2.0 環境產生。
+
+### 驗收與失敗解讀
+
+`scripts/assess_motion_suite.py` 將同 actor／normalizer／51 維 observation 重建、完整回合、實際動作門檻
+與跨引擎誤差分開記錄。共同門檻包括：末端 XYZ 誤差 ≤15 cm、Z 誤差 ≤6 cm、航向誤差 ≤15°、
+全段 root RMSE ≤15 cm；末 0.5 秒最大傾角 ≤15°、雙輪支撐 ≥90%、平均平面速度 ≤0.2 m/s。
+跳躍另要求實際上升 ≥8 cm、連續雙輪無接觸 ≥0.08 s 及前後持續支撐；進度至少為參考的 70%。
+側跳還驗證側向最大 excursion，避免「幾乎沒動」因原片返回原位而錯誤過關。
+台階必須兩輪最後都在指定台面 XY 範圍，輪心減半徑距台面 ≤4 cm，且達到高度進度。
+
+| 動作 | 跨引擎 base XYZ RMSE | 與任務成功的關係 |
+|---|---:|---|
+| 前跳 | 1.69 cm | 兩邊均通過 |
+| 轉向跳 | 2.02 cm | 兩邊均通過既定門檻，但不代表原始空中 90°意圖完成 |
+| 側跳 | 1.11 cm | **兩邊一致地失敗**；不是小 RMSE 就完成技能 |
+| 滾行急停 | 1.10 cm | 兩邊均通過，未測從靜止加速 |
+| 蹲低 | 0.26 cm | 兩邊均通過，未加入頭頂障礙物 |
+| 台階 | 12.03 cm | 兩邊均未上台，且障礙接觸後跨引擎差距較大 |
+
+側跳 reference 有約 4.83 cm 最大穿地，原 120 Hz 腿關節速度峰值約 25.21 rad/s；
+這次保留為負例，沒有逐幀貼地或整段大幅抬高去隱藏問題，不能只據此斷言機器人本體不可能側跳。
+急停保留人體速度／姿態意圖，移除交替踏步，時間放慢 2 倍、位移乘 0.35；
+蹲低取 Duck Under 第 160–330 幀，改為 18 cm 原地蹲低，亦放慢 2 倍。
+兩者輪角速度是幾何滾動重建，不是人類輪軸量測，也不是輪力矩 supervision；輪力矩仍由 policy 學習。
+
+轉向跳整段 yaw 為 88.01／88.91°，但雙輪無接觸區段僅轉 33.32／38.90°。
+原門檻只要求整段 yaw 進度加獨立離地事件，所以保留其 pass，同時明列原始動作意圖只部分達成。
+空中轉角是事後描述性診斷，不拿來重新挑 checkpoint 或修改本輪門檻。
+
+台階的同一 `terrain.json` 同時用於訓練、Isaac 評估和 MuJoCo 部署；
+正式訓練／評估的 live USD collider bounds 誤差小於 3.1e-8 m，MuJoCo 編譯後幾何另行讀回通過。
+後加的 MuJoCo 場景稽核沒有改動原場景生成函式；原 Isaac helper SHA 以執行時 workspace 的唯讀補充快照保存，
+明確標為 retrospective capture，不假裝原始 manifest 已記錄。原始模型 hash 不冒充已加入台階的完整場景 hash。
+Isaac 缺少非輪 ground-only 接觸證據，六項仍全部 `complete_contact_evidence=false`、`hardware_ready=false`。
+
+### 重建入口
+
+原始 ASF／AMC 依 [來源清單](config/mocap_sources.json) 下載並核對雜湊；不從 Git 散布原始或轉換動捕。
+以下使用獨立輸出路徑；已存在的正式實驗目錄不得覆蓋。IK、Isaac、Torch 部署需分別使用相應 Python 環境。
+前三個跳躍的完整參考 recipe 在 `config/suite/*_reference.json`，其 Mink／GMR 設定保存全局位移和原時間戳；
+轉向跳使用 `root_rotating` landmark offset，避免把形態差異偏移固定在世界座標。
+
+```bash
+# 輪式任務改編；先用 cmu_motion.py 解碼對應 ASF/AMC。
+python scripts/prepare_wheel_skill_references.py --skill rolling_stop \
+  --human outputs/my-human-16_08/human_motion.npz --output-dir outputs/my-rolling-stop
+python scripts/prepare_wheel_skill_references.py --skill crouch \
+  --human outputs/my-human-134_01/human_motion.npz --first-frame 160 --last-frame 330 \
+  --crouch-depth 0.18 --output-dir outputs/my-crouch
+
+# 台階：matched MJCF 建立方式沿用前述 sim2sim 章節。
+python scripts/prepare_step_reference.py \
+  --model outputs/sim2sim-cmu-16_03/mujoco_model.xml --output-dir outputs/my-step/prepared
+python scripts/export_tracking_motion.py \
+  --source outputs/my-step/prepared/gmr/robot_reference.npz \
+  --output outputs/my-step/motion.npz --output-fps 50 --append-hold-s 1 \
+  --z-offset 0.008565039259350954
+
+# Isaac Python：600 次更新＋指定 final checkpoint 的 frame-zero 評估。
+# --terrain-file 僅台階需要；其他動作省略。
+python scripts/run_motion_trial.py \
+  --motion-file outputs/my-step/motion.npz \
+  --asset-path outputs/training-asset/WF_TRON1A.usda \
+  --resume outputs/domain-randomization-20261003/training/model_final.pt \
+  --terrain-file outputs/my-step/prepared/terrain.json \
+  --output-dir outputs/my-step/trial --num-envs 2048 --iterations 600 --seed 42
+
+# Torch + MuJoCo Python：地形從 actor 旁 policy_contract.json 自動載入。
+python scripts/eval_tracking_mujoco.py \
+  --policy outputs/my-step/trial/isaac/actor_normalized.pt \
+  --motion-file outputs/my-step/motion.npz \
+  --model outputs/sim2sim-cmu-16_03/mujoco_model.xml --no-visual-mesh \
+  --verify-isaac-trajectory outputs/my-step/trial/isaac/trajectory.npz \
+  --output-dir outputs/my-step/trial/mujoco
+python scripts/assess_motion_suite.py --task step_up \
+  --motion-file outputs/my-step/motion.npz \
+  --isaac-dir outputs/my-step/trial/isaac --mujoco-dir outputs/my-step/trial/mujoco \
+  --output outputs/my-step/trial/assessment.json
+```
+
+公開 `results/2026-10-03-motion-suite/` 僅含去識別化摘要、驗收與影片，不含訓練權重、原始 logs 或來源動捕。
+`scripts/publish_motion_suite.py` 先核對六項完整性、固定預算與雜湊再產生公開快照，保留所有失敗；
+重跑請選新輸出目錄。`outputs/motion-suite-20261003/<task>/trial/` 保留本機原始實驗證據。
+
+最終本機回歸：426 passed、7 skipped、160 subtests passed；7 項 Torch 匯出測試在部署環境另行全數通過，
+部署環境的 12 項 MuJoCo evaluator 測試亦通過。公開報告／影片 hash、來源資料 hash、README 結果連結及私人路徑掃描均通過；
+本輪六項遠端訓練與評估程序皆已退出。

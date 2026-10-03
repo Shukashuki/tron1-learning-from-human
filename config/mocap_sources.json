@@ -22,5 +22,89 @@
         "sha256": "2f60815066e68bd2f70a576400434e53b43af35f8a009f1342e9367ab93c03f9"
       }
     ]
+  },
+  "cmu_16_05": {
+    "description": "CMU subject 16, motion 05: forward jump",
+    "fps": 120,
+    "frame_count": 295,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/16.asf", "url": "http://mocap.cs.cmu.edu/subjects/16/16.asf", "bytes": 7257, "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb"},
+      {"path": "assets/mocap/CMU/16_05.amc", "url": "http://mocap.cs.cmu.edu/subjects/16/16_05.amc", "bytes": 236161, "sha256": "6467f78aad0529d2b9eb6f2f2633b518c299da66959a2171ec73ba40e017787f"}
+    ]
+  },
+  "cmu_16_08": {
+    "description": "CMU subject 16, motion 08: run/jog, sudden stop",
+    "fps": 120,
+    "frame_count": 239,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=16",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/16.asf", "url": "http://mocap.cs.cmu.edu/subjects/16/16.asf", "bytes": 7257, "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb"},
+      {"path": "assets/mocap/CMU/16_08.amc", "url": "http://mocap.cs.cmu.edu/subjects/16/16_08.amc", "bytes": 191378, "sha256": "07fb225c178eda7d232cbe41e975461f8214c3c9f44adf7edff5da25f51b9ec6"}
+    ]
+  },
+  "cmu_141_05": {
+    "description": "CMU subject 141, motion 05: Jump Sideways",
+    "fps": 120,
+    "frame_count": 230,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=141",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/141.asf", "url": "http://mocap.cs.cmu.edu/subjects/141/141.asf", "bytes": 7269, "sha256": "e32993b8079c0914ed4d865ad53f7b9646398808855233e6f650d4f4417df2bb"},
+      {"path": "assets/mocap/CMU/141_05.amc", "url": "http://mocap.cs.cmu.edu/subjects/141/141_05.amc", "bytes": 183926, "sha256": "d5a8665dfe131128480668cb10d473244c812274172164ad51492cfa524b76f2"}
+    ]
+  },
+  "cmu_134_01": {
+    "description": "CMU subject 134, motion 01: Skateboard Motions, Duck Under",
+    "fps": 120,
+    "frame_count": 357,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=134",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/134.asf", "url": "http://mocap.cs.cmu.edu/subjects/134/134.asf", "bytes": 7260, "sha256": "0c60335a79e23b38cbba8d9f6d20eab53ba37bd528577d1ac0715a4530470a84"},
+      {"path": "assets/mocap/CMU/134_01.amc", "url": "http://mocap.cs.cmu.edu/subjects/134/134_01.amc", "bytes": 286048, "sha256": "f85ebf5f726dadbf6a9e85005e4651dc0d033da157041bd1046a60f407c1a54b"}
+    ]
+  },
+  "cmu_83_03": {
+    "description": "CMU subject 83, motion 03: large step to a short ledge",
+    "fps": 120,
+    "frame_count": 669,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/83.asf", "url": "http://mocap.cs.cmu.edu/subjects/83/83.asf", "bytes": 7273, "sha256": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093"},
+      {"path": "assets/mocap/CMU/83_03.amc", "url": "http://mocap.cs.cmu.edu/subjects/83/83_03.amc", "bytes": 539005, "sha256": "4a2e3d8cdde1fb07c93c98012519c46fd7f54764ead45f47ffa8ebd87d6d32b1"}
+    ]
+  },
+  "cmu_83_51": {
+    "description": "CMU subject 83, motion 51: hop turn 90 degrees left in air",
+    "fps": 120,
+    "frame_count": 591,
+    "source_page": "http://mocap.cs.cmu.edu/search.php?subjectnumber=83",
+    "usage_terms": "http://mocap.cs.cmu.edu/",
+    "acknowledgment": "The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.",
+    "terms_summary": "CMU permits use in research and products, but prohibits directly reselling the data, including converted data. Consult the source terms.",
+    "integrity_note": "Retrieved 2026-10-03 via official HTTP because HTTPS was unavailable. SHA-256 pins retrieved bytes, not vendor-authenticated checksums.",
+    "files": [
+      {"path": "assets/mocap/CMU/83.asf", "url": "http://mocap.cs.cmu.edu/subjects/83/83.asf", "bytes": 7273, "sha256": "b4eabfbcaeadf39faba73e6a5b2857830da73a8549266c95370863155e177093"},
+      {"path": "assets/mocap/CMU/83_51.amc", "url": "http://mocap.cs.cmu.edu/subjects/83/83_51.amc", "bytes": 474476, "sha256": "9505c7ac643d3beb53d51a4a5044d43a0fd391ddfff05ce9122abcc3a252d200"}
+    ]
   }
 }
