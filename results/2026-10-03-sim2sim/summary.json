@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "method": "Same normalized PPO actor, independently simulated in Isaac/PhysX and MuJoCo",
+  "verdict": "pass_for_one_deterministic_episode_with_limited_contact_evidence",
+  "assessment_file": "assessment.json",
+  "diagnostic_file": "diagnosis.json",
+  "selected_checkpoint_iteration": 1600,
+  "selection": "First intermediate DC checkpoint observed to complete the MuJoCo clip; then evaluated independently in Isaac and replayed in MuJoCo with the actual Isaac actor export",
+  "dc_training_run": {
+    "resume_checkpoint_iteration": 1400,
+    "environments": 2048,
+    "requested_updates": 600,
+    "completed_last_iteration": 1999,
+    "environment_steps": 29491200,
+    "status": "completed_and_exited"
+  },
+  "simulators": {"IsaacSim": "5.1.0.0", "IsaacLab": "2.3.0 (package 0.47.2)", "MuJoCo": "3.9.0"},
+  "hashes": {
+    "checkpoint": "5d917d34cb92c3ddba8ba2828e97c75dd615b84bacf98a830b58b02bd5e4051c",
+    "actor": "5aedd64370a99e64d1b41ca0a4fb4c49a977ce404bb1fa0ca998816e0a83a4ae",
+    "reference": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+    "training_source": "bfebeaba9336127931e9a9ca8a4d3ad8c998745c122252c6ef32f45af236302a",
+    "isaac_evaluator_source": "f2ea95fb51ae002f6a17e8426a6aee16520cdaabd7b041590a5a27cf1091e6b9",
+    "mujoco_evaluator_source": "fa42ea0470d129073c95b53679459feee1621b358bf5bf268702c4b63760ea0d",
+    "isaac_report": "e526bfd1f152785355f7fab7604e5ce17621ca9cebd99fe2710bdad1412b53a3",
+    "mujoco_report": "a07c7ac9b253acb46edf3a5c2b6de5fbbcb1569610ee0d18610c07bb5432f9c5"
+  },
+  "isaac": {
+    "duration_s": 4.42,
+    "base_height_gain_m": 0.30016571283340454,
+    "flight_duration_s": 0.48,
+    "sustained_landing_start_s": 2.2,
+    "tail_two_wheel_support_fraction": 1.0,
+    "max_tail_tilt_deg": 8.04488468170166,
+    "reference_height_rmse_m": 0.06203119829297066,
+    "contact_source": "wheel net-force proxy, 50 Hz",
+    "nonwheel_ground_contact_evidence": "unavailable"
+  },
+  "mujoco": {
+    "duration_s": 4.419999999999928,
+    "base_height_gain_m": 0.30996094109213823,
+    "flight_duration_s": 0.49999999999998956,
+    "sustained_landing_start_s": 2.2449999999999743,
+    "tail_two_wheel_support_fraction": 1.0,
+    "max_tail_tilt_deg": 8.23606770814546,
+    "reference_height_rmse_m": 0.06645879924335943,
+    "contact_source": "ground-only constraint forces, 200 Hz",
+    "nonwheel_ground_contact_samples": 0
+  },
+  "cross_engine_comparison": {
+    "duration_s": 4.419999999999928,
+    "base_xyz_rmse_m": 0.019572782555880176,
+    "base_z_rmse_m": 0.006216295480552236,
+    "leg_joint_rmse_rad": 0.02444986411054227,
+    "alignment": "shared simulation clock, no phase shifting, DTW, spatial alignment, or extrapolation"
+  },
+  "observation_audit": {"samples": 222, "dimensions": 51, "max_abs_error": 4.76837158203125e-7},
+  "complete_contact_evidence": false,
+  "statistical_robustness_benchmark": false,
+  "hardware_ready": false,
+  "limitations": [
+    "One selected checkpoint and one unperturbed frame-zero episode per engine; not a population success rate.",
+    "DC motor parameters are shared simulation assumptions, not verified hardware ratings.",
+    "Isaac has wheel net-force telemetry but no non-wheel ground-only contact evidence; strict complete-contact-evidence mode does not pass.",
+    "Height is base-link rise from the initial pose, not whole-body COM height.",
+    "The video replays recorded states at half speed using common visual meshes, not a new dynamics simulation."
+  ]
+}

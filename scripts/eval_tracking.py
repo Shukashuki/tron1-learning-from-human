@@ -369,6 +369,7 @@ def main():
             raise RuntimeError(f"Evolving-observation actor export validation failed: {export_validation_max_error}")
         report = {
             "schema_version": 1, "status": "evaluated" if not active.any() else "evaluation_incomplete",
+            "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
             "simulator": "IsaacLab/PhysX", "checkpoint": str(args.checkpoint),
             "checkpoint_sha256": contract["checkpoint_sha256"],
             "runner_config": str(args.runner_config), "runner_config_sha256": sha256(args.runner_config),

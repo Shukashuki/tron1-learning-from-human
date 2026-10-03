@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "scope": "Two bounded free-flight force-response A/B diagnostics, not a policy or jump success test",
+  "simulators": {
+    "IsaacSim": "5.1.0.0",
+    "IsaacLab": "2.3.0 (package 0.47.2)",
+    "MuJoCo": "3.8.1"
+  },
+  "common_protocol": {
+    "cases_per_variant": 33,
+    "commanded_torques_nm": [
+      -4,
+      -1,
+      0,
+      1,
+      4
+    ],
+    "dt_s": 0.005,
+    "root_height_offset_m": 2,
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "all_cases_start_at_identical_pose_with_zero_velocity": true,
+    "joint_pd_gains_and_armature": 0,
+    "force_injection": "Direct native-order PhysX DOF force and named MuJoCo generalized hinge torque; no feedback controller",
+    "joint_effort_and_velocity_limits_preserved": true,
+    "error_definition": "For every nonzero-torque case subtract that engine gravity-only velocity, then compare MuJoCo minus PhysX. Relative L2 divides by the PhysX baseline-subtracted L2 norm; maxima are across cases."
+  },
+  "legacy_joint_friction": {
+    "finding": "IsaacLab 2.3 writes newer static/dynamic/viscous friction properties in Isaac Sim 5.1; the USD legacy wheel friction coefficient 0.01 remained active even when actuator friction was configured as zero. Explicitly clearing the legacy coefficients removed the single-step joint response mismatch.",
+    "steps_per_case": 1,
+    "physics_steps_per_variant": 33,
+    "force_interval_s": 0.005,
+    "new_friction_properties_in_both_variants": [
+      0,
+      0,
+      0
+    ],
+    "original": {
+      "isaac_snapshot_sha256": "2141838e524a637ef3978a370cca79d8ba59039a919ec9d3138ca02c84c640eb",
+      "mujoco_comparison_sha256": "7b4453167f36d8aaa8c30443bb13fa7a6c0d63c9d0e97d380a19058af30c2ed2",
+      "runtime_max_contact_force_n": 0,
+      "response_errors": {
+        "joint_velocity_rad_s": {
+          "max_absolute_error": 0.09161319599173723,
+          "max_relative_l2_error": 0.1795607965746003
+        },
+        "root_com_velocity_w_m_s": {
+          "max_absolute_error": 0.000154856842845566,
+          "max_relative_l2_error": 0.050289862707620384
+        },
+        "root_angular_velocity_w_rad_s": {
+          "max_absolute_error": 0.0010004169563290581,
+          "max_relative_l2_error": 0.04262417278137792
+        }
+      },
+      "wheel_legacy_friction_coefficient": 0.01
+    },
+    "legacy_zero": {
+      "isaac_snapshot_sha256": "1e4ee437311ffaa3c901f776e8ae9dc1085347c632d314ae103b042d17e7a3f0",
+      "mujoco_comparison_sha256": "243f869556f0324455d7b1da4a0aa907abb69a4d82308c760f71a057ae47acf3",
+      "runtime_max_contact_force_n": 0,
+      "response_errors": {
+        "joint_velocity_rad_s": {
+          "max_absolute_error": 7.135045239081705e-7,
+          "max_relative_l2_error": 0.0000014316212018794588
+        },
+        "root_com_velocity_w_m_s": {
+          "max_absolute_error": 0.0000310093759368843,
+          "max_relative_l2_error": 0.01033767336602168
+        },
+        "root_angular_velocity_w_rad_s": {
+          "max_absolute_error": 0.00002380625599619074,
+          "max_relative_l2_error": 0.0007558274784333496
+        }
+      },
+      "wheel_legacy_friction_coefficient": 0
+    },
+    "historical_diagnostic_source_sha256": null,
+    "source_provenance_note": "The original one-step runs did not record their source hashes. The reproduction source hash below describes the current reproducible diagnostic implementation, not a retrospectively claimed historical version."
+  },
+  "rigid_body_angular_speed_units": {
+    "finding": "RigidBodyPropertiesCfg.max_angular_velocity and USD physxRigidBody:maxAngularVelocity use degrees/s. The original value 100 limited body speed to about 1.745 rad/s. Converting the intended 100 rad/s via degrees() removed the multi-step wheel response mismatch.",
+    "steps_per_case": 4,
+    "physics_steps_per_variant": 132,
+    "force_interval_s": 0.02,
+    "all_legacy_friction_coefficients_in_both_variants": 0,
+    "usd_readback_verified_on_all_links": true,
+    "original": {
+      "isaac_snapshot_sha256": "5e199b220c2b527e95d4143c5ea92889a609e13856f3e5217f4145d160b4e799",
+      "mujoco_comparison_sha256": "569f22e453ea1c95ab74e7d13441b41f55c95268d04d9202407d1e185eddf44b",
+      "runtime_max_contact_force_n": 0,
+      "response_errors": {
+        "joint_velocity_rad_s": {
+          "max_absolute_error": 4.414312926439541,
+          "max_relative_l2_error": 0.9799452267882466
+        },
+        "root_com_velocity_w_m_s": {
+          "max_absolute_error": 0.0004971413337141184,
+          "max_relative_l2_error": 0.04184274861319587
+        },
+        "root_angular_velocity_w_rad_s": {
+          "max_absolute_error": 0.0010417902643347493,
+          "max_relative_l2_error": 0.008749283742694064
+        }
+      },
+      "runtime_max_body_angular_velocity_deg_s": 100
+    },
+    "converted_units": {
+      "isaac_snapshot_sha256": "de53071bad18aba3f30c8624fa6a28494bfc0f760805ea2c31fd7fd37076c6dd",
+      "mujoco_comparison_sha256": "d5e057c0cd803cbb28f732df93c01d1ef5bef38d2841858f095f9159b91d16e2",
+      "runtime_max_contact_force_n": 0,
+      "response_errors": {
+        "joint_velocity_rad_s": {
+          "max_absolute_error": 0.000005112554635644528,
+          "max_relative_l2_error": 0.0000024482953233288203
+        },
+        "root_com_velocity_w_m_s": {
+          "max_absolute_error": 0.0004971413337141184,
+          "max_relative_l2_error": 0.04184274861319587
+        },
+        "root_angular_velocity_w_rad_s": {
+          "max_absolute_error": 0.0003817234306838224,
+          "max_relative_l2_error": 0.0029141816871250574
+        }
+      },
+      "runtime_max_body_angular_velocity_deg_s": 5729.578125
+    },
+    "wheel_examples": [
+      {
+        "case": "wheel_L_Joint:+4Nm",
+        "original_limit_physx_rad_s": 4.414205074310303,
+        "corrected_limit_physx_rad_s": 8.82832145690918,
+        "mujoco_rad_s": 8.82831729424363
+      },
+      {
+        "case": "wheel_R_Joint:+4Nm",
+        "original_limit_physx_rad_s": 4.414375305175781,
+        "corrected_limit_physx_rad_s": 8.8284912109375,
+        "mujoco_rad_s": 8.828486507697052
+      }
+    ],
+    "recorded_diagnostic_source_sha256": "82109ba5d8b2bd5abc1d52895e2e4ecee7740361ecbb8ac6f703fee7139058db",
+    "recorded_task_source_sha256": "b6756c0d2af4efc64e0b039bfd64bae6621057be01b62b5f0d6cdc8ad647045b"
+  },
+  "reproduction": {
+    "script": "scripts/diagnose_tracking_dynamics.py",
+    "diagnostic_source_sha256": "82109ba5d8b2bd5abc1d52895e2e4ecee7740361ecbb8ac6f703fee7139058db",
+    "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "friction_ab_flags": [
+      "--legacy-wheel-friction 0.01 --max-body-angular-speed-rad-s 1.7453292519943295 --steps-per-case 1",
+      "--legacy-wheel-friction 0 --max-body-angular-speed-rad-s 1.7453292519943295 --steps-per-case 1"
+    ],
+    "angular_speed_ab_flags": [
+      "--zero-legacy-friction --max-body-angular-speed-rad-s 1.7453292519943295 --steps-per-case 4",
+      "--zero-legacy-friction --max-body-angular-speed-rad-s 100 --steps-per-case 4"
+    ],
+    "mujoco_mode": "--engine mujoco --isaac-snapshot <saved Isaac JSON> --output-dir <new directory>"
+  },
+  "limitations": [
+    "Single initial pose with no contacts; force intervals only 5 ms or 20 ms. These tests do not demonstrate full-policy sim2sim transfer, jump success, contact matching, robustness, or hardware safety.",
+    "The residual root COM/angular velocity differences are reported and are not explained by the joint response agreement.",
+    "Joint speed and force limits were preserved. A body-speed cap is not a motor rating or a validated hardware limit.",
+    "Original motion data, trained weights, raw private snapshots, and remote account/host paths are intentionally not included. SHA256 values identify retained private evidence, not independently downloadable artifacts."
+  ]
+}

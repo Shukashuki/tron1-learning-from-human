@@ -122,6 +122,7 @@ def main():
             "body_names": env.scene["robot"].body_names,
             "reference_name_mapping": env.command_manager.get_term("motion").reference_name_mapping,
             "contract": contract, "resume": str(args.resume) if args.resume else None,
+            "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
             "evaluation_required": "Separate deterministic rollout from frame 0, without airborne resets",
         }
         write_json(output / "manifest.json", manifest)

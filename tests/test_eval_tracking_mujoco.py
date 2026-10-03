@@ -75,6 +75,9 @@ class ObservationTests(unittest.TestCase):
 
     def test_action_q0_offset_pd_and_clip(self):
         c = read_contract()
+        # Preserve the historical ideal-PD regression explicitly. The current
+        # shared DC torque-speed model has separate four-quadrant tests.
+        c["actuator_model"] = "ideal_pd"
         q0 = np.arange(8.) * .02
         action = np.array([2, -2, .1, -.1, 0, .05, 3, -4])
         q = q0.copy()
@@ -156,10 +159,24 @@ class PreparedAssetTests(unittest.TestCase):
             with np.load(Path(tmp) / "run/rollout.npz", allow_pickle=False) as result:
                 self.assertEqual(result["root_pos"].shape, (9, 3))
                 self.assertEqual(result["action_observation"].shape, (2, 51))
+                self.assertEqual(result["nonwheel_ground_contact_count"].shape, (9,))
+                self.assertEqual(result["nonwheel_ground_contact_force_norm_n"].shape, (9,))
+                np.testing.assert_array_equal(result["nonwheel_ground_contact_count"], 0)
                 self.assertFalse(np.allclose(result["root_pos"][0], result["root_pos"][-1]))
                 self.assertTrue(all(np.isfinite(result[name]).all() for name in result.files
                                     if result[name].dtype.kind in "fiu"))
             self.assertEqual(json.loads((Path(tmp) / "run/report.json").read_text())["policy_kind"], "injected_test_callable")
+
+    def test_nonwheel_ground_evidence_detects_body_contact(self):
+        self.measured.initialize()
+        # Diagnostic reset only: deliberately put the base box through the
+        # floor to verify that wheel support cannot conceal body-ground contact.
+        self.data.qpos[2] = .10
+        self.data.qvel[:] = 0.
+        self.mj.mj_forward(self.model, self.data)
+        count, force = self.measured.nonwheel_ground_contacts()
+        self.assertGreater(count, 0)
+        self.assertGreater(force, 1.)
 
     def test_no_visual_mesh_preserves_mass_geometry_and_rollout(self):
         stripped, removed = load_model(DEFAULT_MODEL, no_visual_mesh=True)

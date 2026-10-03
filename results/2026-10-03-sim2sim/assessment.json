@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "verdict": "pass",
+  "fail_reasons": [],
+  "thresholds": {
+    "min_height_gain_m": 0.2,
+    "min_flight_s": 0.2,
+    "min_tail_support_fraction": 0.9,
+    "tail_seconds": 0.5,
+    "max_tail_tilt_deg": 30.0,
+    "contact_threshold_n": 5.0
+  },
+  "provenance": {
+    "checks": {
+      "same_reference": {
+        "passed": true
+      },
+      "same_actor": {
+        "passed": true
+      },
+      "normalized_actor": {
+        "passed": true
+      },
+      "matching_policy_dimensions": {
+        "passed": true
+      },
+      "matching_leg_action_order": {
+        "passed": true
+      },
+      "matching_actuator_contract": {
+        "passed": true,
+        "detail": {
+          "mismatched_fields": []
+        }
+      },
+      "simulation_parameter_assumptions_disclosed": {
+        "passed": true
+      },
+      "legacy_joint_friction_cleared_and_audited": {
+        "passed": true
+      },
+      "actual_joint_velocities_not_hard_clipped": {
+        "passed": true
+      },
+      "matching_reference_length": {
+        "passed": true
+      },
+      "isaac_observation_reconstruction_verified": {
+        "passed": true
+      }
+    },
+    "actor_sha256": "5aedd64370a99e64d1b41ca0a4fb4c49a977ce404bb1fa0ca998816e0a83a4ae",
+    "reference_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+    "actuator_contract": {
+      "matched": true,
+      "mismatched_fields": [],
+      "fields": {
+        "actuator_model": {
+          "isaac": "dc_motor",
+          "mujoco": "dc_motor",
+          "matched": true
+        },
+        "leg_kp": {
+          "isaac": 500.0,
+          "mujoco": 500.0,
+          "matched": true
+        },
+        "leg_kd": {
+          "isaac": 10.0,
+          "mujoco": 10.0,
+          "matched": true
+        },
+        "leg_position_scale": {
+          "isaac": 1.0,
+          "mujoco": 1.0,
+          "matched": true
+        },
+        "wheel_torque_scale_nm": {
+          "isaac": 12.0,
+          "mujoco": 12.0,
+          "matched": true
+        },
+        "leg_torque_limit_nm": {
+          "isaac": 80.0,
+          "mujoco": 80.0,
+          "matched": true
+        },
+        "wheel_torque_limit_nm": {
+          "isaac": 12.0,
+          "mujoco": 12.0,
+          "matched": true
+        },
+        "physics_dt": {
+          "isaac": 0.005,
+          "mujoco": 0.005,
+          "matched": true
+        },
+        "decimation": {
+          "isaac": 4,
+          "mujoco": 4,
+          "matched": true
+        },
+        "policy_fps": {
+          "isaac": 50.0,
+          "mujoco": 50.0,
+          "matched": true
+        },
+        "raw_action_clip": {
+          "isaac": [
+            -1.0,
+            1.0
+          ],
+          "mujoco": [
+            -1.0,
+            1.0
+          ],
+          "matched": true
+        },
+        "leg_saturation_effort_nm": {
+          "isaac": 80.0,
+          "mujoco": 80.0,
+          "matched": true,
+          "required_shared_dc_profile_value": 80.0
+        },
+        "wheel_saturation_effort_nm": {
+          "isaac": 12.0,
+          "mujoco": 12.0,
+          "matched": true,
+          "required_shared_dc_profile_value": 12.0
+        },
+        "leg_motor_velocity_limit_rad_s": {
+          "isaac": 15.0,
+          "mujoco": 15.0,
+          "matched": true,
+          "required_shared_dc_profile_value": 15.0
+        },
+        "wheel_motor_velocity_limit_rad_s": {
+          "isaac": 100.0,
+          "mujoco": 100.0,
+          "matched": true,
+          "required_shared_dc_profile_value": 100.0
+        },
+        "solver_joint_velocity_limit_rad_s": {
+          "isaac": 1000.0,
+          "mujoco": 1000.0,
+          "matched": true,
+          "required_shared_dc_profile_value": 1000.0
+        },
+        "consistent_control_clock": {
+          "matched": true
+        },
+        "motor_velocity_limit_semantics": {
+          "isaac": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+          "mujoco": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+          "matched": true
+        }
+      },
+      "dc_motor_involved": true,
+      "parameter_assumptions": {
+        "isaac": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+        "mujoco": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+        "note": "Shared simulation parameters, not independently verified manufacturer hardware ratings."
+      },
+      "hardware_ready": false
+    },
+    "isaac_trajectory_sha256": "e9189724ec9b0999f37c4f30a080775a5fa4ed67dfca78a65e285d93f79ddebb",
+    "mujoco_trajectory_sha256": "943de9a395b3934946f523b094a8e4a31301526a5a34b6e434a55babde8b68c7",
+    "isaac_report_sha256": "e526bfd1f152785355f7fab7604e5ce17621ca9cebd99fe2710bdad1412b53a3",
+    "mujoco_report_sha256": "a07c7ac9b253acb46edf3a5c2b6de5fbbcb1569610ee0d18610c07bb5432f9c5"
+  },
+  "isaac": {
+    "verdict": "pass",
+    "fail_reasons": [],
+    "checks": {
+      "uniform_contact_sampling": {
+        "passed": true
+      },
+      "frame_zero_start": {
+        "passed": true
+      },
+      "monotonic_reference_without_reset": {
+        "passed": true
+      },
+      "completed_full_reference": {
+        "passed": true
+      },
+      "full_recorded_duration": {
+        "passed": true,
+        "detail": {
+          "recorded_s": 4.42,
+          "expected_s": 4.42
+        }
+      },
+      "no_early_termination": {
+        "passed": true
+      },
+      "physics_only_episode_no_hidden_resets": {
+        "passed": true
+      },
+      "minimum_base_height_gain": {
+        "passed": true
+      },
+      "sustained_flight_followed_by_landing": {
+        "passed": true
+      },
+      "stable_two_wheel_tail_support": {
+        "passed": true
+      },
+      "stable_tail_tilt": {
+        "passed": true
+      }
+    },
+    "environment_index": 0,
+    "recorded_duration_s": 4.42,
+    "base_height_gain_m": 0.30016571283340454,
+    "selected_flight": {
+      "takeoff_s": 1.54,
+      "no_contact_end_s": 2.02,
+      "no_contact_duration_s": 0.48,
+      "landing_s": 2.2,
+      "right_censored": false
+    },
+    "contact_force_source": "net_force_proxy_including_possible_self_contact",
+    "contact_events": {
+      "available": true,
+      "force_threshold_n": 5.0,
+      "sampling_interval_s": 0.020000000000000018,
+      "minimum_prior_support_s": 0.1,
+      "minimum_flight_s": 0.2,
+      "minimum_landing_support_s": 0.1,
+      "two_wheel_contact_fraction": 0.8288288288288288,
+      "left_contact_fraction": 0.8648648648648649,
+      "right_contact_fraction": 0.8423423423423423,
+      "flight_intervals": [
+        {
+          "takeoff_s": 1.54,
+          "no_contact_end_s": 2.02,
+          "no_contact_duration_s": 0.48,
+          "landing_s": 2.2,
+          "right_censored": false
+        }
+      ],
+      "first_takeoff_s": 1.54,
+      "first_landing_s": 2.2,
+      "max_flight_duration_s": 0.48,
+      "reason": null
+    },
+    "tail_two_wheel_support_fraction": 1.0,
+    "max_tail_tilt_deg": 8.04488468170166,
+    "nonwheel_ground_contact": {
+      "status": "unavailable",
+      "reason": "No non-wheel/ground contact telemetry recorded"
+    },
+    "complete_contact_evidence": false
+  },
+  "mujoco": {
+    "verdict": "pass",
+    "fail_reasons": [],
+    "checks": {
+      "uniform_contact_sampling": {
+        "passed": true
+      },
+      "frame_zero_start": {
+        "passed": true
+      },
+      "monotonic_reference_without_reset": {
+        "passed": true
+      },
+      "completed_full_reference": {
+        "passed": true
+      },
+      "full_recorded_duration": {
+        "passed": true,
+        "detail": {
+          "recorded_s": 4.419999999999928,
+          "expected_s": 4.42
+        }
+      },
+      "no_early_termination": {
+        "passed": true
+      },
+      "physics_only_episode_no_hidden_resets": {
+        "passed": true
+      },
+      "minimum_base_height_gain": {
+        "passed": true
+      },
+      "sustained_flight_followed_by_landing": {
+        "passed": true
+      },
+      "stable_two_wheel_tail_support": {
+        "passed": true
+      },
+      "stable_tail_tilt": {
+        "passed": true
+      },
+      "no_nonwheel_ground_contact": {
+        "passed": true
+      }
+    },
+    "environment_index": 0,
+    "recorded_duration_s": 4.419999999999928,
+    "base_height_gain_m": 0.30996094109213823,
+    "selected_flight": {
+      "takeoff_s": 1.5249999999999895,
+      "no_contact_end_s": 2.024999999999979,
+      "no_contact_duration_s": 0.49999999999998956,
+      "landing_s": 2.2449999999999743,
+      "right_censored": false
+    },
+    "contact_force_source": "ground_only",
+    "contact_events": {
+      "available": true,
+      "force_threshold_n": 5.0,
+      "sampling_interval_s": 0.004999999999999893,
+      "minimum_prior_support_s": 0.1,
+      "minimum_flight_s": 0.2,
+      "minimum_landing_support_s": 0.1,
+      "two_wheel_contact_fraction": 0.792090395480226,
+      "left_contact_fraction": 0.8203389830508474,
+      "right_contact_fraction": 0.831638418079096,
+      "flight_intervals": [
+        {
+          "takeoff_s": 1.5249999999999895,
+          "no_contact_end_s": 2.024999999999979,
+          "no_contact_duration_s": 0.49999999999998956,
+          "landing_s": 2.2449999999999743,
+          "right_censored": false
+        }
+      ],
+      "first_takeoff_s": 1.5249999999999895,
+      "first_landing_s": 2.2449999999999743,
+      "max_flight_duration_s": 0.49999999999998956,
+      "reason": null
+    },
+    "tail_two_wheel_support_fraction": 1.0,
+    "max_tail_tilt_deg": 8.23606770814546,
+    "nonwheel_ground_contact": {
+      "status": "confirmed_absent",
+      "field": "nonwheel_ground_contact_count",
+      "maximum": 0.0,
+      "tolerance": 0.0
+    },
+    "complete_contact_evidence": true
+  },
+  "complete_contact_evidence": false,
+  "hardware_ready": false,
+  "require_complete_contact_evidence": false,
+  "statistical_robustness_benchmark": false,
+  "limitations": [
+    "One deterministic frame-zero episode per engine; not a statistical success rate or hardware validation.",
+    "The longest qualifying flight with a recorded landing is used; earlier short bounces do not count.",
+    "Height is measured base-link rise from the initial pose, not whole-robot COM height.",
+    "Isaac net-force telemetry is an explicitly labeled proxy when ground-only telemetry is absent.",
+    "Unavailable non-wheel ground-contact telemetry is disclosed, never interpreted as confirmed absence.",
+    "A pass with complete_contact_evidence=false is limited to the recorded contact channels.",
+    "This assessor never relaxes termination predicates; full duration and original non-early terminal reports are required.",
+    "Support is duration-weighted with held samples; landing detection inherits the sensor sample-rate limit."
+  ]
+}

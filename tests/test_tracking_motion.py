@@ -89,6 +89,20 @@ class RuntimeNameMappingTests(unittest.TestCase):
         np.testing.assert_array_equal(motion.joint_pos, [[1, 2]])
 
 
+class AngularSpeedUnitsTests(unittest.TestCase):
+    def test_rigid_body_limit_converts_radians_to_usd_degrees(self):
+        import math
+        path = ROOT / "training/tron1_tracking.py"
+        tree = ast.parse(path.read_text())
+        cfg = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "make_env_cfg")
+        terms = [node.value for node in ast.walk(cfg) if isinstance(node, ast.keyword)
+                 and node.arg == "max_angular_velocity"]
+        self.assertEqual(len(terms), 1)
+        value = eval(compile(ast.Expression(terms[0]), str(path), "eval"), {"math": math})
+        self.assertAlmostEqual(value, math.degrees(100.0), places=10)
+        self.assertGreater(value, 5000.0)
+
+
 class CommandLifecycleTests(unittest.TestCase):
     """Execute the actual task's lifecycle methods with tiny NumPy stubs.
 

@@ -1,6 +1,23 @@
 # TRON1 Learning from Human
 
-## 公開實驗結果（2026-10-02）
+## 最新結果：單次跳躍 sim2sim 通過（2026-10-03）
+
+[Isaac／MuJoCo 並排影片](results/2026-10-03-sim2sim/tracking_comparison.mp4) ·
+[嚴格驗收報告](results/2026-10-03-sim2sim/assessment.json) ·
+[結果與來源摘要](results/2026-10-03-sim2sim/summary.json)
+
+![同一 DC1600 策略的雙引擎實測](results/2026-10-03-sim2sim/overview.png)
+
+同一個含 normalizer 的 actor，在 Isaac／PhysX 與 MuJoCo 都完成 4.42 秒的起跳、落地與恢復。
+Base 相對起始高度分別上升 **30.02／31.00 cm**，末尾 0.5 秒雙輪支撐比例均為 100%；
+全段跨引擎 base Z RMSE **6.22 mm**、XYZ RMSE **1.96 cm**。
+修正 legacy friction、剛體角速度單位並使用共同 DC 馬達曲線後續訓，沒有硬寫軌跡、裁切實際速度或放寬終止條件。
+
+這是**單一固定初始狀態**、選定 checkpoint 的驗收，不代表抗擾動成功率或真機安全。
+Isaac 輪力仍是 net-force proxy，未記錄非輪部位 ground-only 接觸；驗收明列 `complete_contact_evidence=false`。
+以下保留前次失敗結果供追溯；本次詳細設定與重建方式見末節。
+
+## 歷史公開實驗結果（2026-10-02，修正前）
 
 [精簡實驗報告](results/2026-10-02-tron1-jump/report.json) · [策略／參考比較影片](results/2026-10-02-tron1-jump/tracking_comparison.mp4)
 
@@ -601,3 +618,115 @@ python scripts/compare_tracking.py \
 
 最終本地測試：`CMU_TEST_DATA_DIR=assets/mocap/CMU python -m pytest -q`，98 項通過；
 未指定真實動捕資料目錄時為 97 項通過、1 項跳過。第三方 checkout 的獨立測試不納入此套件。
+
+### 2026-10-03：sim2sim 物理對齊
+
+上節是修正前的歷史 pilot。跨引擎診斷找到兩個具體設定問題，不能只歸因於接觸求解器或 PPO 隨機性：
+
+1. **舊版輪軸摩擦仍生效。** Isaac Sim 5.1 的新 static/dynamic/viscous friction 已是 0，
+   但 USD 的 legacy `physxJoint:jointFriction=0.01` 仍留在兩輪。現在 startup 會明確清零舊係數，
+   讀回全部環境驗證，並將修改前後數值寫入 training/evaluation report；不修改原始資產。
+2. **剛體角速度上限單位誤用。** `RigidBodyPropertiesCfg.max_angular_velocity` 使用 degree/s，
+   不是關節限速 API 的 rad/s。現在用 `math.degrees(100.0)` 設定原本意圖的 100 rad/s，
+   避免 `100 degree/s` 對輪子施加非預期的轉速限制。
+
+無接觸、同姿態／同力矩的 A/B 診斷：只清除 legacy friction 後，一步 joint-velocity response
+最大相對誤差由 17.956% 降至約 0.000143%；再修正角速度單位後，四步比較的最大絕對速度誤差
+由 4.4143 rad/s 降至約 5.11e-6 rad/s。原始比較摘要與來源 hash 見
+[`diagnosis.json`](results/2026-10-03-sim2sim/diagnosis.json)。
+官方單位說明見 [Isaac Lab 2.3 rigid-body schemas](https://isaac-sim.github.io/IsaacLab/v2.3.0/_modules/isaaclab/sim/schemas/schemas_cfg.html)。
+
+這不是把 MuJoCo 狀態硬裁切來配合舊策略，也沒有放寬 tracking termination。
+單步對齊不等於完整跳躍成功：雙修正後，原 pilot 在 Isaac 也於 1.54 s 提早終止，
+與 MuJoCo 的 1.52 s 接近，因此必須在修正後的物理設定下重新訓練／驗證。
+
+進一步對照修正後的 IdealPD checkpoint 1400：Isaac 跳高 0.35594 m，MuJoCo 為 0.62702 m，
+而推蹬時腿速分別貼近 solver 的 15 rad/s 與達到約 28 rad/s。兩者並沒有相同的求解器限速行為。
+**現行訓練因此改用共同的顯式 DC 馬達模型；這是訓練物理模型變更，不是直接修補舊 actor 即宣稱轉移成功。**
+
+| 部位 | 馬達／力矩上限 | 無負載轉速 |
+|---|---:|---:|
+| 六個腿部關節 | 80 Nm | 15 rad/s |
+| 兩個輪關節 | 12 Nm | 100 rad/s |
+
+Isaac 使用官方 `DCMotorCfg`，MuJoCo 按同一四象限 torque-speed envelope 裁切力矩，包括超過無負載轉速時的制動。
+15／100 rad/s 現在是馬達曲線參數，**不是硬裁切實際關節速度**；外力仍可能造成超速。
+PhysX joint solver guard 提高到 1000 rad/s，避免在正常運動中另加 MuJoCo 沒有的 15 rad/s 約束。
+PD 500／10、80／12 Nm ceiling、50 Hz policy、200 Hz actuator 更新、reference 與 termination 保持不變。
+所有馬達參數都是本專案模擬假設，尚未由製造商硬體曲線驗證。
+
+新增工具：
+
+- `scripts/diagnose_tracking_dynamics.py`：有限次、具名關節施力的 PhysX/MuJoCo A/B；可明確重現旧摩擦與角速度上限。
+- `scripts/export_tracking_checkpoint.py`：以已驗證的 JIT 模板匯出新 checkpoint，嚴格替換全部 actor weights 與 normalizer buffers，不啟動 Isaac。
+- `scripts/assess_sim2sim.py`：同 actor／同 reference 的嚴格離線驗收；要求完整片段、至少 0.20 m 上升、至少 0.20 s 騰空後落地，
+  末尾 0.5 s 雙輪支撐比例至少 90%、傾角不超過 30°。有非輪接地證據時也會檢查；缺少證據會明示，不能當作已確認沒有接觸。
+
+```bash
+python scripts/export_tracking_checkpoint.py \
+  --checkpoint outputs/new-training/model_final.pt \
+  --template outputs/remote-beyondmimic/eval-pilot-final/actor_normalized.pt \
+  --output-dir outputs/new-export
+
+# 正式驗收使用 Isaac 該次 evaluation 匯出的同一份 actor，並重建該次觀測。
+python scripts/eval_tracking_mujoco.py \
+  --policy outputs/new-isaac-eval/actor_normalized.pt \
+  --contract outputs/new-isaac-eval/policy_contract.json \
+  --motion-file outputs/tracking-cmu-16_03/motion.npz \
+  --verify-isaac-trajectory outputs/new-isaac-eval/trajectory.npz \
+  --output-dir outputs/new-mujoco-eval --no-visual-mesh
+
+python scripts/assess_sim2sim.py \
+  --isaac-dir outputs/new-isaac-eval \
+  --mujoco-dir outputs/new-mujoco-eval \
+  --output outputs/new-sim2sim-assessment.json
+```
+
+現行 MuJoCo evaluation 額外記錄非輪部位的 ground-only 接觸。Isaac 的歷史輪力是 net-force sensor，
+不是 ground-only filter；驗收會保留這個證據限制。全部設定與實驗仍僅供模擬研究，不代表硬體額定值或真機安全驗證。
+
+`--contract` 明確指定時優先；否則會讀 actor 旁的 `policy_contract.json`，最後才使用現行 task source。
+舊 contract 未列 `actuator_model` 時保持 IdealPD，避免把歷史 checkpoint 默默套進新 DC 物理。
+
+### 同策略雙引擎驗收：DC1600
+
+DC run 從修正後 IdealPD 的 checkpoint 1400 續訓，2048 environments、600 次更新，正常完成後退出；
+本次選用沿途第一個在 MuJoCo 完成完整跳躍的 checkpoint 1600，而非宣稱最後 checkpoint 最佳。
+對該 checkpoint 單獨做 Isaac frame-zero 評估，再將**此次實際匯出的同一份 actor**部署到 MuJoCo。
+兩邊都不使用 reference-state initialization、不在回合內重設 root，也未改動 reference 或 termination。
+
+| 指標 | Isaac／PhysX | MuJoCo |
+|---|---:|---:|
+| 完整動作時長 | 4.42 s | 4.42 s |
+| Base 相對起始高度增量 | 0.30017 m | 0.30996 m |
+| 雙輪無接觸段 | 0.48 s | 0.50 s |
+| 持續雙輪落地開始 | 2.20 s | 2.245 s |
+| 末尾 0.5 s 雙輪支撐比例 | 100% | 100% |
+| 末尾 0.5 s 最大 base 傾角 | 8.04° | 8.24° |
+| Reference 高度 RMSE | 0.06203 m | 0.06646 m |
+| 非輪部位 ground-only 接觸 | 未記錄 | 0 次 |
+
+同一時鐘、不平移或時間扭曲的全段跨引擎比較：base XYZ RMSE 0.019573 m、Z RMSE 0.006216 m、
+六腿關節 RMSE 0.024450 rad。這些是**兩引擎之間的差異**，不是對 reference 的追蹤誤差。
+逐項重建該次 Isaac 的 222 筆 51D 觀測，最大誤差 4.77e-7；actor 匯出相對 runner 的誤差 1.56e-7。
+正式 actor SHA-256：`5aedd64370a99e64d1b41ca0a4fb4c49a977ce404bb1fa0ca998816e0a83a4ae`。
+
+`assess_sim2sim.py` 所有預設 gates 通過，同時核對 actor/reference hashes、控制契約、摩擦 readback 與無速度硬裁切。
+這是接觸證據受限的 pass：Isaac 輪力不是 ground-only，且沒有非輪接地紀錄；
+若加 `--require-complete-contact-evidence` 則不能通過，不能宣稱已排除 Isaac 的所有非輪接觸。
+評估版本為 Isaac Sim 5.1／Isaac Lab 2.3 與 MuJoCo 3.9.0，並非本機 Windows 4.5 runtime 的額外驗收。
+
+本機原始成果在 `outputs/sim2sim-fix/dc-motor/1600-{isaac,verified-mujoco,comparison}`；
+checkpoint 在 `outputs/sim2sim-fix/dc-motor/checkpoints/model_1600.pt`，預覽在 `outputs/sim2sim-dc1600-preview/index.html`。
+影片是兩份已記錄物理軌跡的共同網格重播，沒有重新模擬；半速播放，黃色曲線保留原 reference。
+
+```bash
+python scripts/render_tracking.py \
+  --trajectory outputs/sim2sim-fix/dc-motor/1600-isaac/trajectory.npz \
+  --comparison-trajectory outputs/sim2sim-fix/dc-motor/1600-verified-mujoco/rollout.npz \
+  --motion-file outputs/tracking-cmu-16_03/motion.npz \
+  --output-dir outputs/my-dc1600-preview
+```
+
+本次最終測試：含真實 CMU fixture 的 pytest 為 253 passed、7 skipped、88 subtests passed；
+7 個需要 Torch 的匯出測試另在 Torch 環境全部通過。訓練與 Isaac 評估程序均已退出，沒有留下背景 GPU 工作。

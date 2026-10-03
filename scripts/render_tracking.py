@@ -1,10 +1,11 @@
-"""Render recorded PhysX policy states beside their kinematic reference.
+"""Render recorded PhysX states beside a reference or another actual rollout.
 
 MuJoCo is only the common mesh renderer: mj_forward is used, NEVER mj_step.
 The actual panel replays evaluation data up to the first episode's terminal
 state.  An early-stopped panel freezes visibly while the reference continues.
-An optional MuJoCo policy rollout is added only to the height chart, keeping
-the visual comparison to two robot panels plus one simple time series.
+By default the right panel is the kinematic reference. --comparison-trajectory
+instead shows a second recorded rollout; the reference remains in the height
+chart. --mujoco-trajectory retains the original optional chart-only behavior.
 """
 
 from __future__ import annotations
@@ -141,7 +142,19 @@ def named_qpos(model, clip, time_s):
     return result
 
 
-def main():
+def panel_clips(actual, reference, comparison=None):
+    """Select panel sources without retiming or extending either recorded clip."""
+    right = reference if comparison is None else comparison
+    end_time = float(max(actual.times[-1], reference.times[-1], right.times[-1]))
+    return actual, right, end_time
+
+
+def terminal_annotation(clip, time_s, reason):
+    """A held terminal pose must never be presented as new simulated motion."""
+    return f"RECORDING ENDED\n{reason}" if time_s > clip.times[-1] + 1e-8 else ""
+
+
+def make_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trajectory", type=Path, required=True)
     parser.add_argument("--motion-file", type=Path, required=True)
@@ -149,10 +162,21 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--env-index", type=int, default=0)
     parser.add_argument("--mujoco-trajectory", type=Path, help="Optional additional actual rollout height curve only")
+    parser.add_argument("--comparison-trajectory", type=Path,
+                        help="Second actual rollout for the right robot panel; reference stays in the height chart")
+    parser.add_argument("--comparison-label", default="MuJoCo PPO")
+    parser.add_argument("--primary-label", default="Isaac PhysX")
     parser.add_argument("--playback-speed", type=float, default=0.5)
-    args = parser.parse_args()
+    return parser
+
+
+def main(argv=None):
+    parser = make_parser()
+    args = parser.parse_args(argv)
     if args.playback_speed <= 0 or args.env_index < 0:
         parser.error("playback-speed must be positive and env-index nonnegative")
+    if not args.primary_label.strip() or not args.comparison_label.strip():
+        parser.error("panel labels must not be empty")
     output = args.output_dir.resolve()
     if output.exists() and any(output.iterdir()):
         parser.error("Choose an empty output directory; existing renders are preserved")
@@ -164,6 +188,10 @@ def main():
         "method": "common-mesh visual reconstruction of recorded poses; no resimulation",
         "trajectory": str(args.trajectory.resolve()), "motion_file": str(args.motion_file.resolve()),
         "model": str(args.model.resolve()), "environment_index": args.env_index,
+        "primary_label": args.primary_label,
+        "right_panel_kind": "recorded_policy" if args.comparison_trajectory else "kinematic_reference",
+        "comparison_trajectory": str(args.comparison_trajectory.resolve()) if args.comparison_trajectory else None,
+        "comparison_label": args.comparison_label if args.comparison_trajectory else None,
         "jump_success_claimed": False,
     }
     renderer = None
@@ -173,6 +201,11 @@ def main():
         actual = load_rollout(read_npz(args.trajectory), args.env_index)
         reference = load_reference(read_npz(args.motion_file))
         other = load_rollout(read_npz(args.mujoco_trajectory)) if args.mujoco_trajectory else None
+        comparison = load_rollout(read_npz(args.comparison_trajectory)) if args.comparison_trajectory else None
+        comparison_evaluation = {}
+        if args.comparison_trajectory:
+            path = args.comparison_trajectory.parent / "report.json"
+            comparison_evaluation = json.loads(path.read_text()) if path.is_file() else {}
         evaluation_path = args.trajectory.parent / "report.json"
         evaluation = json.loads(evaluation_path.read_text()) if evaluation_path.is_file() else {}
         episodes = evaluation.get("summary", {}).get("episodes", [])
@@ -183,7 +216,10 @@ def main():
         motion_hash = sha256(args.motion_file)
         if expected_motion_hash and expected_motion_hash != motion_hash:
             raise ValueError("Evaluation and displayed reference have different hashes")
-        end_time = float(max(actual.times[-1], reference.times[-1]))
+        comparison_motion_hash = comparison_evaluation.get("motion_sha256", comparison_evaluation.get("motion_file_sha256"))
+        if comparison_motion_hash and comparison_motion_hash != motion_hash:
+            raise ValueError("Comparison rollout and displayed reference have different hashes")
+        actual, right, end_time = panel_clips(actual, reference, comparison)
         # At 50 Hz source and 25 fps video, every reference/control sample is
         # shown and playback is half speed. Physics data are not retimed.
         sample_fps = 50.0
@@ -192,7 +228,7 @@ def main():
         model = mujoco.MjModel.from_xml_path(str(args.model.resolve()))
         if model.nmesh == 0:
             raise ValueError("The visualization model has no official robot meshes")
-        for clip in (actual, reference) + ((other,) if other else ()):
+        for clip in (actual, reference) + ((comparison,) if comparison else ()) + ((other,) if other else ()):
             named_qpos(model, clip, clip.times[0])  # eager name/schema checks
         for geom in range(model.ngeom):
             if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH and model.geom(geom).name != "floor":
@@ -205,7 +241,8 @@ def main():
         options.sitegroup[:] = 0
         camera = mujoco.MjvCamera()
         camera.type = mujoco.mjtCamera.mjCAMERA_FREE
-        all_roots = np.concatenate((actual.root, reference.root), axis=0)
+        camera_roots = (actual.root, reference.root) + ((comparison.root,) if comparison else ())
+        all_roots = np.concatenate(camera_roots, axis=0)
         low, high = all_roots.min(0), all_roots.max(0)
         camera.lookat[:] = [0.5 * (low[0] + high[0]), 0.5 * (low[1] + high[1]),
                             max(0.55, 0.5 * high[2])]
@@ -228,13 +265,18 @@ def main():
         ref_ax = fig.add_subplot(grid[0, 1])
         for ax in (actual_ax, ref_ax):
             ax.set_axis_off()
-        actual_ax.set_title("RECORDED POLICY  /  Isaac PhysX", loc="left", color=ACTUAL, fontsize=12, pad=10)
-        ref_ax.set_title("KINEMATIC TARGET  /  no dynamics", loc="left", color=REFERENCE, fontsize=12, pad=10)
+        actual_ax.set_title(f"RECORDED POLICY  /  {args.primary_label}", loc="left", color=ACTUAL, fontsize=12, pad=10)
+        right_title = (f"RECORDED POLICY  /  {args.comparison_label}" if comparison
+                       else "KINEMATIC TARGET  /  no dynamics")
+        ref_ax.set_title(right_title, loc="left", color=OTHER if comparison else REFERENCE, fontsize=12, pad=10)
         actual_artist = actual_ax.imshow(robot_image(actual, 0.0))
-        reference_artist = ref_ax.imshow(robot_image(reference, 0.0))
+        reference_artist = ref_ax.imshow(robot_image(right, 0.0))
         stopped_label = actual_ax.text(0.03, 0.93, "", transform=actual_ax.transAxes, va="top",
                                        color="#ff7777", fontsize=11, weight="bold",
                                        bbox={"facecolor": BG, "alpha": 0.85, "edgecolor": "none"})
+        comparison_stopped_label = ref_ax.text(0.03, 0.93, "", transform=ref_ax.transAxes, va="top",
+                                              color="#ff7777", fontsize=11, weight="bold",
+                                              bbox={"facecolor": BG, "alpha": 0.85, "edgecolor": "none"})
         chart = fig.add_subplot(grid[1, :])
         chart.set_facecolor(PANEL)
         chart.tick_params(colors=MUTED, labelsize=9)
@@ -242,39 +284,59 @@ def main():
             spine.set_color("#334155")
         chart.grid(color="#64748b", alpha=0.16)
         chart.plot(reference.times, reference.root[:, 2], color=REFERENCE, lw=1.6, label="Kinematic reference")
-        chart.plot(actual.times, actual.root[:, 2], color=ACTUAL, lw=2.0, label="Actual PhysX policy")
-        if other:
+        primary_chart_label = "Actual PhysX policy" if args.primary_label == "Isaac PhysX" else args.primary_label
+        chart.plot(actual.times, actual.root[:, 2], color=ACTUAL, lw=2.0, label=primary_chart_label)
+        if comparison:
+            chart.plot(comparison.times, comparison.root[:, 2], color=OTHER, lw=1.7, label=args.comparison_label)
+        duplicate_other = (args.mujoco_trajectory and args.comparison_trajectory
+                           and args.mujoco_trajectory.resolve() == args.comparison_trajectory.resolve())
+        if other and not duplicate_other:
             chart.plot(other.times, other.root[:, 2], color=OTHER, lw=1.5, label="Actual MuJoCo policy")
         chart.set_xlim(0.0, end_time)
         chart.set_xlabel("Simulation time (s)", fontsize=10)
         chart.set_ylabel("Base-link height (m)", fontsize=10)
         chart.legend(loc="best", fontsize=9, frameon=False, labelcolor=TEXT)
         cursor = chart.axvline(0.0, color=TEXT, lw=1, alpha=0.75)
-        if actual.times[-1] < reference.times[-1] - 1e-6:
+        if actual.times[-1] < (end_time if comparison else reference.times[-1]) - 1e-6:
             chart.axvline(actual.times[-1], color="#ff7777", lw=1, ls="--", alpha=0.8)
+        if comparison and comparison.times[-1] < end_time - 1e-6:
+            chart.axvline(comparison.times[-1], color=OTHER, lw=1, ls="--", alpha=0.8)
         fig.text(0.045, 0.945, "TRON1 WF  /  learned motion tracking", fontsize=21, weight="bold")
-        fig.text(0.045, 0.900, "Actual recorded robot state vs. GMR reference", fontsize=12, color=MUTED)
+        subtitle = ("Two recorded physics rollouts / reference height retained" if comparison
+                    else "Actual recorded robot state vs. GMR reference")
+        fig.text(0.045, 0.900, subtitle, fontsize=12, color=MUTED)
         clock = fig.text(0.81, 0.945, "0.00 s", fontsize=15, color=ACTUAL)
         measured_gain = float(np.max(actual.root[:, 2]) - actual.root[0, 2])
         reference_gain = float(np.max(reference.root[:, 2]) - reference.root[0, 2])
         stop_reason = episode.get("end_reason", "end of available recorded trajectory")
+        comparison_stop_reason = comparison_evaluation.get("termination", "end of available recorded trajectory")
+        if comparison_evaluation.get("termination_terms"):
+            comparison_stop_reason += ": " + ", ".join(map(str, comparison_evaluation["termination_terms"]))
         outcome_note = "Full reference survived" if episode.get("completed_full_reference") else "Full reference not verified"
+        comparison_gain = float(np.max(comparison.root[:, 2]) - comparison.root[0, 2]) if comparison else None
+        outcome_text = (f"{args.primary_label}: {measured_gain:.3f} m  |  {args.comparison_label}: {comparison_gain:.3f} m"
+                        f"  |  Reference rise: {reference_gain:.3f} m" if comparison else
+                        f"Actual base rise: {measured_gain:.3f} m  |  Reference rise: {reference_gain:.3f} m  |  {outcome_note}")
         fig.text(0.045, 0.083,
-                 f"Actual base rise: {measured_gain:.3f} m  |  Reference rise: {reference_gain:.3f} m  |  {outcome_note}",
+                 outcome_text,
                  fontsize=10, color=TEXT)
         fig.text(0.045, 0.053,
                  f"{args.playback_speed:g}x playback. One first episode only; an early terminal pose freezes visibly. No jump-success claim.",
                  fontsize=9, color=MUTED)
         fig.text(0.045, 0.026,
-                 "Both panels use MuJoCo meshes for visualization only (zero simulation steps); actual dynamics were recorded in PhysX.",
+                 ("Both panels replay recorded physics with common MuJoCo meshes; zero simulation steps are executed by this renderer."
+                  if comparison else
+                  "Both panels use MuJoCo meshes for visualization only (zero simulation steps); actual dynamics were recorded in PhysX."),
                  fontsize=8.5, color=MUTED)
 
         def update(time_s):
             actual_artist.set_data(robot_image(actual, time_s))
-            reference_artist.set_data(robot_image(reference, time_s))
+            reference_artist.set_data(robot_image(right, time_s))
             cursor.set_xdata([time_s, time_s])
             clock.set_text(f"{time_s:.2f} s")
-            stopped_label.set_text(f"RECORDING ENDED\n{stop_reason}" if time_s > actual.times[-1] + 1e-8 else "")
+            stopped_label.set_text(terminal_annotation(actual, time_s, stop_reason))
+            comparison_stopped_label.set_text(terminal_annotation(comparison, time_s, comparison_stop_reason)
+                                               if comparison else "")
             fig.canvas.draw()
 
         preview_time = float(reference.times[np.argmax(reference.root[:, 2])])
@@ -309,14 +371,30 @@ def main():
             "video_frames": len(frame_times), "video_fps": video_fps, "playback_speed": args.playback_speed,
             "video_resolution": [width, height], "full_decode_verified": True,
             "optional_mujoco_height_curve": str(args.mujoco_trajectory.resolve()) if args.mujoco_trajectory else None,
+            "comparison_trajectory_sha256": sha256(args.comparison_trajectory) if args.comparison_trajectory else None,
+            "comparison_samples": len(comparison.times) if comparison else None,
+            "comparison_sample_span_s": float(comparison.times[-1] - comparison.times[0]) if comparison else None,
+            "comparison_terminal_time_s": float(comparison.times[-1]) if comparison else None,
+            "comparison_base_link_height_gain_m": comparison_gain,
+            "comparison_source_result": comparison_evaluation if comparison else None,
+            "comparison_terminal_pose_frozen_and_labeled": bool(comparison),
         })
+        page_heading = "TRON1：兩份實際物理策略軌跡" if comparison else "TRON1：實際策略軌跡與參考動作"
+        page_description = (
+            f"左側為 {html.escape(args.primary_label)} 實測軌跡；右側為 {html.escape(args.comparison_label)} 實測軌跡。"
+            "高度圖仍保留 GMR 參考；兩側僅以 MuJoCo 網格重建畫面，未重新模擬。" if comparison else
+            "左側為 Isaac／PhysX 實際策略紀錄；右側為 GMR 運動學參考。兩側僅以 MuJoCo 網格重建畫面，未重新模擬。")
+        comparison_note = (f"<p>右側實測底座上升 {comparison_gain:.3f} m；紀錄結束原因："
+                           f"{html.escape(str(comparison_stop_reason))}。右側提前結束時凍結並標示，不延伸或改寫動作。</p>"
+                           if comparison else "")
         page = f'''<!doctype html><html lang="zh-Hant"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>TRON1 tracking</title>
 <style>body{{margin:2rem auto;max-width:1400px;padding:0 1rem;background:{BG};color:{TEXT};font:16px system-ui}}video,img{{width:100%;border-radius:10px}}a{{color:{ACTUAL}}}p{{line-height:1.6}}</style>
-<h1>TRON1：實際策略軌跡與參考動作</h1>
-<p>左側為 Isaac／PhysX 實際策略紀錄；右側為 GMR 運動學參考。兩側僅以 MuJoCo 網格重建畫面，未重新模擬。</p>
+<h1>{page_heading}</h1>
+<p>{page_description}</p>
 <video controls autoplay muted loop playsinline src="tracking_comparison.mp4"></video>
 <p>實際底座上升 {measured_gain:.3f} m；參考上升 {reference_gain:.3f} m。提前終止後明確凍結最後姿態，不拼接重置後回合。此預覽不宣稱跳躍成功。</p>
+{comparison_note}
 <p><a href="tracking_comparison.mp4">下載影片</a> · <a href="overview.png">關鍵畫面</a> · <a href="render_report.json">渲染紀錄</a></p>
 <p>紀錄結束原因：{html.escape(str(stop_reason))}</p></html>'''
         (output / "index.html").write_text(page, encoding="utf-8")

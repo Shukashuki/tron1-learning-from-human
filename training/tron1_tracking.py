@@ -55,7 +55,7 @@ def _load_upstream():
 mdp, TrackingEnvCfg = _load_upstream()
 
 import isaaclab.sim as sim_utils
-from isaaclab.actuators import IdealPDActuatorCfg
+from isaaclab.actuators import DCMotorCfg
 from isaaclab.assets import ArticulationCfg
 from isaaclab.managers import EventTermCfg, ObservationGroupCfg, ObservationTermCfg
 from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
@@ -315,6 +315,30 @@ class TronObservationsCfg:
     critic: CriticCfg = CriticCfg()
 
 
+def clear_legacy_joint_friction(env, env_ids=None):
+    """Remove USD legacy friction left active alongside the PhysX 5.1 API.
+
+    Isaac Lab's explicit actuator friction=0 writes the new static/dynamic/
+    viscous properties, but does not clear physxJoint:jointFriction. The pinned
+    asset contains 0.01 on both wheels. A direct single-step A/B test verified
+    that it still alters dynamics, even when all three new properties are zero.
+    Clear and read back the legacy field once at startup, never during rollout.
+    """
+    view = env.scene["robot"].root_physx_view
+    before = view.get_dof_friction_coefficients().clone().cpu()
+    indices = torch.arange(env.num_envs, dtype=torch.int32, device="cpu")
+    view.set_dof_friction_coefficients(torch.zeros_like(before), indices)
+    after = view.get_dof_friction_coefficients().clone().cpu()
+    if not torch.isfinite(after).all() or torch.count_nonzero(after).item():
+        raise RuntimeError("Legacy PhysX joint friction was not cleared")
+    env.legacy_joint_friction_audit = {
+        "joint_names": list(env.scene["robot"].joint_names),
+        "before_first_environment": before[0].tolist(),
+        "after_first_environment": after[0].tolist(),
+        "all_environments_verified_zero": True,
+    }
+
+
 @configclass
 class TronEventsCfg:
     # A fixed material assignment, not domain randomization.  Startup joint
@@ -327,6 +351,7 @@ class TronEventsCfg:
             "restitution_range": (0.0, 0.0), "num_buckets": 1,
         },
     )
+    legacy_joint_friction = EventTermCfg(func=clear_legacy_joint_friction, mode="startup")
 
 
 @configclass
@@ -381,7 +406,9 @@ def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=F
             usd_path=str(asset_path), activate_contact_sensors=True,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 disable_gravity=False, linear_damping=0.0, angular_damping=0.0,
-                max_linear_velocity=100.0, max_angular_velocity=100.0,
+                # RigidBodyPropertiesCfg uses DEG/s, unlike joint limits.
+                # 100 deg/s silently brakes rapidly spinning wheel bodies.
+                max_linear_velocity=100.0, max_angular_velocity=math.degrees(100.0),
                 max_depenetration_velocity=1.0,
             ),
             articulation_props=sim_utils.ArticulationRootPropertiesCfg(
@@ -394,16 +421,16 @@ def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=F
         ),
         soft_joint_pos_limit_factor=0.95,
         actuators={
-            "legs": IdealPDActuatorCfg(
+            "legs": DCMotorCfg(
                 joint_names_expr=LEG_JOINT_NAMES, stiffness=500.0, damping=10.0,
-                effort_limit=80.0, effort_limit_sim=80.0,
-                velocity_limit=15.0, velocity_limit_sim=15.0,
+                saturation_effort=80.0, effort_limit=80.0, effort_limit_sim=80.0,
+                velocity_limit=15.0, velocity_limit_sim=1000.0,
                 armature=0.0, friction=0.0,
             ),
-            "wheels": IdealPDActuatorCfg(
+            "wheels": DCMotorCfg(
                 joint_names_expr=WHEEL_JOINT_NAMES, stiffness=0.0, damping=0.0,
-                effort_limit=12.0, effort_limit_sim=12.0,
-                velocity_limit=100.0, velocity_limit_sim=100.0,
+                saturation_effort=12.0, effort_limit=12.0, effort_limit_sim=12.0,
+                velocity_limit=100.0, velocity_limit_sim=1000.0,
                 armature=0.0, friction=0.0,
             ),
         },
@@ -454,6 +481,15 @@ def observation_action_contract():
         "leg_position_offset": "reference_frame_0_joint_pos",
         "wheel_torque_scale_nm": 12.0, "leg_kp": 500.0, "leg_kd": 10.0,
         "leg_torque_limit_nm": 80.0, "wheel_torque_limit_nm": 12.0,
+        "actuator_model": "dc_motor",
+        "leg_saturation_effort_nm": 80.0, "wheel_saturation_effort_nm": 12.0,
+        "leg_motor_velocity_limit_rad_s": 15.0, "wheel_motor_velocity_limit_rad_s": 100.0,
+        "solver_joint_velocity_limit_rad_s": 1000.0,
+        "motor_velocity_limit_semantics": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+        "legacy_joint_friction_coefficient": 0.0,
+        "legacy_joint_friction_startup_readback_required": True,
+        "rigid_body_max_angular_speed_rad_s": 100.0,
+        "rigid_body_angular_speed_config_units": "degrees_per_second",
         "quaternion_order": "wxyz", "root_prescribed_during_steps": False,
         "wheel_orientation_tracking": False, "wheel_angle_observation": False,
         "reference_state_initialization_training_only": True,
