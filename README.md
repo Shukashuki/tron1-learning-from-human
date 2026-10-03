@@ -1,5 +1,11 @@
 # TRON1 Learning from Human
 
+Early jump demonstration — CMU `16_03`, DC1600 policy: takeoff, landing, and recovery in Isaac and MuJoCo. Click the preview to watch.
+
+[![TRON1 jump demonstration: Isaac and MuJoCo](results/2026-10-03-sim2sim/overview.png)](results/2026-10-03-sim2sim/tracking_comparison.mp4)
+
+[Jump video](results/2026-10-03-sim2sim/tracking_comparison.mp4) · [Assessment](results/2026-10-03-sim2sim/assessment.json) · [Original pilot video (MuJoCo ended early)](results/2026-10-02-tron1-jump/tracking_comparison.mp4)
+
 ## 1. Motivation
 
 Can a wheel-legged robot reproduce selected human-inspired motions and transfer the same learned controller between physics simulators?
