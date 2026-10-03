@@ -1,0 +1,149 @@
+{
+  "status": "rendered",
+  "simulation_steps": 0,
+  "full_decode_verified": true,
+  "method": "four synchronized panels: transformed human keypoints, exported kinematics, two recorded physics rollouts",
+  "source_clip": "141_05",
+  "source_hashes": {
+    "human": "00b69e79cc6aedcb8677e30dccc3a33eac8179611f13a62a2b27129b8c4dca1e",
+    "mink": "884b88d746a028f3bac18fc9741377290a2ac776f6b03ba791f45231463a171a",
+    "gmr": "d36e9de4e159bc6af2e05e1087ad53ab9b147ba13231b8bcb12ac90872dbf923",
+    "reference": "40751fc76493bc5239a56e17fa72e8a14ca57347df550ae81d874be9aaf3656e",
+    "isaac": "696402ff013c1780435066971fdf11449b2ffebfe7338a202a71c64cb55b060f",
+    "mujoco": "5ae8f829cc2ca94489898c60777fa3e46f346d8154e14203cf2f0834110ebde0",
+    "mink_report": "49eee4164f4f3f9e85720e0c39b05d334c32ac6a9a48248a638897a9a2edf689",
+    "gmr_report": "b8f2e46be9f1d027daf9229f57e170200d7aec5b8599121333c2d76096b7cc8f",
+    "export_report": "568556cc250f130dfcf27678df11c8e64bdc344b253914d74f65017b309b1736",
+    "isaac_report": "28c8d9e26c2688886a05edb36c8509b504a7b2f9e83cfdaa847d646fe2381084",
+    "mujoco_report": "ee3380f80f8856819720d9176058f71a1639f924d70be92ba0505f8d719aaa06",
+    "model": "30c8bb94b32b1804aa2f7de2425f7a8dd02be7792881255388097e2e68092e52",
+    "terrain": null,
+    "renderer_script": "62abaa6bea794bd38e0e64248172afdfd21825d382f6b442b7293f5f8f077262",
+    "assessment": "a1486a2a69e71ef7973a3df1f14ad5f679f49e231604fdeff779ea1500f45b50",
+    "source_adapter": "0cf3dc4eeb621ee43b0a65f9b7df7f927edc7c0e0de6ba557a8f21a66d190ae6"
+  },
+  "task": "side_jump",
+  "task_verdict": "fail",
+  "failed_checks": [
+    "isaac.full_motion_root_rmse",
+    "isaac.minimum_actual_rise",
+    "isaac.intended_side_excursion_progress",
+    "mujoco.full_motion_root_rmse",
+    "mujoco.minimum_actual_rise",
+    "mujoco.intended_side_excursion_progress"
+  ],
+  "outcome_note": "FAIL: 6 unmet engine/task checks (see report). Recorded failures retained; no retiming or retraining.",
+  "task_adapted": false,
+  "adaptation_note": "Human: one heading alignment + uniform scale. Gold points: pelvis / ankles (not wheel targets).",
+  "original_adaptation": null,
+  "terrain": null,
+  "same_actor_provenance": {
+    "reference_sha256": "40751fc76493bc5239a56e17fa72e8a14ca57347df550ae81d874be9aaf3656e",
+    "actor_sha256": "7cec8e3e2972888c79922584b679c3899283880e99851ede64e14d10f7464e11",
+    "isaac_actor_file": "<private-path>",
+    "isaac_trajectory_sha256": "696402ff013c1780435066971fdf11449b2ffebfe7338a202a71c64cb55b060f",
+    "mujoco_trajectory_sha256": "5ae8f829cc2ca94489898c60777fa3e46f346d8154e14203cf2f0834110ebde0",
+    "isaac_report_sha256": "28c8d9e26c2688886a05edb36c8509b504a7b2f9e83cfdaa847d646fe2381084",
+    "mujoco_report_sha256": "ee3380f80f8856819720d9176058f71a1639f924d70be92ba0505f8d719aaa06",
+    "actor_dim": 51,
+    "action_dim": 8,
+    "observation_verification": {
+      "status": "passed",
+      "observations_checked": 147,
+      "max_abs_error": 3.8743019104003906e-07,
+      "max_abs_error_by_term": {
+        "ref_leg_q_ref_leg_dq_phase_sin_cos": 3.8743019104003906e-07,
+        "motion_anchor_pos_b": 1.1920928955078125e-07,
+        "motion_anchor_ori_b_6d_first_two_columns_row_major": 2.812594175338745e-07,
+        "base_lin_vel_b": 1.1920928955078125e-07,
+        "base_ang_vel_b": 2.384185791015625e-07,
+        "leg_joint_pos_rel": 0.0,
+        "joint_velocities": 0.0,
+        "previous_clipped_actions": 0.0
+      },
+      "trajectory_sha256": "696402ff013c1780435066971fdf11449b2ffebfe7338a202a71c64cb55b060f",
+      "atol": 2e-05,
+      "rtol": 2e-05
+    },
+    "leg_joint_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ]
+  },
+  "video_resolution": [
+    1920,
+    1080
+  ],
+  "video_frames": 147,
+  "video_fps": 25.0,
+  "playback_speed": 0.5,
+  "task_end_s": 2.92,
+  "source_sample_span_s": 1.9083333333333334,
+  "source_hold_at_s": 1.9,
+  "hold_start_task_s": 1.9,
+  "source_time_mapping": "exported source_time_s composed with original adaptation time scale and source crop; no posthoc phase alignment",
+  "human_uniform_scale": 0.8110209988472306,
+  "human_transform_verified_against_raw_source": true,
+  "human_display_transform": "heading_uniform_scale_root_alignment",
+  "human_heading_alignment": [
+    [
+      -0.9995793878224387,
+      0.029000817928444507,
+      0.0
+    ],
+    [
+      -0.029000817928444507,
+      -0.9995793878224387,
+      -0.0
+    ],
+    [
+      -0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "human_seed_root_m": [
+    0.0,
+    0.0,
+    0.9068200040531158
+  ],
+  "human_display_floor_m": 0.23127366239476677,
+  "human_floor_measured_contact": false,
+  "reference_uniform_z_offset_m": 0.001,
+  "fixed_shared_camera": true,
+  "robot_panels_share_camera": true,
+  "human_camera": {
+    "lookat": [
+      0.22411099263163406,
+      0.19697463721452022,
+      0.7044741416338972
+    ],
+    "distance": 2.884985949885894,
+    "azimuth": 125.0,
+    "elevation": -13.0
+  },
+  "camera": {
+    "lookat": [
+      0.22411099263163406,
+      0.19697463721452022,
+      0.7044741416338972
+    ],
+    "distance": 2.884985949885894,
+    "azimuth": 125.0,
+    "elevation": -13.0
+  },
+  "video_sha256": "3a795bef2da5ac98482696361a5a0a19a87093208c5dfdce8cd341c16432f8a0",
+  "overview_sha256": "254737fe3572f1d8c1718f78a570ef9fed879cf0d8f22b086bf16b63bd4ffe57",
+  "limitations": [
+    "Human is native-size for adapted tasks, aligned/scaled for GMR tasks; ankles are not wheel targets.",
+    "Human display plane is native z=0 for adaptations, or shifted by the constant pelvis alignment for GMR; not contact evidence.",
+    "Kinematic reference prescribes poses; it proves no contact, force or balance feasibility.",
+    "Terminal reference/human hold is explicitly labeled; export subframe tails and original task adaptations are preserved.",
+    "Recorded rollouts retain their real timestamps and freeze visibly if their recording ends.",
+    "Source human pelvis and robot base link are not whole-body COM; no new training or dynamics simulation."
+  ]
+}

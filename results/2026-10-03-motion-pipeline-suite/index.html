@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRON1 WF 六動作四欄同步比較</title>
+<style>
+body{background:#0a1220;color:#e2e8f0;font:16px/1.6 system-ui;max-width:1600px;margin:2rem auto;padding:0 1rem}
+video{width:100%;display:block}a{color:#38bdf8}section{margin:3rem 0}.fail{color:#fca5a5}.partial{color:#fde68a}
+</style>
+<h1>TRON1 WF：六動作四欄同步比較</h1>
+<p>人體關鍵點 → 純運動學訓練參考 → Isaac 策略 → MuJoCo 策略。每項任務使用共同時間軸，0.5 倍速，附 pelvis／base 高度變化曲線。</p>
+<p>本頁只重播既有紀錄：沒有重新訓練、動力學模擬或事後起跳對齊。每個動作是分開訓練的策略；每引擎各一回合，不是穩健性成功率。純運動學不證明接觸或平衡可行。</p>
+<p>急停／蹲低保留原先的時間與幅度改編，人體維持原尺寸、獨立固定相機；其他任務人體沿用 GMR 的固定朝向與等比縮放。三個機器人欄共用固定相機。來源與末端 hold 均明確標示。</p>
+<section><h2>前跳 — 通過</h2>
+<video controls preload="none" poster="forward_jump/overview.png" src="forward_jump/motion_pipeline.mp4" playsinline></video>
+<p><a href="forward_jump/motion_pipeline.mp4">影片</a> · <a href="forward_jump/render_report.json">來源／渲染紀錄</a></p></section>
+<section><h2 class="partial">轉向跳 — 門檻通過，但不是空中轉 90°</h2>
+<p>整段轉向約 90°；空中僅轉 33.32°／38.90°（Isaac／MuJoCo）。</p>
+<video controls preload="none" poster="turn_jump/overview.png" src="turn_jump/motion_pipeline.mp4" playsinline></video>
+<p><a href="turn_jump/motion_pipeline.mp4">影片</a> · <a href="turn_jump/render_report.json">來源／渲染紀錄</a></p></section>
+<section><h2 class="fail">側跳 — 失敗</h2>
+<p>高度、側向位移及追蹤誤差未通過；參考軌跡的穿地缺陷也保留，未修飾。</p>
+<video controls preload="none" poster="side_jump/overview.png" src="side_jump/motion_pipeline.mp4" playsinline></video>
+<p><a href="side_jump/motion_pipeline.mp4">影片</a> · <a href="side_jump/render_report.json">來源／渲染紀錄</a></p></section>
+<section><h2>滾行急停 — 通過（人體動作改編）</h2>
+<p>開始時已在滾行，不是從靜止加速。原改編：時間 ×2、平移 ×0.35、高度 ×0.15；移除交替踏步。</p>
+<video controls preload="none" poster="rolling_stop/overview.png" src="rolling_stop/motion_pipeline.mp4" playsinline></video>
+<p><a href="rolling_stop/motion_pipeline.mp4">影片</a> · <a href="rolling_stop/render_report.json">來源／渲染紀錄</a></p></section>
+<section><h2>蹲低 — 通過（人體動作改編）</h2>
+<p>原始第 160–330 幀、時間 ×2，改編為原地 0.18 m 蹲低；人體原幅度與機器人參考不同。</p>
+<video controls preload="none" poster="crouch/overview.png" src="crouch/motion_pipeline.mp4" playsinline></video>
+<p><a href="crouch/motion_pipeline.mp4">影片</a> · <a href="crouch/render_report.json">來源／渲染紀錄</a></p></section>
+<section><h2 class="fail">上台階 — 失敗</h2>
+<p>機器人欄顯示實際評估使用的 11.64 cm 台階；兩引擎均未達雙輪上台面的終態。台階尺寸從足端推估，非 CMU 場景真值。</p>
+<video controls preload="none" poster="step_up/overview.png" src="step_up/motion_pipeline.mp4" playsinline></video>
+<p><a href="step_up/motion_pipeline.mp4">影片</a> · <a href="step_up/render_report.json">來源／渲染紀錄</a></p></section>
+<p><a href="../2026-10-03-motion-suite/summary.json">原實驗數值與評估</a> · <a href="../../README.md">專案說明與重建方法</a></p>
+</html>

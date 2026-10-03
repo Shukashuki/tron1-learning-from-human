@@ -1,8 +1,9 @@
 """Four-way source/kinematics/Isaac/MuJoCo visualization; NEVER simulate.
 
 Uses the exported training reference, including its source-time map, clearance
-and terminal hold. The human skeleton is the verified aligned/scaled GMR input,
-not raw-size human data, wheel targets, a policy or measured contact evidence.
+and terminal hold. Human keypoints are verified aligned/scaled GMR input, or
+native-size source data for explicitly disclosed wheel-task adaptations.
+Neither is wheel targets, a policy or measured contact evidence.
 """
 from __future__ import annotations
 
@@ -84,10 +85,15 @@ def validate_hash_chain(human_path, gmr_path, mink_path, motion_path, model_path
 
 def prepare(task_dir, model_path):
     task = Path(task_dir)
-    paths = {"human": task / "human/human_motion.npz", "mink": task / "mink/robot_reference.npz",
-             "gmr": task / "gmr/robot_reference.npz", "reference": task / "tracking/motion.npz",
+    from motion_pipeline_sources import prepare_adapted, with_outcome
+    if (task / "adaptation.json").is_file():
+        return prepare_adapted(task, model_path)
+    base = task / "prepared" if (task / "prepared/gmr/robot_reference.npz").is_file() else task
+    motion_path = task / "tracking/motion.npz" if (task / "tracking/motion.npz").is_file() else task / "motion.npz"
+    paths = {"human": task / "human/human_motion.npz", "mink": base / "mink/robot_reference.npz",
+             "gmr": base / "gmr/robot_reference.npz", "reference": motion_path,
              "isaac": task / "trial/isaac/trajectory.npz", "mujoco": task / "trial/mujoco/rollout.npz"}
-    report_paths = {"mink": task / "mink/report.json", "gmr": task / "gmr/report.json",
+    report_paths = {"mink": base / "mink/report.json", "gmr": base / "gmr/report.json",
                     "export": paths["reference"].with_suffix(".json"),
                     "isaac": task / "trial/isaac/report.json", "mujoco": task / "trial/mujoco/report.json"}
     reports = {key: json.loads(path.read_text()) for key, path in report_paths.items()}
@@ -99,6 +105,13 @@ def prepare(task_dir, model_path):
         raise ValueError("Actual rollouts and kinematic playback use different references")
     if reports["isaac"].get("terrain") != reports["mujoco"].get("terrain"):
         raise ValueError("Actual rollouts use different terrain")
+    terrain_hash = None
+    if reports["isaac"].get("terrain") is not None:
+        terrain_path = base / "terrain.json"
+        terrain_hash = sha256(terrain_path)
+        if (terrain_hash != reports["isaac"]["terrain_file_sha256"]
+                or json.loads(terrain_path.read_text()) != reports["isaac"]["terrain"]):
+            raise ValueError("Rendered terrain differs from evaluated terrain")
     if reports["export"]["sampling"]["retimed"]:
         raise ValueError("This renderer currently requires an unretimed GMR export")
     arrays = {key: read_npz(path) for key, path in paths.items()}
@@ -134,7 +147,7 @@ def prepare(task_dir, model_path):
             raise ValueError("Unexpected time warp in the unretimed reference")
     isaac, mj = load_rollout(arrays["isaac"]), load_rollout(arrays["mujoco"])
     metadata = json.loads(raw["metadata_json"].item())
-    return {"human": human, "reference": kinematic, "isaac": isaac, "mujoco": mj,
+    return with_outcome({"human": human, "reference": kinematic, "isaac": isaac, "mujoco": mj,
             "task_times": task_times, "source_times": source_times, "reports": reports,
             "source_clip": Path(metadata["source"]["amc_path"]).stem, "scale": scale,
             "human_display_floor_m": human_display_floor,
@@ -143,7 +156,7 @@ def prepare(task_dir, model_path):
             "provenance": sanitize(provenance),
             "hashes": {**{k: sha256(p) for k, p in paths.items()},
                        **{k + "_report": sha256(p) for k, p in report_paths.items()}, "model": sha256(model_path),
-                       "renderer_script": sha256(Path(__file__))}}
+                       "terrain": terrain_hash, "renderer_script": sha256(Path(__file__))}}, task)
 
 
 def render(prepared, model_path, output, playback_speed):
@@ -151,7 +164,7 @@ def render(prepared, model_path, output, playback_speed):
     end_s = float(max(reference.times[-1], isaac.times[-1], mj.times[-1]))
     timeline = frame_times(end_s)
     task_times, source_times = prepared["task_times"], prepared["source_times"]
-    hold_start = float(source_times[-1])
+    hold_start = prepared["hold_start_task_s"]
     from eval_tracking_mujoco import load_model
     model, _ = load_model(model_path, terrain=prepared["reports"]["isaac"].get("terrain"))
     if not model.nmesh:
@@ -166,11 +179,19 @@ def render(prepared, model_path, output, playback_speed):
     options.sitegroup[:] = 0
     camera = mujoco.MjvCamera()
     camera.type = mujoco.mjtCamera.mjCAMERA_FREE
-    points = np.concatenate((human.positions.reshape(-1, 3), reference.root, isaac.root, mj.root))
+    points = np.concatenate((reference.root, isaac.root, mj.root) + (() if prepared["adapted"] else (human.positions.reshape(-1, 3),)))
     low, high = points.min(0), points.max(0)
     camera.lookat[:] = [(low[0] + high[0]) / 2, (low[1] + high[1]) / 2, high[2] * .46]
-    camera.distance = max(2.8, (high[2] - min(0., low[2])) * 1.7)
+    camera.distance = max(2.8, (high[2] - min(0., low[2])) * 1.7, float(np.max(high[:2] - low[:2])) * 1.4 + 1.5)
     camera.azimuth, camera.elevation = 125, -13
+    human_camera = camera
+    if prepared["adapted"]:
+        human_camera = mujoco.MjvCamera()
+        human_camera.type = mujoco.mjtCamera.mjCAMERA_FREE
+        low_h, high_h = human.positions.min(axis=(0, 1)), human.positions.max(axis=(0, 1))
+        human_camera.lookat[:] = (low_h + high_h) / 2
+        human_camera.distance = max(3., float(np.max(high_h - low_h)) * 1.8)
+        human_camera.azimuth, human_camera.elevation = 125, -13
     renderer, writer, fig = None, None, None
     try:
         renderer = mujoco.Renderer(model, width=460, height=520)
@@ -180,7 +201,7 @@ def render(prepared, model_path, output, playback_speed):
             data.qpos[:] = named_qpos(model, clip, time_s)
             data.qvel[:] = 0
             mujoco.mj_forward(model, data)  # Kinematics only: NO dynamics integration.
-            renderer.update_scene(data, camera=camera, scene_option=options)
+            renderer.update_scene(data, camera=human_camera if skeleton else camera, scene_option=options)
             if skeleton:
                 for geom in renderer.scene.geoms[:renderer.scene.ngeom]:
                     if geom.objtype == mujoco.mjtObj.mjOBJ_GEOM:
@@ -207,10 +228,11 @@ def render(prepared, model_path, output, playback_speed):
 
         plt.rcParams.update({"font.family": "DejaVu Sans", "text.color": TEXT, "axes.labelcolor": MUTED})
         fig = plt.figure(figsize=(19.2, 10.8), dpi=100, facecolor=BG)
-        titles = [("HUMAN KEYPOINTS", f"CMU {prepared['source_clip']} | aligned, scale {prepared['scale']:.3f}", HUMAN),
-                  ("GMR KINEMATICS", "Exported training reference | NO DYNAMICS", REFERENCE),
-                  ("ISAAC POLICY", "Recorded PhysX rollout | NOT reference", ACTUAL),
-                  ("MUJOCO POLICY", "Same actor | recorded physics rollout", OTHER)]
+        assessment = prepared["reports"]["assessment"]
+        titles = [("HUMAN KEYPOINTS", f"CMU {prepared['source_clip']} | " + ("native meters; separate camera" if prepared["adapted"] else f"aligned, scale {prepared['scale']:.3f}"), HUMAN),
+                  ("ADAPTED KINEMATICS" if prepared["adapted"] else "GMR KINEMATICS", "Exported training reference | NO DYNAMICS", REFERENCE),
+                  (f"ISAAC POLICY | {assessment['isaac']['verdict'].upper()}", "Recorded PhysX rollout | NOT reference", ACTUAL),
+                  (f"MUJOCO POLICY | {assessment['mujoco']['verdict'].upper()}", "Same actor | recorded physics rollout", OTHER)]
         artists, labels = [], []
         clips = (reference, reference, isaac, mj)
         for i, (title, subtitle, color) in enumerate(titles):
@@ -221,7 +243,8 @@ def render(prepared, model_path, output, playback_speed):
             labels.append(ax.text(.04, .95, "", va="top", transform=ax.transAxes, color=color,
                                   fontsize=10, bbox={"facecolor": BG, "alpha": .88, "edgecolor": "none"}))
             if i == 0:
-                ax.text(.03, .03, f"Display floor z={prepared['human_display_floor_m']:.3f} m\nConstant alignment offset / NOT contact", transform=ax.transAxes,
+                floor_note = "Original display plane / NOT contact" if prepared["adapted"] else "Constant alignment offset / NOT contact"
+                ax.text(.03, .03, f"Display floor z={prepared['human_display_floor_m']:.3f} m\n{floor_note}", transform=ax.transAxes,
                         fontsize=9, color=HUMAN, bbox={"facecolor": BG, "alpha": .9, "edgecolor": "none"})
         chart = fig.add_axes([.05, .135, .92, .16], facecolor=PANEL)
         chart.tick_params(colors=MUTED)
@@ -230,20 +253,26 @@ def render(prepared, model_path, output, playback_speed):
         chart.grid(alpha=.16)
         human_z = np.array([human.sample(source_clock(task_times, source_times, t))[human.names.index("root"), 2]
                             for t in timeline])
-        chart.plot(timeline, human_z - human_z[0], color=HUMAN, ls="--", label="Human pelvis (scaled)", lw=2)
-        for clip, color, name in ((reference, REFERENCE, "GMR reference"), (isaac, ACTUAL, "Isaac"), (mj, OTHER, "MuJoCo")):
+        chart.plot(timeline, human_z - human_z[0], color=HUMAN, ls="--", label="Human pelvis (native)" if prepared["adapted"] else "Human pelvis (scaled)", lw=2)
+        for clip, color, name in ((reference, REFERENCE, "Adapted reference" if prepared["adapted"] else "GMR reference"), (isaac, ACTUAL, "Isaac"), (mj, OTHER, "MuJoCo")):
             chart.plot(clip.times, clip.root[:, 2] - clip.root[0, 2], color=color, label=name, lw=2)
         chart.axvline(hold_start, color=MUTED, ls=":", lw=1)
-        chart.set(xlim=(0, end_s), xlabel="Shared task time (s); no phase alignment or time warping",
+        chart.set(xlim=(0, end_s), xlabel="Shared task time (s); original adaptation clock preserved, no posthoc phase alignment",
                   ylabel="Pelvis / base rise (m)")
         chart.legend(loc="upper right", ncol=4, frameon=False, labelcolor=TEXT, fontsize=10)
         cursor = chart.axvline(0, color=TEXT, lw=1)
         fig.text(.035, .95, f"CMU {prepared['source_clip']}  /  TRON1 WF  /  one-motion comparison", fontsize=23, weight="bold")
-        fig.text(.035, .905, "Source keypoints  >  kinematic retargeting  >  learned control in two physics engines", fontsize=15, color=MUTED)
+        outcome_note = f"Recorded task gates {assessment['verdict'].upper()}; one nominal episode per engine, not a robustness success rate."
+        if prepared["task"] == "turn_jump":
+            outcome_note = f"Task gates {assessment['verdict'].upper()}; these gates do not certify a 90-degree airborne turn. One nominal episode per engine."
+        if assessment["verdict"] == "fail":
+            outcome_note = f"FAIL: {len(assessment['failed_checks'])} unmet engine/task checks (see report). Recorded failures retained; no retiming or retraining."
+        fig.text(.035, .905, outcome_note, fontsize=15, color=MUTED)
         stamp = fig.text(.73, .95, "", fontsize=15, color=TEXT)
-        fig.text(.035, .073, f"Human: one heading alignment + uniform scale. Gold points: pelvis / ankles (not wheel targets).  |  Playback {playback_speed:g}x", fontsize=12, color=MUTED)
+        fig.text(.035, .073, prepared["adaptation_note"] + f"  |  Playback {playback_speed:g}x", fontsize=12, color=MUTED)
         fig.text(.035, .047, f"Robot reference: {prepared['reports']['export']['uniform_z_offset_m'] * 1000:.1f} mm global Z offset; terminal hold from {hold_start:.2f} s. Wheel spin is unobserved.", fontsize=12, color=MUTED)
-        fig.text(.035, .021, "All panels use one fixed camera and metric scale. Zero physics steps here; right panels replay recorded dynamics. Pelvis/base height is not COM height.", fontsize=11, color=MUTED)
+        camera_note = "Human uses its own fixed camera/native meters; robot panels share one fixed camera." if prepared["adapted"] else "All panels use one fixed camera and metric scale."
+        fig.text(.035, .021, camera_note + " Zero physics steps here; right panels replay recorded dynamics. Pelvis/base is not COM.", fontsize=11, color=MUTED)
         episode = prepared["reports"]["isaac"]["summary"]["episodes"][0]
         reasons = (episode["end_reason"], prepared["reports"]["mujoco"]["termination"])
         def update(t):
@@ -254,7 +283,8 @@ def render(prepared, model_path, output, playback_speed):
             cursor.set_xdata([t, t])
             stamp.set_text(f"Task {t:.2f} s   |   Source {source_clock(task_times, source_times, t):.2f} s")
             fig.canvas.draw()
-        update(float(reference.times[np.argmax(reference.root[:, 2])]))
+        preview_index = np.argmin(reference.root[:, 2]) if prepared["task"] == "crouch" else np.argmax(reference.root[:, 2])
+        update(float(reference.times[preview_index]))
         fig.savefig(output / "overview.png", dpi=100, facecolor=BG)
         width, height = fig.canvas.get_width_height()
         video = output / "motion_pipeline.mp4"
@@ -272,21 +302,30 @@ def render(prepared, model_path, output, playback_speed):
         return {"status": "rendered", "simulation_steps": 0, "full_decode_verified": True,
                 "method": "four synchronized panels: transformed human keypoints, exported kinematics, two recorded physics rollouts",
                 "source_clip": prepared["source_clip"], "source_hashes": prepared["hashes"],
+                "task": prepared["task"], "task_verdict": assessment["verdict"], "failed_checks": assessment["failed_checks"],
+                "outcome_note": outcome_note, "task_adapted": prepared["adapted"], "adaptation_note": prepared["adaptation_note"],
+                "original_adaptation": prepared["reports"].get("adaptation", {}).get("calibration_and_adaptation"),
+                "terrain": prepared["reports"]["isaac"].get("terrain"),
                 "same_actor_provenance": prepared["provenance"], "video_resolution": [width, height],
                 "video_frames": len(timeline), "video_fps": 50 * playback_speed, "playback_speed": playback_speed,
                 "task_end_s": end_s, "source_sample_span_s": float(human.times[-1]),
-                "source_hold_at_s": hold_start, "source_time_mapping": "exported source_time_s, no inferred phase alignment",
+                "source_hold_at_s": float(source_times[-1]), "hold_start_task_s": hold_start,
+                "source_time_mapping": "exported source_time_s composed with original adaptation time scale and source crop; no posthoc phase alignment",
                 "human_uniform_scale": prepared["scale"], "human_transform_verified_against_raw_source": True,
+                "human_display_transform": "identity_native" if prepared["adapted"] else "heading_uniform_scale_root_alignment",
                 "human_heading_alignment": prepared["human_heading_alignment"], "human_seed_root_m": prepared["human_seed_root_m"],
                 "human_display_floor_m": prepared["human_display_floor_m"], "human_floor_measured_contact": False,
                 "reference_uniform_z_offset_m": prepared["reports"]["export"]["uniform_z_offset_m"],
-                "fixed_shared_camera": True, "camera": {"lookat": camera.lookat.tolist(), "distance": float(camera.distance),
+                "fixed_shared_camera": not prepared["adapted"], "robot_panels_share_camera": True,
+                "human_camera": {"lookat": human_camera.lookat.tolist(), "distance": float(human_camera.distance),
+                "azimuth": float(human_camera.azimuth), "elevation": float(human_camera.elevation)},
+                "camera": {"lookat": camera.lookat.tolist(), "distance": float(camera.distance),
                 "azimuth": float(camera.azimuth), "elevation": float(camera.elevation)},
                 "video_sha256": sha256(video), "overview_sha256": sha256(output / "overview.png"),
-                "limitations": ["Human skeleton is aligned/scaled for visual comparison; ankles are not robot wheel targets.",
-                    "Human display floor follows its single constant pelvis-alignment offset; it is not the robot ground or contact evidence.",
+                "limitations": ["Human is native-size for adapted tasks, aligned/scaled for GMR tasks; ankles are not wheel targets.",
+                    "Human display plane is native z=0 for adaptations, or shifted by the constant pelvis alignment for GMR; not contact evidence.",
                     "Kinematic reference prescribes poses; it proves no contact, force or balance feasibility.",
-                    "Terminal reference/human hold is explicitly labeled; source final 0.01 s is omitted by the 50 Hz export.",
+                    "Terminal reference/human hold is explicitly labeled; export subframe tails and original task adaptations are preserved.",
                     "Recorded rollouts retain their real timestamps and freeze visibly if their recording ends.",
                     "Source human pelvis and robot base link are not whole-body COM; no new training or dynamics simulation."]}
     finally:
@@ -300,7 +339,7 @@ def render(prepared, model_path, output, playback_speed):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task-dir", type=Path, required=True, help="Unretimed suite task with human/mink/gmr/tracking/trial evidence")
+    parser.add_argument("--task-dir", type=Path, required=True, help="Suite task with verified GMR or explicit wheel-adaptation evidence")
     parser.add_argument("--model", type=Path, default=ROOT / "assets/robots/WF_TRON1A/mujoco/robot.xml")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--playback-speed", type=float, default=.5)
@@ -318,9 +357,9 @@ def main(argv=None):
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>TRON1 單動作四欄比較</title>
 <style>body{background:#0a1220;color:#e2e8f0;font:16px system-ui;margin:2rem}video,img{width:100%;max-width:1920px}a{color:#38bdf8}</style>
 <h1>人體關鍵點 → 純運動學 → Isaac → MuJoCo</h1>
-<p>左側骨架已做朝向對齊與等比例縮放；第二欄只播放訓練參考姿態、沒有物理模擬。右側兩欄為同政策的實際物理紀錄。</p>
+<p>人體關鍵點的縮放、裁切及時鐘映射依各任務明確標示；第二欄只播放訓練參考姿態，沒有物理模擬。右側兩欄為同政策的實際物理紀錄，保留失敗結果。</p>
 <video src="motion_pipeline.mp4" controls autoplay muted loop playsinline></video>
-<p>同一時間軸、固定相機。末端停留明確標示；本影片沒有重新訓練或重新執行動力學。</p>
+<p>同一任務時間軸、固定相機。急停／蹲低的人體原尺寸畫面使用獨立固定相機；原始時間及幅度改編如實保留。末端停留明確標示；沒有重新訓練或重新執行動力學。</p>
 <p><a href="motion_pipeline.mp4">影片</a> · <a href="overview.png">預覽</a> · <a href="render_report.json">來源與渲染紀錄</a></p></html>''', encoding="utf-8")
         print(json.dumps({"status": report["status"], "video": str(args.output_dir / "motion_pipeline.mp4"), "simulation_steps": 0}))
     except BaseException as exc:

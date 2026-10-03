@@ -18,9 +18,14 @@
 [完整數值、失敗項與來源](results/2026-10-03-motion-suite/summary.json) ·
 [六任務預算／參考改編設定](config/suite/motion_suite.json)
 
-新增單一前跳的[四欄同步比較影片](results/2026-10-03-motion-pipeline/forward_jump/motion_pipeline.mp4)：
-人體關鍵點 → GMR 純運動學參考 → Isaac 策略 → MuJoCo 策略，並附共同時間軸的高度變化曲線。
-來源與時間對齊檢查見[渲染紀錄](results/2026-10-03-motion-pipeline/forward_jump/render_report.json)。
+六項實驗統一提供[四欄同步比較總覽](results/2026-10-03-motion-pipeline-suite/index.html)：
+人體關鍵點 → 純運動學訓練參考 → Isaac 策略 → MuJoCo 策略，並附共同時間軸的高度變化曲線。
+
+| 前跳 | 轉向跳 | 側跳（失敗） | 滾行急停 | 蹲低 | 上台階（失敗） |
+|---|---|---|---|---|---|
+| [四欄影片](results/2026-10-03-motion-pipeline-suite/forward_jump/motion_pipeline.mp4) | [四欄影片](results/2026-10-03-motion-pipeline-suite/turn_jump/motion_pipeline.mp4) | [四欄影片](results/2026-10-03-motion-pipeline-suite/side_jump/motion_pipeline.mp4) | [四欄影片](results/2026-10-03-motion-pipeline-suite/rolling_stop/motion_pipeline.mp4) | [四欄影片](results/2026-10-03-motion-pipeline-suite/crouch/motion_pipeline.mp4) | [四欄影片](results/2026-10-03-motion-pipeline-suite/step_up/motion_pipeline.mp4) |
+
+各動作目錄附來源與時間映射的 `render_report.json`。原有雙欄影片及[早期前跳四欄快照](results/2026-10-03-motion-pipeline/forward_jump/index.html)保留。
 
 每動作、每引擎只有 **1 次名義條件完整回合**，從參考第 0 幀及其初速度開始；不是一般成功率或真機驗收。
 影片以共同 renderer 畫出實際記錄姿態，沒有重新模擬或用參考播放冒充策略。
@@ -1003,7 +1008,10 @@ python scripts/assess_motion_suite.py --task step_up \
 部署環境的 12 項 MuJoCo evaluator 測試亦通過。公開報告／影片 hash、來源資料 hash、README 結果連結及私人路徑掃描均通過；
 本輪六項遠端訓練與評估程序皆已退出。
 
-### 單一動作：關鍵點、純運動學與物理策略同步比較
+### 每項實驗的標準格式：關鍵點、純運動學與物理策略同步比較
+
+後續每項實驗沿用四欄格式；不將純運動學播放當成物理策略成果。來源或實際 rollout 缺失時，
+渲染器會拒絕產生完整比較，不以參考姿態補造策略紀錄。現在支援本輪六項任務，保留評估 PASS／FAIL。
 
 以前跳 `16_05` 的同一組資料做四欄播放，不重新訓練，也不重新執行動力學。
 純運動學欄使用真正交給訓練的 `tracking/motion.npz`，包含 +5.8 mm 全局高度偏移、50 Hz 重採樣和末端 1 秒 hold；
@@ -1023,4 +1031,21 @@ MUJOCO_GL=egl python scripts/render_motion_pipeline.py \
 
 輸出 `motion_pipeline.mp4`、`overview.png`、`index.html` 及已去除私人路徑的 `render_report.json`。
 來源 hash 鏈、同 actor、具名關節順序、末端 hold 與影片完整解碼皆檢查；只用 `mj_forward` 重建畫面，沒有 `mj_step`。
-此入口限定具有人體／Mink／GMR／export 來源鏈且未重定時的任務，不能直接拿輪式急停或蹲低的改編資料冒充同一轉換流程。
+GMR 任務檢查人體／Mink／GMR／export 來源鏈。急停與蹲低則檢查原始人體／明確改編／export 來源鏈，
+第二欄標示 `ADAPTED KINEMATICS`，不冒充 GMR；人體欄保留原尺寸並使用獨立固定相機，三個機器人欄仍共用相機。
+急停保留原先 2 倍時間、0.35 倍平移、0.15 倍高度的改編；蹲低保留原始第 160–330 幀裁切、
+2 倍時間及原地 0.18 m 深度設定。時鐘先從 export 回到改編時間，再回到原始人體時間，包含蹲低的 1.325 s 起始偏移。
+人體與 reference 的幅度不同是原本的任務改編，不是渲染時重新配準。末端 hold 不繼續推進人體來源。
+報告的舊欄名 `source_sample_span_s` 記錄來源末幀的原始時間戳；裁切片段的實際長度見
+`original_adaptation.source_selected_span_s`，不可將兩者混用。
+上台階三個機器人欄使用與評估相同、經 hash 驗證的真實碰撞台階；人體欄地面只作顯示，不代表 CMU 接觸真值。
+
+批次重建（輸出目錄需為新目錄或空目錄）：
+
+```bash
+for task in forward_jump turn_jump side_jump rolling_stop crouch step_up; do
+  MUJOCO_GL=egl python scripts/render_motion_pipeline.py \
+    --task-dir "outputs/motion-suite-20261003/$task" \
+    --output-dir "outputs/fourway-suite/$task" --playback-speed 0.5
+done
+```
