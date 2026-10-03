@@ -18,6 +18,10 @@
 [完整數值、失敗項與來源](results/2026-10-03-motion-suite/summary.json) ·
 [六任務預算／參考改編設定](config/suite/motion_suite.json)
 
+新增單一前跳的[四欄同步比較影片](results/2026-10-03-motion-pipeline/forward_jump/motion_pipeline.mp4)：
+人體關鍵點 → GMR 純運動學參考 → Isaac 策略 → MuJoCo 策略，並附共同時間軸的高度變化曲線。
+來源與時間對齊檢查見[渲染紀錄](results/2026-10-03-motion-pipeline/forward_jump/render_report.json)。
+
 每動作、每引擎只有 **1 次名義條件完整回合**，從參考第 0 幀及其初速度開始；不是一般成功率或真機驗收。
 影片以共同 renderer 畫出實際記錄姿態，沒有重新模擬或用參考播放冒充策略。
 急停、蹲低是明確的輪足任務改編；台階碰撞幾何實際存在，但尺寸是從足端高度估計，不是 CMU 實景真值。
@@ -998,3 +1002,25 @@ python scripts/assess_motion_suite.py --task step_up \
 最終本機回歸：426 passed、7 skipped、160 subtests passed；7 項 Torch 匯出測試在部署環境另行全數通過，
 部署環境的 12 項 MuJoCo evaluator 測試亦通過。公開報告／影片 hash、來源資料 hash、README 結果連結及私人路徑掃描均通過；
 本輪六項遠端訓練與評估程序皆已退出。
+
+### 單一動作：關鍵點、純運動學與物理策略同步比較
+
+以前跳 `16_05` 的同一組資料做四欄播放，不重新訓練，也不重新執行動力學。
+純運動學欄使用真正交給訓練的 `tracking/motion.npz`，包含 +5.8 mm 全局高度偏移、50 Hz 重採樣和末端 1 秒 hold；
+不是另一版未加偏移的 120 Hz GMR。人體關鍵點依輸出的 `source_time_s` 取樣，2.44 秒後明確標示 endpoint hold，
+不做起跳時間／峰值對齊；原片最後 0.01 秒未進入 50 Hz reference。
+
+人體骨架使用原 retargeter 的固定朝向對齊及 0.7221 等比例縮放，並獨立從原始解碼骨架驗證轉換。
+這個 pelvis 對齊把人體顯示地面移到 z=0.18784 m，因此左欄單獨畫出並標示該固定顯示平面；
+不是逐幀貼地，也不是人體接觸量測。金色點為 pelvis／ankle；人體 ankle 與機器人 wheel-center 之間仍有形態映射偏移。
+四欄相機及公尺尺度相同，下方比較的是各自初始高度的變化，pelvis／base-link 皆不是全身 COM。
+
+```bash
+MUJOCO_GL=egl python scripts/render_motion_pipeline.py \
+  --task-dir outputs/motion-suite-20261003/forward_jump \
+  --output-dir outputs/my-forward-fourway --playback-speed 0.5
+```
+
+輸出 `motion_pipeline.mp4`、`overview.png`、`index.html` 及已去除私人路徑的 `render_report.json`。
+來源 hash 鏈、同 actor、具名關節順序、末端 hold 與影片完整解碼皆檢查；只用 `mj_forward` 重建畫面，沒有 `mj_step`。
+此入口限定具有人體／Mink／GMR／export 來源鏈且未重定時的任務，不能直接拿輪式急停或蹲低的改編資料冒充同一轉換流程。
