@@ -1,0 +1,3157 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "benchmark_kind": "paired_fixed_draw_validation",
+  "engine": "MuJoCo",
+  "seed": 20261004,
+  "thresholds": {
+    "min_height_gain_m": 0.2,
+    "min_flight_s": 0.2,
+    "min_tail_support_fraction": 0.9,
+    "tail_seconds": 0.5,
+    "max_tail_tilt_deg": 30.0,
+    "contact_threshold_n": 5.0
+  },
+  "draw_manifest_sha256": "6fc37d030a4bf108af53597a61029551e951dc4eee85d702a442caade2183ff0",
+  "actors": {
+    "baseline": {
+      "policy_sha256": "5aedd64370a99e64d1b41ca0a4fb4c49a977ce404bb1fa0ca998816e0a83a4ae",
+      "nominal_contract_sha256": "b9f78eccdab5aeed9c76e6caf919e469728cbdb9a622fbf164ee1882d706b644",
+      "nominal_contract": {
+        "policy_fps": 50.0,
+        "physics_dt": 0.005,
+        "decimation": 4,
+        "actor_dim": 51,
+        "critic_dim": 120,
+        "action_dim": 8,
+        "leg_joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_joint_names": [
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "observed_joint_velocity_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "body_names": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link",
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ],
+        "orientation_body_names": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link"
+        ],
+        "actor_terms": [
+          [
+            "ref_leg_q_ref_leg_dq_phase_sin_cos",
+            14
+          ],
+          [
+            "motion_anchor_pos_b",
+            3
+          ],
+          [
+            "motion_anchor_ori_b_6d_first_two_columns_row_major",
+            6
+          ],
+          [
+            "base_lin_vel_b",
+            3
+          ],
+          [
+            "base_ang_vel_b",
+            3
+          ],
+          [
+            "leg_joint_pos_rel",
+            6
+          ],
+          [
+            "joint_velocities",
+            8
+          ],
+          [
+            "previous_clipped_actions",
+            8
+          ]
+        ],
+        "raw_action_clip": [
+          -1.0,
+          1.0
+        ],
+        "leg_position_scale": 1.0,
+        "leg_position_offset": "reference_frame_0_joint_pos",
+        "wheel_torque_scale_nm": 12.0,
+        "leg_kp": 500.0,
+        "leg_kd": 10.0,
+        "leg_torque_limit_nm": 80.0,
+        "wheel_torque_limit_nm": 12.0,
+        "actuator_model": "dc_motor",
+        "leg_saturation_effort_nm": 80.0,
+        "wheel_saturation_effort_nm": 12.0,
+        "leg_motor_velocity_limit_rad_s": 15.0,
+        "wheel_motor_velocity_limit_rad_s": 100.0,
+        "solver_joint_velocity_limit_rad_s": 1000.0,
+        "motor_velocity_limit_semantics": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+        "legacy_joint_friction_coefficient": 0.0,
+        "legacy_joint_friction_startup_readback_required": true,
+        "rigid_body_max_angular_speed_rad_s": 100.0,
+        "rigid_body_angular_speed_config_units": "degrees_per_second",
+        "quaternion_order": "wxyz",
+        "root_prescribed_during_steps": false,
+        "wheel_orientation_tracking": false,
+        "wheel_angle_observation": false,
+        "reference_state_initialization_training_only": true,
+        "training_full_clip_start_fraction": 0.2,
+        "deterministic_evaluation_start_frame": 0,
+        "motion_end_hidden_teleport": false,
+        "domain_randomization": "disabled for initial pilot",
+        "actuator_limits_provenance": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+        "hardware_ready": false,
+        "actor_file": "actor_normalized.pt",
+        "actor_includes_observation_normalizer": true,
+        "actor_output_is_unclipped": true,
+        "actor_observation_groups": [
+          "policy"
+        ],
+        "export_validation_max_abs_error": 1.564621925354004e-07,
+        "actual_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "actual_body_order": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "limx_imu",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link",
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ],
+        "reference_file_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+        "checkpoint_sha256": "5d917d34cb92c3ddba8ba2828e97c75dd615b84bacf98a830b58b02bd5e4051c",
+        "default_joint_position_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "candidate": {
+      "policy_sha256": "29528af6094a2636701fac1d6f9bc2fa786533a40b2c1a968eb27c6e5cc2c1ea",
+      "nominal_contract_sha256": "3c0f42e4aa80c1164e6a1df80f0f89d2174950e259037585ef23b9863d83dace",
+      "nominal_contract": {
+        "policy_fps": 50.0,
+        "physics_dt": 0.005,
+        "decimation": 4,
+        "actor_dim": 51,
+        "critic_dim": 120,
+        "action_dim": 8,
+        "leg_joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint"
+        ],
+        "wheel_joint_names": [
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "observed_joint_velocity_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "body_names": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link",
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ],
+        "orientation_body_names": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link"
+        ],
+        "actor_terms": [
+          [
+            "ref_leg_q_ref_leg_dq_phase_sin_cos",
+            14
+          ],
+          [
+            "motion_anchor_pos_b",
+            3
+          ],
+          [
+            "motion_anchor_ori_b_6d_first_two_columns_row_major",
+            6
+          ],
+          [
+            "base_lin_vel_b",
+            3
+          ],
+          [
+            "base_ang_vel_b",
+            3
+          ],
+          [
+            "leg_joint_pos_rel",
+            6
+          ],
+          [
+            "joint_velocities",
+            8
+          ],
+          [
+            "previous_clipped_actions",
+            8
+          ]
+        ],
+        "raw_action_clip": [
+          -1.0,
+          1.0
+        ],
+        "leg_position_scale": 1.0,
+        "leg_position_offset": "reference_frame_0_joint_pos",
+        "wheel_torque_scale_nm": 12.0,
+        "leg_kp": 500.0,
+        "leg_kd": 10.0,
+        "leg_torque_limit_nm": 80.0,
+        "wheel_torque_limit_nm": 12.0,
+        "actuator_model": "dc_motor",
+        "leg_saturation_effort_nm": 80.0,
+        "wheel_saturation_effort_nm": 12.0,
+        "leg_motor_velocity_limit_rad_s": 15.0,
+        "wheel_motor_velocity_limit_rad_s": 100.0,
+        "solver_joint_velocity_limit_rad_s": 1000.0,
+        "motor_velocity_limit_semantics": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+        "legacy_joint_friction_coefficient": 0.0,
+        "legacy_joint_friction_startup_readback_required": true,
+        "rigid_body_max_angular_speed_rad_s": 100.0,
+        "rigid_body_angular_speed_config_units": "degrees_per_second",
+        "quaternion_order": "wxyz",
+        "root_prescribed_during_steps": false,
+        "wheel_orientation_tracking": false,
+        "wheel_angle_observation": false,
+        "reference_state_initialization_training_only": true,
+        "training_full_clip_start_fraction": 0.2,
+        "deterministic_evaluation_start_frame": 0,
+        "motion_end_hidden_teleport": false,
+        "domain_randomization": "disabled during evaluation; fixed actuator parameters",
+        "actuator_limits_provenance": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+        "hardware_ready": false,
+        "training_domain_randomization": {
+          "schema_version": 1,
+          "mode": "random",
+          "seed": 42,
+          "torque_scale_range": [
+            0.85,
+            1.0
+          ],
+          "velocity_scale_range": [
+            0.85,
+            1.0
+          ],
+          "wheel_friction_nm_range": [
+            0.0,
+            0.3
+          ],
+          "nominal_probability": 0.2,
+          "friction_smoothing_rad_s": 0.5
+        },
+        "actor_file": "actor_normalized.pt",
+        "actor_includes_observation_normalizer": true,
+        "actor_output_is_unclipped": true,
+        "actor_observation_groups": [
+          "policy"
+        ],
+        "export_validation_max_abs_error": 2.384185791015625e-07,
+        "actual_joint_order": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "actual_body_order": [
+          "base_Link",
+          "abad_L_Link",
+          "abad_R_Link",
+          "limx_imu",
+          "hip_L_Link",
+          "hip_R_Link",
+          "knee_L_Link",
+          "knee_R_Link",
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ],
+        "reference_file_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+        "checkpoint_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+        "default_joint_position_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "motion_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+  "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "runner_source_sha256": "24b7f312d3c50325f89fab6a47fde4e6205f9721d260435b170b74c30e654931",
+  "assessor_source_sha256": "afb2d565e3afa6a42f4be0d855bab69937c19be0da0442764b7ffa0f2543ebae",
+  "summary": {
+    "nominal": {
+      "draw_count": 1,
+      "baseline_pass_count": 1,
+      "candidate_pass_count": 1,
+      "candidate_only_pass": 0,
+      "baseline_only_pass": 0,
+      "both_pass": 1,
+      "both_fail": 0
+    },
+    "random_only": {
+      "draw_count": 16,
+      "baseline_pass_count": 0,
+      "candidate_pass_count": 15,
+      "candidate_only_pass": 15,
+      "baseline_only_pass": 0,
+      "both_pass": 0,
+      "both_fail": 1
+    }
+  },
+  "pairs": [
+    {
+      "id": "nominal",
+      "kind": "nominal",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "velocity_scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_friction_nm": [
+          0.0,
+          0.0
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": true
+      },
+      "domain_parameters_sha256": "3bc6c4bf9ddf971f59a963a5b6ed2a0895d60f6aab02ba01af4feff63857aec6",
+      "baseline": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.30996094109213823,
+          "flight_s": 0.49999999999998956,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.23606770814546
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/nominal/baseline",
+        "report_sha256": "b105e589209ece9e5b0ee9b5d8e49e06228c7dd6e88222829cf2381f20b626ab",
+        "rollout_sha256": "943de9a395b3934946f523b094a8e4a31301526a5a34b6e434a55babde8b68c7",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "velocity_scale": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "wheel_friction_nm": [
+            0.0,
+            0.0
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": true
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.3526828753857798,
+          "flight_s": 0.5149999999999892,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.258356608807132
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/nominal/candidate",
+        "report_sha256": "2569c5cf8191f81bfbbccc5c59009dd4c78ba41002dcd369eb1514a2989eb471",
+        "rollout_sha256": "72386be8701ff0c956fae355268cc54e5f5ddfad30ae3f8aa4c4bbc860a4b4d9",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "velocity_scale": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "wheel_friction_nm": [
+            0.0,
+            0.0
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": true
+        }
+      },
+      "paired_outcome": "both_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.04272193429364157,
+        "flight_s": 0.01499999999999968,
+        "tail_two_wheel_support_fraction": 0.0,
+        "max_tail_tilt_deg": 0.022288900661671107
+      }
+    },
+    {
+      "id": "validation_001",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8573555472455103,
+          0.9109536381473601,
+          0.9434442649416017,
+          0.9899449822626551,
+          0.8630871635865911,
+          0.9925900024929112,
+          0.8883873409116758,
+          0.9934571587694939
+        ],
+        "velocity_scale": [
+          0.9967467749915908,
+          0.9887349203290321,
+          0.851211828262808,
+          0.8631429572549951,
+          0.9178192960080673,
+          0.884900839777412,
+          0.8570465879057025,
+          0.9757320190042171
+        ],
+        "wheel_friction_nm": [
+          0.26629359215743864,
+          0.03175298484885764
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "ebea84c70ca51626c8c43478c8dc73d2856bc3136dfb813bd9af854170c858f3",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.24700082190913553,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.009999999999999787,
+          "max_tail_tilt_deg": 20.8326997242607
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_001/baseline",
+        "report_sha256": "3f35ccb21b2aa9e27701f919b453c501880990a0fa183aa118739275e99024bb",
+        "rollout_sha256": "e990ce5e5849574450c48188e8461c3078b74c4406d5e9a172df468388e35bce",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8573555472455103,
+            0.9109536381473601,
+            0.9434442649416017,
+            0.9899449822626551,
+            0.8630871635865911,
+            0.9925900024929112,
+            0.8883873409116758,
+            0.9934571587694939
+          ],
+          "velocity_scale": [
+            0.9967467749915908,
+            0.9887349203290321,
+            0.851211828262808,
+            0.8631429572549951,
+            0.9178192960080673,
+            0.884900839777412,
+            0.8570465879057025,
+            0.9757320190042171
+          ],
+          "wheel_friction_nm": [
+            0.26629359215743864,
+            0.03175298484885764
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.3005227815343168,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.50875562008795
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_001/candidate",
+        "report_sha256": "da932b28b8ce0076beb3657e30bafbf9aa0e25a47ea85a5fca24cee8862bf2d5",
+        "rollout_sha256": "d78fbbfb7f9fc3c092b5d4e7df66fba0e492a027109515d31c62bd4adf23a523",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8573555472455103,
+            0.9109536381473601,
+            0.9434442649416017,
+            0.9899449822626551,
+            0.8630871635865911,
+            0.9925900024929112,
+            0.8883873409116758,
+            0.9934571587694939
+          ],
+          "velocity_scale": [
+            0.9967467749915908,
+            0.9887349203290321,
+            0.851211828262808,
+            0.8631429572549951,
+            0.9178192960080673,
+            0.884900839777412,
+            0.8570465879057025,
+            0.9757320190042171
+          ],
+          "wheel_friction_nm": [
+            0.26629359215743864,
+            0.03175298484885764
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.05352195962518125,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9900000000000002,
+        "max_tail_tilt_deg": -12.32394410417275
+      }
+    },
+    {
+      "id": "validation_002",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8631295250593225,
+          0.9838170675827134,
+          0.9587473978714415,
+          0.9634417935426856,
+          0.9355480855363327,
+          0.9130342302389951,
+          0.8725745095732038,
+          0.9477362409108792
+        ],
+        "velocity_scale": [
+          0.9649798765737827,
+          0.9694280075415856,
+          0.9610645634376231,
+          0.9807206393347048,
+          0.872719626136168,
+          0.9964048364894574,
+          0.8792417369370924,
+          0.855890493040644
+        ],
+        "wheel_friction_nm": [
+          0.023888668000399547,
+          0.024906043169946577
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "026f1a76ccc72d70f822e4f63fd5221ce818bd8ef41e3bf52f3d5c2dbfa10b7c",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.26279639407291766,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 21.152035168790622
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_002/baseline",
+        "report_sha256": "67472242e69c9cc6301dae8d93f3472589b4a23dc5122fd64e272687b53aba97",
+        "rollout_sha256": "0e7ebb2d3d569237bb01cfb5735f30b0517bc2a683b41106507b2d71743a8a73",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8631295250593225,
+            0.9838170675827134,
+            0.9587473978714415,
+            0.9634417935426856,
+            0.9355480855363327,
+            0.9130342302389951,
+            0.8725745095732038,
+            0.9477362409108792
+          ],
+          "velocity_scale": [
+            0.9649798765737827,
+            0.9694280075415856,
+            0.9610645634376231,
+            0.9807206393347048,
+            0.872719626136168,
+            0.9964048364894574,
+            0.8792417369370924,
+            0.855890493040644
+          ],
+          "wheel_friction_nm": [
+            0.023888668000399547,
+            0.024906043169946577
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.32300232466217604,
+          "flight_s": 0.49999999999998956,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.309182209451059
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_002/candidate",
+        "report_sha256": "e95c0113b1e0d3908089d494077ff2228c4de3c5deedfb2b369858ff643142e6",
+        "rollout_sha256": "61e636f431ec73a910c8a3a49a80ad83107d825637e714ab24416e146ffeeb95",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8631295250593225,
+            0.9838170675827134,
+            0.9587473978714415,
+            0.9634417935426856,
+            0.9355480855363327,
+            0.9130342302389951,
+            0.8725745095732038,
+            0.9477362409108792
+          ],
+          "velocity_scale": [
+            0.9649798765737827,
+            0.9694280075415856,
+            0.9610645634376231,
+            0.9807206393347048,
+            0.872719626136168,
+            0.9964048364894574,
+            0.8792417369370924,
+            0.855890493040644
+          ],
+          "wheel_friction_nm": [
+            0.023888668000399547,
+            0.024906043169946577
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06020593058925838,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -12.842852959339563
+      }
+    },
+    {
+      "id": "validation_003",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9727304279593657,
+          0.9933759292957274,
+          0.8849662282871976,
+          0.9814968434594571,
+          0.8777930978600409,
+          0.8542298028515694,
+          0.9529076150037299,
+          0.8816560247723911
+        ],
+        "velocity_scale": [
+          0.8623456644149379,
+          0.9173980348159978,
+          0.9869355017743164,
+          0.9878786083341441,
+          0.9816675609891304,
+          0.9270706057964112,
+          0.9848563080778494,
+          0.9951198072928553
+        ],
+        "wheel_friction_nm": [
+          0.10904611180885629,
+          0.1977444304147119
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "0558fcbf90b49cd91a74476d08e9d87cc5f368cc870a1a204582edd17a4a8354",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.20192353089118065,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.08000000000001961,
+          "max_tail_tilt_deg": 21.842516429552465
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_003/baseline",
+        "report_sha256": "f38876b170933aaa834a0f24329bfb36fbe05228df8de67b8064b14de435f5c7",
+        "rollout_sha256": "1d5c9d2cfb99e670f72531c6865efbcbab56ede2ce0199ea4f48d521c9d58a8e",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9727304279593657,
+            0.9933759292957274,
+            0.8849662282871976,
+            0.9814968434594571,
+            0.8777930978600409,
+            0.8542298028515694,
+            0.9529076150037299,
+            0.8816560247723911
+          ],
+          "velocity_scale": [
+            0.8623456644149379,
+            0.9173980348159978,
+            0.9869355017743164,
+            0.9878786083341441,
+            0.9816675609891304,
+            0.9270706057964112,
+            0.9848563080778494,
+            0.9951198072928553
+          ],
+          "wheel_friction_nm": [
+            0.10904611180885629,
+            0.1977444304147119
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.27582448536727666,
+          "flight_s": 0.4699999999999902,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.2469677633816465
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_003/candidate",
+        "report_sha256": "09e7abc1d9a648c977511c32d6ed8a3c029a08a85140f4956f1d0beb98437371",
+        "rollout_sha256": "a4491b2a1cbfd23bd69388773067c653abbfb0158da2105c62ffa7c9dd6044bb",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9727304279593657,
+            0.9933759292957274,
+            0.8849662282871976,
+            0.9814968434594571,
+            0.8777930978600409,
+            0.8542298028515694,
+            0.9529076150037299,
+            0.8816560247723911
+          ],
+          "velocity_scale": [
+            0.8623456644149379,
+            0.9173980348159978,
+            0.9869355017743164,
+            0.9878786083341441,
+            0.9816675609891304,
+            0.9270706057964112,
+            0.9848563080778494,
+            0.9951198072928553
+          ],
+          "wheel_friction_nm": [
+            0.10904611180885629,
+            0.1977444304147119
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.07390095447609601,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9199999999999804,
+        "max_tail_tilt_deg": -14.595548666170817
+      }
+    },
+    {
+      "id": "validation_004",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8752346507335448,
+          0.9744612741843548,
+          0.8540617963147226,
+          0.8881131092466358,
+          0.879486709479332,
+          0.8748969866957175,
+          0.9977105076350592,
+          0.8888717870076882
+        ],
+        "velocity_scale": [
+          0.9093935089326735,
+          0.9356746208512726,
+          0.937188206739763,
+          0.9357456558902429,
+          0.8541348039892546,
+          0.8959373647893591,
+          0.9435162339054378,
+          0.8566859223370115
+        ],
+        "wheel_friction_nm": [
+          0.05414633525326152,
+          0.10737079361046238
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "f510bcaa3c1a74ac741776b90ebb246f83f1ea44224ff0fbb668917bf7da77d8",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "minimum_base_height_gain",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.19349218527339596,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.040000000000020464,
+          "max_tail_tilt_deg": 21.17278167334306
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_004/baseline",
+        "report_sha256": "b4b13deb4dba5099b34772c9b9695753f4bd60c9e7b289d2cad6d57a3734283b",
+        "rollout_sha256": "50d44b0319cb03fd46c02754334e3be6b2c4551d1ee5e541344f5d9026a44c8c",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8752346507335448,
+            0.9744612741843548,
+            0.8540617963147226,
+            0.8881131092466358,
+            0.879486709479332,
+            0.8748969866957175,
+            0.9977105076350592,
+            0.8888717870076882
+          ],
+          "velocity_scale": [
+            0.9093935089326735,
+            0.9356746208512726,
+            0.937188206739763,
+            0.9357456558902429,
+            0.8541348039892546,
+            0.8959373647893591,
+            0.9435162339054378,
+            0.8566859223370115
+          ],
+          "wheel_friction_nm": [
+            0.05414633525326152,
+            0.10737079361046238
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.28077140061290895,
+          "flight_s": 0.47999999999999,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.857887689482851
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_004/candidate",
+        "report_sha256": "d031900c0c0dc23ba8a1fde98d8aee6813e3ba2d988e79b5b60d29f1b1f4f7d9",
+        "rollout_sha256": "cbfa6027de6950573f8e0bc5990c1d1f642009082afeb62d3f4dfec2a82709f3",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8752346507335448,
+            0.9744612741843548,
+            0.8540617963147226,
+            0.8881131092466358,
+            0.879486709479332,
+            0.8748969866957175,
+            0.9977105076350592,
+            0.8888717870076882
+          ],
+          "velocity_scale": [
+            0.9093935089326735,
+            0.9356746208512726,
+            0.937188206739763,
+            0.9357456558902429,
+            0.8541348039892546,
+            0.8959373647893591,
+            0.9435162339054378,
+            0.8566859223370115
+          ],
+          "wheel_friction_nm": [
+            0.05414633525326152,
+            0.10737079361046238
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.087279215339513,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9599999999999795,
+        "max_tail_tilt_deg": -13.314893983860209
+      }
+    },
+    {
+      "id": "validation_005",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8898935995428292,
+          0.9940690778405769,
+          0.9561857260132622,
+          0.935704000790532,
+          0.9096578199739985,
+          0.8752398723074849,
+          0.9534852666206685,
+          0.8869634027437173
+        ],
+        "velocity_scale": [
+          0.9872792008804953,
+          0.8995200572914104,
+          0.9523809921691695,
+          0.8573439789794329,
+          0.9052340318406581,
+          0.9706892496871915,
+          0.9834772920197048,
+          0.8983523746708697
+        ],
+        "wheel_friction_nm": [
+          0.2005114469492085,
+          0.14658896511898076
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "cd319d733580d8cd45925065283e86dbba6611725c39f51d26bc2272b8e203a2",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.22851962151397753,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.019999999999999574,
+          "max_tail_tilt_deg": 22.515514998720693
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_005/baseline",
+        "report_sha256": "48d00f508e31114499cd1fe51409001d1ba8a014c38d1848c55a05f6631bf336",
+        "rollout_sha256": "6bedd5581e8f22d05d8441e662cd71e21509b721aa30fbe4729a84dbf6b0ffea",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8898935995428292,
+            0.9940690778405769,
+            0.9561857260132622,
+            0.935704000790532,
+            0.9096578199739985,
+            0.8752398723074849,
+            0.9534852666206685,
+            0.8869634027437173
+          ],
+          "velocity_scale": [
+            0.9872792008804953,
+            0.8995200572914104,
+            0.9523809921691695,
+            0.8573439789794329,
+            0.9052340318406581,
+            0.9706892496871915,
+            0.9834772920197048,
+            0.8983523746708697
+          ],
+          "wheel_friction_nm": [
+            0.2005114469492085,
+            0.14658896511898076
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.2988743027449523,
+          "flight_s": 0.47999999999999,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.126301163112991
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_005/candidate",
+        "report_sha256": "3283fdfcd549e45690477ac90e51a7029da7013a778238e15661fff8b3c9b469",
+        "rollout_sha256": "18de35f902597c3724b49914085a1a72765f4cdb5494c9c1eb23eab4c29e8c80",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8898935995428292,
+            0.9940690778405769,
+            0.9561857260132622,
+            0.935704000790532,
+            0.9096578199739985,
+            0.8752398723074849,
+            0.9534852666206685,
+            0.8869634027437173
+          ],
+          "velocity_scale": [
+            0.9872792008804953,
+            0.8995200572914104,
+            0.9523809921691695,
+            0.8573439789794329,
+            0.9052340318406581,
+            0.9706892496871915,
+            0.9834772920197048,
+            0.8983523746708697
+          ],
+          "wheel_friction_nm": [
+            0.2005114469492085,
+            0.14658896511898076
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.07035468123097477,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9800000000000004,
+        "max_tail_tilt_deg": -14.389213835607702
+      }
+    },
+    {
+      "id": "validation_006",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9687046680969241,
+          0.9648754593121665,
+          0.8840933759029138,
+          0.9618931696884645,
+          0.9206818625553775,
+          0.8868881132244704,
+          0.915920159011982,
+          0.9744333444618655
+        ],
+        "velocity_scale": [
+          0.9831171318158096,
+          0.9151345106709896,
+          0.872594987501048,
+          0.8871642870247275,
+          0.995448236537983,
+          0.9425542274943915,
+          0.8872138856632914,
+          0.9256119145541639
+        ],
+        "wheel_friction_nm": [
+          0.01805758464996596,
+          0.05917138121089057
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "4e7eda86aff3bf0834d7e57ae6c32eb27a14cc21725e77ab8c6cae2f90de3bf4",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.24045589982531523,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 22.228123617671084
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_006/baseline",
+        "report_sha256": "fb1169ecffaac0df49a84e7a3e760f11e00bb046f404c283c439d8a9b81d6f5d",
+        "rollout_sha256": "a45e6bbbb5b38d92bc470696a724c5da49fad3440111a6f6588e540ef4b0724d",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9687046680969241,
+            0.9648754593121665,
+            0.8840933759029138,
+            0.9618931696884645,
+            0.9206818625553775,
+            0.8868881132244704,
+            0.915920159011982,
+            0.9744333444618655
+          ],
+          "velocity_scale": [
+            0.9831171318158096,
+            0.9151345106709896,
+            0.872594987501048,
+            0.8871642870247275,
+            0.995448236537983,
+            0.9425542274943915,
+            0.8872138856632914,
+            0.9256119145541639
+          ],
+          "wheel_friction_nm": [
+            0.01805758464996596,
+            0.05917138121089057
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.30941493710725365,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.972432651880186
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_006/candidate",
+        "report_sha256": "66c96569ec88dda6c59543940087af47248608a54fef19dc7cbd8dfd1a8a1377",
+        "rollout_sha256": "cce07968399eb24877b9c397ff46eef311f02956a1eb3892ae59263283cf9a82",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9687046680969241,
+            0.9648754593121665,
+            0.8840933759029138,
+            0.9618931696884645,
+            0.9206818625553775,
+            0.8868881132244704,
+            0.915920159011982,
+            0.9744333444618655
+          ],
+          "velocity_scale": [
+            0.9831171318158096,
+            0.9151345106709896,
+            0.872594987501048,
+            0.8871642870247275,
+            0.995448236537983,
+            0.9425542274943915,
+            0.8872138856632914,
+            0.9256119145541639
+          ],
+          "wheel_friction_nm": [
+            0.01805758464996596,
+            0.05917138121089057
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06895903728193842,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -14.255690965790897
+      }
+    },
+    {
+      "id": "validation_007",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9095997818361348,
+          0.9376811596791063,
+          0.8522244449734487,
+          0.9501475720016096,
+          0.9354798158302231,
+          0.8557451168123321,
+          0.9625817584452991,
+          0.8676202643257204
+        ],
+        "velocity_scale": [
+          0.8697913125919225,
+          0.9221549958828127,
+          0.9362462058685921,
+          0.9725344556056581,
+          0.8707134581034037,
+          0.8712892720653858,
+          0.8890964336457527,
+          0.9817900364758995
+        ],
+        "wheel_friction_nm": [
+          0.29960087655433143,
+          0.03085440004532003
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "d857d98ac56927b4df71591cf59017f5422fc7cd30be01aa9e0d8d5a79107434",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "minimum_base_height_gain",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.19565093279018697,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.11000000000001897,
+          "max_tail_tilt_deg": 21.845518015730846
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_007/baseline",
+        "report_sha256": "9709a59d6511418bb05288ec172d33fbdf829426305805f25dc5f9ab4ef89dec",
+        "rollout_sha256": "a19e6f28d81c815a2c56babebfda92198c995b793036fcc323dac74ba7ea3125",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9095997818361348,
+            0.9376811596791063,
+            0.8522244449734487,
+            0.9501475720016096,
+            0.9354798158302231,
+            0.8557451168123321,
+            0.9625817584452991,
+            0.8676202643257204
+          ],
+          "velocity_scale": [
+            0.8697913125919225,
+            0.9221549958828127,
+            0.9362462058685921,
+            0.9725344556056581,
+            0.8707134581034037,
+            0.8712892720653858,
+            0.8890964336457527,
+            0.9817900364758995
+          ],
+          "wheel_friction_nm": [
+            0.29960087655433143,
+            0.03085440004532003
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support",
+          "stable_tail_tilt"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.2626558786314992,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 32.47981610108877
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_007/candidate",
+        "report_sha256": "692c800ff77496bbb95c5adeeef52a1c1c0b40b5a701703121e2d6a888c4a3de",
+        "rollout_sha256": "e47ba62d5f26e399ebd47ae0aa6d4dbfba424ef20f980e14a5687d63a3d4c1ff",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9095997818361348,
+            0.9376811596791063,
+            0.8522244449734487,
+            0.9501475720016096,
+            0.9354798158302231,
+            0.8557451168123321,
+            0.9625817584452991,
+            0.8676202643257204
+          ],
+          "velocity_scale": [
+            0.8697913125919225,
+            0.9221549958828127,
+            0.9362462058685921,
+            0.9725344556056581,
+            0.8707134581034037,
+            0.8712892720653858,
+            0.8890964336457527,
+            0.9817900364758995
+          ],
+          "wheel_friction_nm": [
+            0.29960087655433143,
+            0.03085440004532003
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "both_fail",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06700494584131222,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": -0.11000000000001897,
+        "max_tail_tilt_deg": 10.634298085357926
+      }
+    },
+    {
+      "id": "validation_008",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9941226642990418,
+          0.8791403145652008,
+          0.9938095358032748,
+          0.9601333836356624,
+          0.9040012252688424,
+          0.8593032221267057,
+          0.9876929281735322,
+          0.9083575764231285
+        ],
+        "velocity_scale": [
+          0.8661709705416236,
+          0.9138896111566492,
+          0.8734809444147718,
+          0.9993814924012565,
+          0.8921333609827994,
+          0.9470449261310427,
+          0.98676701497339,
+          0.9071074573408228
+        ],
+        "wheel_friction_nm": [
+          0.16117374657350134,
+          0.06289349737437487
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "87f8851a73ba28084a8ee155216dc50c5486eff1e477443a9da1fa109cbed38d",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "minimum_base_height_gain",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.19537645128332226,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.05000000000002025,
+          "max_tail_tilt_deg": 21.37393772646188
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_008/baseline",
+        "report_sha256": "a7ec06d96adc27070fd9064232260ef8094b705082a120517f00965d80cd815d",
+        "rollout_sha256": "1081cf94029bc08f622e03239fa2d491d6783d9980dd3616471a433dc47a9128",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9941226642990418,
+            0.8791403145652008,
+            0.9938095358032748,
+            0.9601333836356624,
+            0.9040012252688424,
+            0.8593032221267057,
+            0.9876929281735322,
+            0.9083575764231285
+          ],
+          "velocity_scale": [
+            0.8661709705416236,
+            0.9138896111566492,
+            0.8734809444147718,
+            0.9993814924012565,
+            0.8921333609827994,
+            0.9470449261310427,
+            0.98676701497339,
+            0.9071074573408228
+          ],
+          "wheel_friction_nm": [
+            0.16117374657350134,
+            0.06289349737437487
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.2936461203737948,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.672773641739245
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_008/candidate",
+        "report_sha256": "97e543f944d088f91d750bba7055cfacfaf2a7238ab01702e632c51e5fb9e13d",
+        "rollout_sha256": "39abe65c627dd92ae9c24abbc2a7689160ffe8bd8130cda679a4ebf2256a47ef",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9941226642990418,
+            0.8791403145652008,
+            0.9938095358032748,
+            0.9601333836356624,
+            0.9040012252688424,
+            0.8593032221267057,
+            0.9876929281735322,
+            0.9083575764231285
+          ],
+          "velocity_scale": [
+            0.8661709705416236,
+            0.9138896111566492,
+            0.8734809444147718,
+            0.9993814924012565,
+            0.8921333609827994,
+            0.9470449261310427,
+            0.98676701497339,
+            0.9071074573408228
+          ],
+          "wheel_friction_nm": [
+            0.16117374657350134,
+            0.06289349737437487
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.09826966909047252,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9499999999999797,
+        "max_tail_tilt_deg": -13.701164084722635
+      }
+    },
+    {
+      "id": "validation_009",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9659419913576592,
+          0.9853754282880909,
+          0.9369649089225804,
+          0.910672515738733,
+          0.8790061801648625,
+          0.9412475368875902,
+          0.9406331648527309,
+          0.8587163184003453
+        ],
+        "velocity_scale": [
+          0.9121282298386306,
+          0.8969058350787057,
+          0.9691529407026072,
+          0.9780055960161574,
+          0.9915932930469401,
+          0.8917792782920971,
+          0.9500424553473138,
+          0.8675136658560099
+        ],
+        "wheel_friction_nm": [
+          0.024727508278547104,
+          0.23057711857717883
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "1953bbfeec34dabcb8b25d848c9a53d265ecc534517457b2a0fa38a29323b683",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.23368426852015678,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.009999999999999787,
+          "max_tail_tilt_deg": 22.090482545128978
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_009/baseline",
+        "report_sha256": "1777b262d4861a77f7534b84c205399131862e231e43ae1f6ac89d6f1ecb3d9d",
+        "rollout_sha256": "7a68e6d13080970ca3827876dec209f3859dcb70eb338348e5498479a5a11d35",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9659419913576592,
+            0.9853754282880909,
+            0.9369649089225804,
+            0.910672515738733,
+            0.8790061801648625,
+            0.9412475368875902,
+            0.9406331648527309,
+            0.8587163184003453
+          ],
+          "velocity_scale": [
+            0.9121282298386306,
+            0.8969058350787057,
+            0.9691529407026072,
+            0.9780055960161574,
+            0.9915932930469401,
+            0.8917792782920971,
+            0.9500424553473138,
+            0.8675136658560099
+          ],
+          "wheel_friction_nm": [
+            0.024727508278547104,
+            0.23057711857717883
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.30168524224340154,
+          "flight_s": 0.47999999999999,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.288310743995591
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_009/candidate",
+        "report_sha256": "e368d662075ad2e96292b308a19ff99255b55692d957dc8cb1485b19350e0208",
+        "rollout_sha256": "57caaafbe1cfbde1e1c4e7c3b5bd838294ee4349d05b1652a8e8a61ab440edaa",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9659419913576592,
+            0.9853754282880909,
+            0.9369649089225804,
+            0.910672515738733,
+            0.8790061801648625,
+            0.9412475368875902,
+            0.9406331648527309,
+            0.8587163184003453
+          ],
+          "velocity_scale": [
+            0.9121282298386306,
+            0.8969058350787057,
+            0.9691529407026072,
+            0.9780055960161574,
+            0.9915932930469401,
+            0.8917792782920971,
+            0.9500424553473138,
+            0.8675136658560099
+          ],
+          "wheel_friction_nm": [
+            0.024727508278547104,
+            0.23057711857717883
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06800097372324476,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9900000000000002,
+        "max_tail_tilt_deg": -13.802171801133387
+      }
+    },
+    {
+      "id": "validation_010",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9450876300472731,
+          0.9649952947675458,
+          0.8912030411554576,
+          0.9563085541390204,
+          0.8582513470273273,
+          0.9607072257394428,
+          0.9475563727795507,
+          0.8643954869611538
+        ],
+        "velocity_scale": [
+          0.8521148350164823,
+          0.9707148659471947,
+          0.8661745138402942,
+          0.8535151094444643,
+          0.9945499489668634,
+          0.9447151008940183,
+          0.938778881669129,
+          0.8978840074132378
+        ],
+        "wheel_friction_nm": [
+          0.20472361905242878,
+          0.10610981335295745
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "ca63b37fcb62006cf01a0f30a72250ecf8359edebbbeaac8fda8e695f9e96d3d",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.24305201268594145,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 20.934010083394586
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_010/baseline",
+        "report_sha256": "349c4ffdbb87971f7504736df4a2bba41a4a5fe59f48071cc444cc0bdcd726ec",
+        "rollout_sha256": "08b85e373982e6e3a04447bbcd942abc218819e60d26e412ce531eee3d4ff765",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9450876300472731,
+            0.9649952947675458,
+            0.8912030411554576,
+            0.9563085541390204,
+            0.8582513470273273,
+            0.9607072257394428,
+            0.9475563727795507,
+            0.8643954869611538
+          ],
+          "velocity_scale": [
+            0.8521148350164823,
+            0.9707148659471947,
+            0.8661745138402942,
+            0.8535151094444643,
+            0.9945499489668634,
+            0.9447151008940183,
+            0.938778881669129,
+            0.8978840074132378
+          ],
+          "wheel_friction_nm": [
+            0.20472361905242878,
+            0.10610981335295745
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.3074882076098251,
+          "flight_s": 0.4899999999999898,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.396739983678541
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_010/candidate",
+        "report_sha256": "0c5e6635e52ec872fac853e7888ec4236c608b1490d4ad446ee6adcd1149bd84",
+        "rollout_sha256": "bd40a265e6abc4375c312fadab38ba8e5ea51cae3fef7d2ea471fb588e321c88",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9450876300472731,
+            0.9649952947675458,
+            0.8912030411554576,
+            0.9563085541390204,
+            0.8582513470273273,
+            0.9607072257394428,
+            0.9475563727795507,
+            0.8643954869611538
+          ],
+          "velocity_scale": [
+            0.8521148350164823,
+            0.9707148659471947,
+            0.8661745138402942,
+            0.8535151094444643,
+            0.9945499489668634,
+            0.9447151008940183,
+            0.938778881669129,
+            0.8978840074132378
+          ],
+          "wheel_friction_nm": [
+            0.20472361905242878,
+            0.10610981335295745
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06443619492388364,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -12.537270099716045
+      }
+    },
+    {
+      "id": "validation_011",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8917119181564528,
+          0.9089932468275027,
+          0.9441375087056286,
+          0.8857014500420429,
+          0.9415598490517899,
+          0.9241391625643481,
+          0.9007179829811914,
+          0.9747110394714464
+        ],
+        "velocity_scale": [
+          0.8939515850756652,
+          0.9451282018215077,
+          0.9179779171966352,
+          0.9694670685498037,
+          0.902237617549609,
+          0.9315896407611968,
+          0.9390527301510624,
+          0.8710151756111932
+        ],
+        "wheel_friction_nm": [
+          0.2848518070201023,
+          0.17649061036336455
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "edf22e882080686ac74a5302e7e33785f9d157338f6582261efe5beb5dc2cec2",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.24400249303494737,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.009999999999999787,
+          "max_tail_tilt_deg": 22.328490907978477
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_011/baseline",
+        "report_sha256": "b207281028c739ce5e8b1bc7d25724b8d499f4d65373fdd8e7f57aef07d67913",
+        "rollout_sha256": "fbdf40bc14c2a423272142ae179651a1a613b69efead429a1e45a3ec5686ddb7",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8917119181564528,
+            0.9089932468275027,
+            0.9441375087056286,
+            0.8857014500420429,
+            0.9415598490517899,
+            0.9241391625643481,
+            0.9007179829811914,
+            0.9747110394714464
+          ],
+          "velocity_scale": [
+            0.8939515850756652,
+            0.9451282018215077,
+            0.9179779171966352,
+            0.9694670685498037,
+            0.902237617549609,
+            0.9315896407611968,
+            0.9390527301510624,
+            0.8710151756111932
+          ],
+          "wheel_friction_nm": [
+            0.2848518070201023,
+            0.17649061036336455
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.305917210648317,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.57531257758337
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_011/candidate",
+        "report_sha256": "c7e11eb7bb1aa60345a7b999e4a476878d6e16da2bf9e52195dfc4563d911a98",
+        "rollout_sha256": "208bec505e3bb3dfa71f64758ec7088ed1d7eb6ae49ebf27b0d6b1fb0e8a466c",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8917119181564528,
+            0.9089932468275027,
+            0.9441375087056286,
+            0.8857014500420429,
+            0.9415598490517899,
+            0.9241391625643481,
+            0.9007179829811914,
+            0.9747110394714464
+          ],
+          "velocity_scale": [
+            0.8939515850756652,
+            0.9451282018215077,
+            0.9179779171966352,
+            0.9694670685498037,
+            0.902237617549609,
+            0.9315896407611968,
+            0.9390527301510624,
+            0.8710151756111932
+          ],
+          "wheel_friction_nm": [
+            0.2848518070201023,
+            0.17649061036336455
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.06191471761336964,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9900000000000002,
+        "max_tail_tilt_deg": -13.753178330395107
+      }
+    },
+    {
+      "id": "validation_012",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8865780217156446,
+          0.9922566777631675,
+          0.9730333510576438,
+          0.9652904260876651,
+          0.9879435330797518,
+          0.874634804807716,
+          0.9628361439685366,
+          0.9887018759798125
+        ],
+        "velocity_scale": [
+          0.9342982236917483,
+          0.9771754353156756,
+          0.8579154699610728,
+          0.9829839584143075,
+          0.8532721362725857,
+          0.9062536185620678,
+          0.9186396276146074,
+          0.8965516621518157
+        ],
+        "wheel_friction_nm": [
+          0.07562242124401981,
+          0.07635655734921264
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "33dc2aac045e39e0fd4da2c76f32e0967168e820eaed618ff9f092e9e87ccd94",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.2370111854721726,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 21.67320089355003
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_012/baseline",
+        "report_sha256": "4ba2e8ea2842ef5dee089d6e10b1b1dfe582f7d946430d65c2ce93772f57cfd0",
+        "rollout_sha256": "e565dd3120b184a5637e31be70cf3b503ceae00e2db9eb9fc3232b721374b2bd",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8865780217156446,
+            0.9922566777631675,
+            0.9730333510576438,
+            0.9652904260876651,
+            0.9879435330797518,
+            0.874634804807716,
+            0.9628361439685366,
+            0.9887018759798125
+          ],
+          "velocity_scale": [
+            0.9342982236917483,
+            0.9771754353156756,
+            0.8579154699610728,
+            0.9829839584143075,
+            0.8532721362725857,
+            0.9062536185620678,
+            0.9186396276146074,
+            0.8965516621518157
+          ],
+          "wheel_friction_nm": [
+            0.07562242124401981,
+            0.07635655734921264
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.297146040645351,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.620281127803411
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_012/candidate",
+        "report_sha256": "4bdb992b7a986d45a019ad502b01ba77fcbad2a483937942670b2e84808c3897",
+        "rollout_sha256": "6a6858d3180d05c4b7724277e06a5eea51bf6456f8072f5126abe3d87bc8898b",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8865780217156446,
+            0.9922566777631675,
+            0.9730333510576438,
+            0.9652904260876651,
+            0.9879435330797518,
+            0.874634804807716,
+            0.9628361439685366,
+            0.9887018759798125
+          ],
+          "velocity_scale": [
+            0.9342982236917483,
+            0.9771754353156756,
+            0.8579154699610728,
+            0.9829839584143075,
+            0.8532721362725857,
+            0.9062536185620678,
+            0.9186396276146074,
+            0.8965516621518157
+          ],
+          "wheel_friction_nm": [
+            0.07562242124401981,
+            0.07635655734921264
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.0601348551731784,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -14.052919765746621
+      }
+    },
+    {
+      "id": "validation_013",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9120966262468965,
+          0.9356699186366302,
+          0.9872710283255414,
+          0.9996608453725973,
+          0.9138326122249557,
+          0.8654518421943433,
+          0.9423842156027444,
+          0.9006039294082153
+        ],
+        "velocity_scale": [
+          0.9794596400362823,
+          0.991801921319305,
+          0.9691423466516111,
+          0.850012938882351,
+          0.9049558671858371,
+          0.905916122564553,
+          0.8831179672509464,
+          0.865523293257138
+        ],
+        "wheel_friction_nm": [
+          0.14222870659423903,
+          0.21647911862501343
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "3939d0a3f2ee0d5c333890dc9594d7a902b0a2372056728cb5b610acf64f1028",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.21048582323498666,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.009999999999999787,
+          "max_tail_tilt_deg": 22.767466312582506
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_013/baseline",
+        "report_sha256": "303b3f99f26c81bdaec7e3c7d03ef40a7d1a09b49b4a01064885ecb3e843dfd0",
+        "rollout_sha256": "8b66792353d8ed36449aff8bd9e18792b6cf5744be8911ff3bc2c4ad72916688",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9120966262468965,
+            0.9356699186366302,
+            0.9872710283255414,
+            0.9996608453725973,
+            0.9138326122249557,
+            0.8654518421943433,
+            0.9423842156027444,
+            0.9006039294082153
+          ],
+          "velocity_scale": [
+            0.9794596400362823,
+            0.991801921319305,
+            0.9691423466516111,
+            0.850012938882351,
+            0.9049558671858371,
+            0.905916122564553,
+            0.8831179672509464,
+            0.865523293257138
+          ],
+          "wheel_friction_nm": [
+            0.14222870659423903,
+            0.21647911862501343
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.29252905996303813,
+          "flight_s": 0.4849999999999899,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.425678577248661
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_013/candidate",
+        "report_sha256": "d13af9a2ffa054ad6771bb554027f34e20c482f3e7e03b4c20456e8e4182e73f",
+        "rollout_sha256": "e0203a7e5e5141c75932d636c0f11dbba3a29368a87a64b5be0da50740dee5f0",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9120966262468965,
+            0.9356699186366302,
+            0.9872710283255414,
+            0.9996608453725973,
+            0.9138326122249557,
+            0.8654518421943433,
+            0.9423842156027444,
+            0.9006039294082153
+          ],
+          "velocity_scale": [
+            0.9794596400362823,
+            0.991801921319305,
+            0.9691423466516111,
+            0.850012938882351,
+            0.9049558671858371,
+            0.905916122564553,
+            0.8831179672509464,
+            0.865523293257138
+          ],
+          "wheel_friction_nm": [
+            0.14222870659423903,
+            0.21647911862501343
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.08204323672805147,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9900000000000002,
+        "max_tail_tilt_deg": -15.341787735333845
+      }
+    },
+    {
+      "id": "validation_014",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8971247404450204,
+          0.9198310810029846,
+          0.8804579330869212,
+          0.9741872313318843,
+          0.9441160927689888,
+          0.8534581204905419,
+          0.9173630471165299,
+          0.8953471342503682
+        ],
+        "velocity_scale": [
+          0.8662735606215475,
+          0.9651540990340596,
+          0.9039707929509154,
+          0.9198498223510853,
+          0.9446654557529691,
+          0.9467974185096072,
+          0.9444246069982873,
+          0.9912428179828151
+        ],
+        "wheel_friction_nm": [
+          0.08182523900967247,
+          0.2819371178670992
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "fcddaab482fd19055814e48951b088e1f9423ee94784e2333eb71f5fe9e1e08a",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.23223022437546637,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.02999999999999936,
+          "max_tail_tilt_deg": 22.011253423536072
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_014/baseline",
+        "report_sha256": "d50515bcb5c12c87ac366dd03d03a6f8f774c86bc222ed89493ca5ff199eb9c8",
+        "rollout_sha256": "f9d7379a281d0ccda96ac287c46878f39af7968ff767ad4a77fce7fdeb745cd9",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8971247404450204,
+            0.9198310810029846,
+            0.8804579330869212,
+            0.9741872313318843,
+            0.9441160927689888,
+            0.8534581204905419,
+            0.9173630471165299,
+            0.8953471342503682
+          ],
+          "velocity_scale": [
+            0.8662735606215475,
+            0.9651540990340596,
+            0.9039707929509154,
+            0.9198498223510853,
+            0.9446654557529691,
+            0.9467974185096072,
+            0.9444246069982873,
+            0.9912428179828151
+          ],
+          "wheel_friction_nm": [
+            0.08182523900967247,
+            0.2819371178670992
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.2854453917262978,
+          "flight_s": 0.47999999999999,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 6.989277876579153
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_014/candidate",
+        "report_sha256": "cf1d61546d29421e3b1c2fb2306ff1d1829b1f25c0c60c43dad05ae709af2eba",
+        "rollout_sha256": "483fe9fe3dc15c70b394699be4b1dfef043105a6c0ea36a2292e2906aa62a1e7",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8971247404450204,
+            0.9198310810029846,
+            0.8804579330869212,
+            0.9741872313318843,
+            0.9441160927689888,
+            0.8534581204905419,
+            0.9173630471165299,
+            0.8953471342503682
+          ],
+          "velocity_scale": [
+            0.8662735606215475,
+            0.9651540990340596,
+            0.9039707929509154,
+            0.9198498223510853,
+            0.9446654557529691,
+            0.9467974185096072,
+            0.9444246069982873,
+            0.9912428179828151
+          ],
+          "wheel_friction_nm": [
+            0.08182523900967247,
+            0.2819371178670992
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.05321516735083143,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 0.9700000000000006,
+        "max_tail_tilt_deg": -15.02197554695692
+      }
+    },
+    {
+      "id": "validation_015",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8910366715474275,
+          0.9783770977555015,
+          0.9608103075842424,
+          0.9181221129746384,
+          0.8600468782833685,
+          0.9540901513827756,
+          0.9226943717582912,
+          0.9408221164650932
+        ],
+        "velocity_scale": [
+          0.9749691965888021,
+          0.9347751858512793,
+          0.9256628877826137,
+          0.8647691305441947,
+          0.8884347672908709,
+          0.9266678488064475,
+          0.9203132792114547,
+          0.9191993350213299
+        ],
+        "wheel_friction_nm": [
+          0.1566648308567948,
+          0.20282833145791393
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "7ac619779eb6a40d5f482ca45bffc0535983883f49a26c7401a53acf3b1e8a9c",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.2384603025638372,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 22.35124828133092
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_015/baseline",
+        "report_sha256": "f2f9014a8932ca6d1a67d48efc77182047dd7e37204078a84d18408dd5c5cd18",
+        "rollout_sha256": "32713fd37650e61131296e75c6bca1cb78b0d745aceb22944e30fcd963abe1d7",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8910366715474275,
+            0.9783770977555015,
+            0.9608103075842424,
+            0.9181221129746384,
+            0.8600468782833685,
+            0.9540901513827756,
+            0.9226943717582912,
+            0.9408221164650932
+          ],
+          "velocity_scale": [
+            0.9749691965888021,
+            0.9347751858512793,
+            0.9256628877826137,
+            0.8647691305441947,
+            0.8884347672908709,
+            0.9266678488064475,
+            0.9203132792114547,
+            0.9191993350213299
+          ],
+          "wheel_friction_nm": [
+            0.1566648308567948,
+            0.20282833145791393
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.31026542782470545,
+          "flight_s": 0.49499999999998967,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 8.462336565241907
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_015/candidate",
+        "report_sha256": "108234757fff44d29fec990cd1ba10ba67b815d8bfcc6fda23bea501ab1661ef",
+        "rollout_sha256": "10a5fd7895152758ff7c40bd32d2845f187ada9607bad93544b942e742d3c37c",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.8910366715474275,
+            0.9783770977555015,
+            0.9608103075842424,
+            0.9181221129746384,
+            0.8600468782833685,
+            0.9540901513827756,
+            0.9226943717582912,
+            0.9408221164650932
+          ],
+          "velocity_scale": [
+            0.9749691965888021,
+            0.9347751858512793,
+            0.9256628877826137,
+            0.8647691305441947,
+            0.8884347672908709,
+            0.9266678488064475,
+            0.9203132792114547,
+            0.9191993350213299
+          ],
+          "wheel_friction_nm": [
+            0.1566648308567948,
+            0.20282833145791393
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.07180512526086824,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -13.888911716089014
+      }
+    },
+    {
+      "id": "validation_016",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9487006823719932,
+          0.9362469348060809,
+          0.9615198088574402,
+          0.9883057227097838,
+          0.9949998202818239,
+          0.9267204126023267,
+          0.9204700534678372,
+          0.8682493745188676
+        ],
+        "velocity_scale": [
+          0.9501924305904509,
+          0.872718672791364,
+          0.9862609510340989,
+          0.9821373456184661,
+          0.9394643442994347,
+          0.894054272119195,
+          0.8656856241437475,
+          0.99021516293137
+        ],
+        "wheel_friction_nm": [
+          0.190847475324286,
+          0.06545423958632912
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "00d97a3af35568388464d7efeccf6afb1c6157d35b16e806dabad7baf788886d",
+      "baseline": {
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support"
+        ],
+        "metrics": {
+          "base_height_gain_m": 0.25738962190161785,
+          "flight_s": null,
+          "tail_two_wheel_support_fraction": 0.0,
+          "max_tail_tilt_deg": 22.89768373330355
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_016/baseline",
+        "report_sha256": "6803d8ac9557fdd78b4c8e9da44f0b7c34c18b08235612b6ab1d7a59e9de4823",
+        "rollout_sha256": "73f57570bc2fe0726b7f00d2b6ad5b7c72fde897028be8db51f1fbbb9db551c6",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9487006823719932,
+            0.9362469348060809,
+            0.9615198088574402,
+            0.9883057227097838,
+            0.9949998202818239,
+            0.9267204126023267,
+            0.9204700534678372,
+            0.8682493745188676
+          ],
+          "velocity_scale": [
+            0.9501924305904509,
+            0.872718672791364,
+            0.9862609510340989,
+            0.9821373456184661,
+            0.9394643442994347,
+            0.894054272119195,
+            0.8656856241437475,
+            0.99021516293137
+          ],
+          "wheel_friction_nm": [
+            0.190847475324286,
+            0.06545423958632912
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "candidate": {
+        "verdict": "pass",
+        "fail_reasons": [],
+        "metrics": {
+          "base_height_gain_m": 0.31266065341259064,
+          "flight_s": 0.4899999999999898,
+          "tail_two_wheel_support_fraction": 1.0,
+          "max_tail_tilt_deg": 7.975998812805748
+        },
+        "complete_contact_evidence": true,
+        "trial_directory": "trials/validation_016/candidate",
+        "report_sha256": "6ea19d0428428a8809f0a5a05793f7c58bcc5e212a78deda7e71487f461f3ac3",
+        "rollout_sha256": "970a696200fac7bc3f99b7c28926bada13e46b909397d1ae32ab0f9480873a4e",
+        "engine_version": "3.9.0",
+        "actual_domain_parameters": {
+          "joint_names": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint",
+            "wheel_L_Joint",
+            "wheel_R_Joint"
+          ],
+          "torque_scale": [
+            0.9487006823719932,
+            0.9362469348060809,
+            0.9615198088574402,
+            0.9883057227097838,
+            0.9949998202818239,
+            0.9267204126023267,
+            0.9204700534678372,
+            0.8682493745188676
+          ],
+          "velocity_scale": [
+            0.9501924305904509,
+            0.872718672791364,
+            0.9862609510340989,
+            0.9821373456184661,
+            0.9394643442994347,
+            0.894054272119195,
+            0.8656856241437475,
+            0.99021516293137
+          ],
+          "wheel_friction_nm": [
+            0.190847475324286,
+            0.06545423958632912
+          ],
+          "friction_smoothing_rad_s": 0.5,
+          "is_nominal": false
+        }
+      },
+      "paired_outcome": "candidate_only_pass",
+      "metric_delta_candidate_minus_baseline": {
+        "base_height_gain_m": 0.05527103151097279,
+        "flight_s": null,
+        "tail_two_wheel_support_fraction": 1.0,
+        "max_tail_tilt_deg": -14.9216849204978
+      }
+    }
+  ],
+  "hardware_ready": false,
+  "population_success_rate_estimate": false,
+  "limitations": [
+    "One initial reference-frame-zero state; only three simulated actuator parameter families vary, independently per joint.",
+    "Nominal is reported separately from fixed random validation draws; no confidence or population-rate claim.",
+    "Repeated use for checkpoint selection makes this a validation suite, not an independent final test set.",
+    "Both actors use the same stored draws and original termination predicates; failures are retained.",
+    "Nominal policy mappings stay fixed. Runtime scales apply to both DC saturation and effort and to no-load speed.",
+    "Wheel drag is friction_nm*tanh(wheel_velocity/0.5), not a stiction model; net torque retains nominal +/-80/12 Nm guards.",
+    "Simulation parameters are assumptions, not independently verified manufacturer ratings or hardware validation.",
+    "This does not replace same-actor Isaac/MuJoCo transfer assessment; no nominal Isaac evidence is paired with randomized physics."
+  ]
+}

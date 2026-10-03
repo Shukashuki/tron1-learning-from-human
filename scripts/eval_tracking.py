@@ -156,6 +156,8 @@ def main():
     parser.add_argument("--num-envs", default=16, type=int)
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
+    parser.add_argument("--domain-parameters", type=Path,
+                        help="One explicit fixed actuator-domain draw JSON; never resample during evaluation")
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
     if args.num_envs < 1 or args.contact_threshold_n <= 0:
@@ -181,6 +183,11 @@ def main():
 
         sys.path.insert(0, str(ROOT))
         from training.tron1_tracking import make_env_cfg, observation_action_contract, WHEEL_BODY_NAMES
+        from training.tron1_domain_randomization import (
+            validate_draw, apply_draw_to_contract, domain_randomization_audit,
+        )
+        domain_parameters = (validate_draw(json.loads(args.domain_parameters.read_text()))
+                             if args.domain_parameters else None)
 
         def to_numpy(tensor):
             return tensor.detach().cpu().numpy().copy()
@@ -232,7 +239,8 @@ def main():
                         }
                 super()._reset_idx(env_ids)
 
-        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, eval_mode=True)
+        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, eval_mode=True,
+                           dr_profile={"mode": "fixed", "fixed_draw": domain_parameters} if domain_parameters else None)
         cfg.seed = args.seed
         env = TerminalCaptureEnv(cfg=cfg)
         robot = env.scene["robot"]
@@ -357,6 +365,13 @@ def main():
                                         arrays["joint_position_rad"]), axis=-1)
         summary = summarize_episodes(arrays, outcomes, reference, args.contact_threshold_n)
         contract = observation_action_contract()
+        contract["domain_randomization"] = "disabled during evaluation; fixed actuator parameters"
+        if domain_parameters is not None:
+            contract = apply_draw_to_contract(contract, domain_parameters)
+        training_manifest = args.checkpoint.parent / "manifest.json"
+        if training_manifest.is_file():
+            metadata = json.loads(training_manifest.read_text())
+            contract["training_domain_randomization"] = metadata.get("domain_randomization_profile")
         contract.update({
             "actor_file": "actor_normalized.pt", "actor_includes_observation_normalizer": True,
             "actor_output_is_unclipped": True, "actor_observation_groups": actor.obs_groups["policy"],
@@ -370,6 +385,9 @@ def main():
         report = {
             "schema_version": 1, "status": "evaluated" if not active.any() else "evaluation_incomplete",
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
+            "domain_parameters": domain_parameters,
+            "domain_parameters_file_sha256": sha256(args.domain_parameters) if args.domain_parameters else None,
+            "domain_randomization_audit": domain_randomization_audit(env),
             "simulator": "IsaacLab/PhysX", "checkpoint": str(args.checkpoint),
             "checkpoint_sha256": contract["checkpoint_sha256"],
             "runner_config": str(args.runner_config), "runner_config_sha256": sha256(args.runner_config),

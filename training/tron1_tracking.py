@@ -61,6 +61,9 @@ from isaaclab.managers import EventTermCfg, ObservationGroupCfg, ObservationTerm
 from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.math import matrix_from_quat, quat_apply, quat_error_magnitude, quat_inv, quat_mul, yaw_quat
+from training.tron1_domain_randomization import (
+    make_actuator_class, reset_domain_randomization, validate_profile,
+)
 
 
 LEG_JOINT_NAMES = [
@@ -352,6 +355,7 @@ class TronEventsCfg:
         },
     )
     legacy_joint_friction = EventTermCfg(func=clear_legacy_joint_friction, mode="startup")
+    domain_randomization: EventTermCfg | None = None
 
 
 @configclass
@@ -361,13 +365,16 @@ class TronTrackingEnvCfg(TrackingEnvCfg):
     events: TronEventsCfg = TronEventsCfg()
 
 
-def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=False):
+def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=False, dr_profile=None):
     """Return a registry-free ManagerBasedRLEnv config for the local motion.
 
     The entrypoint must clip all raw policy actions to [-1, 1], identically in
     training, evaluation and MuJoCo deployment.  Explicit actuators additionally
     clip final torques, so Gaussian exploration cannot bypass motor limits.
     """
+    profile = None if dr_profile is None else validate_profile(dr_profile)
+    if eval_mode and profile is not None and profile["mode"] != "fixed":
+        raise ValueError("Evaluation may use only an explicit fixed domain draw, never random reset sampling")
     motion_file = Path(motion_file).resolve()
     asset_path = Path(asset_path).resolve()
     if not motion_file.is_file() or not asset_path.is_file():
@@ -442,6 +449,14 @@ def make_env_cfg(motion_file, asset_path, num_envs, device="cuda:0", eval_mode=F
         deterministic_start=bool(eval_mode), sampling_bin_seconds=0.2,
         start_fraction=0.2,
     )
+    if profile is not None:
+        actuator_class = make_actuator_class()
+        for actuator in cfg.scene.robot.actuators.values():
+            actuator.class_type = actuator_class
+        cfg.events.domain_randomization = EventTermCfg(
+            func=reset_domain_randomization, mode="reset", min_step_count_between_reset=0,
+            params={"profile": profile},
+        )
     # Keep the official exponential tracking objectives, but omit wheel axial
     # rotation.  The arbitrary zero wheel angle in the IK reference is not a
     # physical rolling target.

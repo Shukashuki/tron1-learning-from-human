@@ -1,0 +1,755 @@
+{
+  "schema_version": 1,
+  "seed": 20261004,
+  "rng": "NumPy PCG64",
+  "random_draw_count": 16,
+  "nominal_draw_count": 1,
+  "sampling": "independent uniform per-joint draws: eight torque scales, eight speed scales, two axle losses; no nominal mixture",
+  "ranges": {
+    "torque_scale": [
+      0.85,
+      1.0
+    ],
+    "velocity_scale": [
+      0.85,
+      1.0
+    ],
+    "wheel_friction_nm": [
+      0.0,
+      0.3
+    ]
+  },
+  "draws": [
+    {
+      "id": "nominal",
+      "kind": "nominal",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "velocity_scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_friction_nm": [
+          0.0,
+          0.0
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": true
+      },
+      "domain_parameters_sha256": "3bc6c4bf9ddf971f59a963a5b6ed2a0895d60f6aab02ba01af4feff63857aec6"
+    },
+    {
+      "id": "validation_001",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8573555472455103,
+          0.9109536381473601,
+          0.9434442649416017,
+          0.9899449822626551,
+          0.8630871635865911,
+          0.9925900024929112,
+          0.8883873409116758,
+          0.9934571587694939
+        ],
+        "velocity_scale": [
+          0.9967467749915908,
+          0.9887349203290321,
+          0.851211828262808,
+          0.8631429572549951,
+          0.9178192960080673,
+          0.884900839777412,
+          0.8570465879057025,
+          0.9757320190042171
+        ],
+        "wheel_friction_nm": [
+          0.26629359215743864,
+          0.03175298484885764
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "ebea84c70ca51626c8c43478c8dc73d2856bc3136dfb813bd9af854170c858f3"
+    },
+    {
+      "id": "validation_002",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8631295250593225,
+          0.9838170675827134,
+          0.9587473978714415,
+          0.9634417935426856,
+          0.9355480855363327,
+          0.9130342302389951,
+          0.8725745095732038,
+          0.9477362409108792
+        ],
+        "velocity_scale": [
+          0.9649798765737827,
+          0.9694280075415856,
+          0.9610645634376231,
+          0.9807206393347048,
+          0.872719626136168,
+          0.9964048364894574,
+          0.8792417369370924,
+          0.855890493040644
+        ],
+        "wheel_friction_nm": [
+          0.023888668000399547,
+          0.024906043169946577
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "026f1a76ccc72d70f822e4f63fd5221ce818bd8ef41e3bf52f3d5c2dbfa10b7c"
+    },
+    {
+      "id": "validation_003",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9727304279593657,
+          0.9933759292957274,
+          0.8849662282871976,
+          0.9814968434594571,
+          0.8777930978600409,
+          0.8542298028515694,
+          0.9529076150037299,
+          0.8816560247723911
+        ],
+        "velocity_scale": [
+          0.8623456644149379,
+          0.9173980348159978,
+          0.9869355017743164,
+          0.9878786083341441,
+          0.9816675609891304,
+          0.9270706057964112,
+          0.9848563080778494,
+          0.9951198072928553
+        ],
+        "wheel_friction_nm": [
+          0.10904611180885629,
+          0.1977444304147119
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "0558fcbf90b49cd91a74476d08e9d87cc5f368cc870a1a204582edd17a4a8354"
+    },
+    {
+      "id": "validation_004",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8752346507335448,
+          0.9744612741843548,
+          0.8540617963147226,
+          0.8881131092466358,
+          0.879486709479332,
+          0.8748969866957175,
+          0.9977105076350592,
+          0.8888717870076882
+        ],
+        "velocity_scale": [
+          0.9093935089326735,
+          0.9356746208512726,
+          0.937188206739763,
+          0.9357456558902429,
+          0.8541348039892546,
+          0.8959373647893591,
+          0.9435162339054378,
+          0.8566859223370115
+        ],
+        "wheel_friction_nm": [
+          0.05414633525326152,
+          0.10737079361046238
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "f510bcaa3c1a74ac741776b90ebb246f83f1ea44224ff0fbb668917bf7da77d8"
+    },
+    {
+      "id": "validation_005",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8898935995428292,
+          0.9940690778405769,
+          0.9561857260132622,
+          0.935704000790532,
+          0.9096578199739985,
+          0.8752398723074849,
+          0.9534852666206685,
+          0.8869634027437173
+        ],
+        "velocity_scale": [
+          0.9872792008804953,
+          0.8995200572914104,
+          0.9523809921691695,
+          0.8573439789794329,
+          0.9052340318406581,
+          0.9706892496871915,
+          0.9834772920197048,
+          0.8983523746708697
+        ],
+        "wheel_friction_nm": [
+          0.2005114469492085,
+          0.14658896511898076
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "cd319d733580d8cd45925065283e86dbba6611725c39f51d26bc2272b8e203a2"
+    },
+    {
+      "id": "validation_006",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9687046680969241,
+          0.9648754593121665,
+          0.8840933759029138,
+          0.9618931696884645,
+          0.9206818625553775,
+          0.8868881132244704,
+          0.915920159011982,
+          0.9744333444618655
+        ],
+        "velocity_scale": [
+          0.9831171318158096,
+          0.9151345106709896,
+          0.872594987501048,
+          0.8871642870247275,
+          0.995448236537983,
+          0.9425542274943915,
+          0.8872138856632914,
+          0.9256119145541639
+        ],
+        "wheel_friction_nm": [
+          0.01805758464996596,
+          0.05917138121089057
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "4e7eda86aff3bf0834d7e57ae6c32eb27a14cc21725e77ab8c6cae2f90de3bf4"
+    },
+    {
+      "id": "validation_007",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9095997818361348,
+          0.9376811596791063,
+          0.8522244449734487,
+          0.9501475720016096,
+          0.9354798158302231,
+          0.8557451168123321,
+          0.9625817584452991,
+          0.8676202643257204
+        ],
+        "velocity_scale": [
+          0.8697913125919225,
+          0.9221549958828127,
+          0.9362462058685921,
+          0.9725344556056581,
+          0.8707134581034037,
+          0.8712892720653858,
+          0.8890964336457527,
+          0.9817900364758995
+        ],
+        "wheel_friction_nm": [
+          0.29960087655433143,
+          0.03085440004532003
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "d857d98ac56927b4df71591cf59017f5422fc7cd30be01aa9e0d8d5a79107434"
+    },
+    {
+      "id": "validation_008",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9941226642990418,
+          0.8791403145652008,
+          0.9938095358032748,
+          0.9601333836356624,
+          0.9040012252688424,
+          0.8593032221267057,
+          0.9876929281735322,
+          0.9083575764231285
+        ],
+        "velocity_scale": [
+          0.8661709705416236,
+          0.9138896111566492,
+          0.8734809444147718,
+          0.9993814924012565,
+          0.8921333609827994,
+          0.9470449261310427,
+          0.98676701497339,
+          0.9071074573408228
+        ],
+        "wheel_friction_nm": [
+          0.16117374657350134,
+          0.06289349737437487
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "87f8851a73ba28084a8ee155216dc50c5486eff1e477443a9da1fa109cbed38d"
+    },
+    {
+      "id": "validation_009",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9659419913576592,
+          0.9853754282880909,
+          0.9369649089225804,
+          0.910672515738733,
+          0.8790061801648625,
+          0.9412475368875902,
+          0.9406331648527309,
+          0.8587163184003453
+        ],
+        "velocity_scale": [
+          0.9121282298386306,
+          0.8969058350787057,
+          0.9691529407026072,
+          0.9780055960161574,
+          0.9915932930469401,
+          0.8917792782920971,
+          0.9500424553473138,
+          0.8675136658560099
+        ],
+        "wheel_friction_nm": [
+          0.024727508278547104,
+          0.23057711857717883
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "1953bbfeec34dabcb8b25d848c9a53d265ecc534517457b2a0fa38a29323b683"
+    },
+    {
+      "id": "validation_010",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9450876300472731,
+          0.9649952947675458,
+          0.8912030411554576,
+          0.9563085541390204,
+          0.8582513470273273,
+          0.9607072257394428,
+          0.9475563727795507,
+          0.8643954869611538
+        ],
+        "velocity_scale": [
+          0.8521148350164823,
+          0.9707148659471947,
+          0.8661745138402942,
+          0.8535151094444643,
+          0.9945499489668634,
+          0.9447151008940183,
+          0.938778881669129,
+          0.8978840074132378
+        ],
+        "wheel_friction_nm": [
+          0.20472361905242878,
+          0.10610981335295745
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "ca63b37fcb62006cf01a0f30a72250ecf8359edebbbeaac8fda8e695f9e96d3d"
+    },
+    {
+      "id": "validation_011",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8917119181564528,
+          0.9089932468275027,
+          0.9441375087056286,
+          0.8857014500420429,
+          0.9415598490517899,
+          0.9241391625643481,
+          0.9007179829811914,
+          0.9747110394714464
+        ],
+        "velocity_scale": [
+          0.8939515850756652,
+          0.9451282018215077,
+          0.9179779171966352,
+          0.9694670685498037,
+          0.902237617549609,
+          0.9315896407611968,
+          0.9390527301510624,
+          0.8710151756111932
+        ],
+        "wheel_friction_nm": [
+          0.2848518070201023,
+          0.17649061036336455
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "edf22e882080686ac74a5302e7e33785f9d157338f6582261efe5beb5dc2cec2"
+    },
+    {
+      "id": "validation_012",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8865780217156446,
+          0.9922566777631675,
+          0.9730333510576438,
+          0.9652904260876651,
+          0.9879435330797518,
+          0.874634804807716,
+          0.9628361439685366,
+          0.9887018759798125
+        ],
+        "velocity_scale": [
+          0.9342982236917483,
+          0.9771754353156756,
+          0.8579154699610728,
+          0.9829839584143075,
+          0.8532721362725857,
+          0.9062536185620678,
+          0.9186396276146074,
+          0.8965516621518157
+        ],
+        "wheel_friction_nm": [
+          0.07562242124401981,
+          0.07635655734921264
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "33dc2aac045e39e0fd4da2c76f32e0967168e820eaed618ff9f092e9e87ccd94"
+    },
+    {
+      "id": "validation_013",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9120966262468965,
+          0.9356699186366302,
+          0.9872710283255414,
+          0.9996608453725973,
+          0.9138326122249557,
+          0.8654518421943433,
+          0.9423842156027444,
+          0.9006039294082153
+        ],
+        "velocity_scale": [
+          0.9794596400362823,
+          0.991801921319305,
+          0.9691423466516111,
+          0.850012938882351,
+          0.9049558671858371,
+          0.905916122564553,
+          0.8831179672509464,
+          0.865523293257138
+        ],
+        "wheel_friction_nm": [
+          0.14222870659423903,
+          0.21647911862501343
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "3939d0a3f2ee0d5c333890dc9594d7a902b0a2372056728cb5b610acf64f1028"
+    },
+    {
+      "id": "validation_014",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8971247404450204,
+          0.9198310810029846,
+          0.8804579330869212,
+          0.9741872313318843,
+          0.9441160927689888,
+          0.8534581204905419,
+          0.9173630471165299,
+          0.8953471342503682
+        ],
+        "velocity_scale": [
+          0.8662735606215475,
+          0.9651540990340596,
+          0.9039707929509154,
+          0.9198498223510853,
+          0.9446654557529691,
+          0.9467974185096072,
+          0.9444246069982873,
+          0.9912428179828151
+        ],
+        "wheel_friction_nm": [
+          0.08182523900967247,
+          0.2819371178670992
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "fcddaab482fd19055814e48951b088e1f9423ee94784e2333eb71f5fe9e1e08a"
+    },
+    {
+      "id": "validation_015",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.8910366715474275,
+          0.9783770977555015,
+          0.9608103075842424,
+          0.9181221129746384,
+          0.8600468782833685,
+          0.9540901513827756,
+          0.9226943717582912,
+          0.9408221164650932
+        ],
+        "velocity_scale": [
+          0.9749691965888021,
+          0.9347751858512793,
+          0.9256628877826137,
+          0.8647691305441947,
+          0.8884347672908709,
+          0.9266678488064475,
+          0.9203132792114547,
+          0.9191993350213299
+        ],
+        "wheel_friction_nm": [
+          0.1566648308567948,
+          0.20282833145791393
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "7ac619779eb6a40d5f482ca45bffc0535983883f49a26c7401a53acf3b1e8a9c"
+    },
+    {
+      "id": "validation_016",
+      "kind": "random_validation",
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.9487006823719932,
+          0.9362469348060809,
+          0.9615198088574402,
+          0.9883057227097838,
+          0.9949998202818239,
+          0.9267204126023267,
+          0.9204700534678372,
+          0.8682493745188676
+        ],
+        "velocity_scale": [
+          0.9501924305904509,
+          0.872718672791364,
+          0.9862609510340989,
+          0.9821373456184661,
+          0.9394643442994347,
+          0.894054272119195,
+          0.8656856241437475,
+          0.99021516293137
+        ],
+        "wheel_friction_nm": [
+          0.190847475324286,
+          0.06545423958632912
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "domain_parameters_sha256": "00d97a3af35568388464d7efeccf6afb1c6157d35b16e806dabad7baf788886d"
+    }
+  ]
+}

@@ -1,6 +1,21 @@
 # TRON1 Learning from Human
 
-## 最新結果：單次跳躍 sim2sim 通過（2026-10-03）
+## 最新結果：三軸 domain randomization（2026-10-03）
+
+輪軸阻力、馬達無負載轉速與馬達扭矩能力的 DR 續訓已完成。
+使用預先指定的最終 checkpoint，在同一組 16 個未用於訓練的獨立參數 draw 上，
+MuJoCo 完整跳躍驗收由原策略 **0/16 提升至 15/16**；名義條件兩策略都通過。
+DR 策略在名義條件與一組固定弱化條件的 Isaac／MuJoCo sim2sim 也均通過。
+
+[配對驗證逐筆結果](results/2026-10-03-domain-randomization/paired_validation.json) ·
+[訓練與參數稽核](results/2026-10-03-domain-randomization/training_summary.json) ·
+[雙引擎驗收摘要](results/2026-10-03-domain-randomization/evaluation_summary.json) ·
+[固定弱化條件影片](results/2026-10-03-domain-randomization/tracking_comparison.mp4)
+
+這是小型、固定初始姿態的模擬驗證集，不代表一般條件下或真機的成功率；保留 1 組失敗，未放寬驗收門檻。
+新策略名義跳躍的峰值傾角也較大，改善不代表所有追蹤品質指標都提升。範圍與完整限制見末節。
+
+## 前一階段：DC1600 單次跳躍 sim2sim（2026-10-03）
 
 [Isaac／MuJoCo 並排影片](results/2026-10-03-sim2sim/tracking_comparison.mp4) ·
 [嚴格驗收報告](results/2026-10-03-sim2sim/assessment.json) ·
@@ -730,3 +745,105 @@ python scripts/render_tracking.py \
 
 本次最終測試：含真實 CMU fixture 的 pytest 為 253 passed、7 skipped、88 subtests passed；
 7 個需要 Torch 的匯出測試另在 Torch 環境全部通過。訓練與 Isaac 評估程序均已退出，沒有留下背景 GPU 工作。
+
+### Motor-domain randomization：三軸魯棒性續訓
+
+`--domain-randomization motor-v1` 啟用以下**模擬假設範圍**，並非量測出的真機誤差分布：
+
+| 隨機化項目 | 非名義回合的抽樣範圍 | 生效位置 |
+|---|---|---|
+| 輪軸阻力 | 左右輪各 0–0.3 Nm | 馬達輸出後的平滑 Coulomb 軸阻力 |
+| 馬達無負載轉速 | 各關節名義值 × 0.85–1.00 | DC torque-speed 曲線；不裁切 qvel |
+| 馬達扭矩能力 | 各關節名義值 × 0.85–1.00 | 同時縮放 stall 與 continuous effort ceiling |
+
+每個環境在 episode reset 抽樣，回合內不變；80% 為逐關節獨立抽樣，20% 為整台機器人的名義參數。
+抽樣以 `(seed, environment_id, reset_count)` 定址，部分環境重設或重設順序不會改變其他環境的參數。
+Actor 保持 51 維觀測／8 維動作，隨機參數不洩漏給 actor；可以直接從 DC1600 checkpoint 續訓。
+此版只訓練「較弱馬達＋額外軸阻力」，不包含強於名義值的馬達、地面摩擦、質量或外力推擠隨機化。
+
+軸阻力採 `tau_loss = friction_nm * tanh(actual_joint_velocity / 0.5)`，零速沒有靜摩擦／stiction 模型。
+先由縮放後的 DC 包絡產生 motor torque，再扣除軸阻力，最後以名義 ±80／±12 Nm 限制**淨輸出力矩**。
+這個最後 net-effort guard 是兩引擎共用的模擬約定，不是完整電氣／軸承模型。
+腿部 PD 500／10、wheel action scale 12 Nm、50 Hz policy／200 Hz actuator、legacy friction=0、
+body angular guard=100 rad/s、joint solver guard=1000 rad/s、原 tracking reward／termination 均固定。
+不把單位錯誤或引擎特有摩擦係數當作 domain randomization。
+
+Isaac 在 reset event 更新各環境的 actuator tensors 與 DC overspeed cache；MuJoCo 用相同公式與具名參數。
+事件生命週期參照 [Isaac Lab 2.3 events](https://isaac-sim.github.io/IsaacLab/v2.3.0/source/api/lab/isaaclab.envs.mdp.html)。
+Manifest 保存 profile、來源 hash、初始 actuator readback；訓練完成另存 `domain_randomization_final_audit.json`。
+評估預設仍是名義參數；`--domain-parameters` 可指定一份固定 draw，該回合不重新抽樣。
+
+```bash
+python scripts/train_tracking.py \
+  --motion-file outputs/tracking-cmu-16_03/motion.npz \
+  --asset-path outputs/training-asset/WF_TRON1A.usda \
+  --resume outputs/sim2sim-fix/dc-motor/checkpoints/model_1600.pt \
+  --domain-randomization motor-v1 --num-envs 2048 --iterations 600 \
+  --output-dir outputs/my-dr-training --headless --device cuda:0
+
+# Isaac 固定條件評估：不指定 --domain-parameters 即採名義條件。
+python scripts/eval_tracking.py \
+  --motion-file outputs/tracking-cmu-16_03/motion.npz \
+  --asset-path outputs/training-asset/WF_TRON1A.usda \
+  --checkpoint outputs/my-dr-training/model_final.pt \
+  --runner-config outputs/my-dr-training/runner_config.json \
+  --output-dir outputs/my-dr-isaac-eval --num-envs 1 --headless --device cuda:0
+```
+
+訓練完成不自動代表 robustness 提升；需用相同 held-out draws 對舊策略與新策略做 paired comparison，
+沿用完整 4.42 s、至少 0.20 m 上升、0.20 s 騰空、落地與末尾穩定雙輪支撐等門檻。
+
+#### 本次 DR 實測結果
+
+從 DC1600 續訓 2048 environments × 600 updates，29,491,200 environment steps，含啟動約 484.38 秒。
+選用事先指定的最終 checkpoint（iteration 2199），未依此 validation set 挑選中途最佳模型。
+訓練 seed=42；驗證 seed=20261004，16 個非名義 draw 各包含獨立的 8 torque scales、8 speed scales 與 2 wheel friction values。
+兩策略使用完全相同的已儲存 draw，每組都從相同 reference 第 0 幀起始；另列 1 組 nominal。
+
+| MuJoCo 同條件配對驗收 | 原 DC1600 | DR final |
+|---|---:|---:|
+| Nominal | 1/1 | 1/1 |
+| 16 組隨機 actuator-domain 條件 | 0/16 | 15/16 |
+
+`validation_007` 仍在 2.00 秒因原 `ee_body_pos` 條件提前終止，base 上升 0.26266 m、未完成落地；
+該例保留在報告中，沒有移除、改參考軌跡或放寬 termination。
+上述 15/16 是這份小型驗證集的通過數，不是未知分布的成功率估計；也沒有改變初始姿態、外力或地面。
+
+同一 final checkpoint 另做兩組 Isaac → MuJoCo 實際 actor-export 重播：
+
+| 雙引擎條件 | Isaac base 上升 | MuJoCo base 上升 | 兩邊完整片段 | 跨引擎 Z RMSE |
+|---|---:|---:|---:|---:|
+| Nominal | 0.34385 m | 0.35268 m | 4.42 s | 0.00667 m |
+| Fixed probe | 0.30278 m | 0.31027 m | 4.42 s | 0.01583 m |
+
+Fixed probe 見 `config/domain_randomization_probe.json`：所有 torque／speed scales=0.925、各輪軸阻力=0.15 Nm。
+兩組的末尾 0.5 秒雙輪支撐比例均為 100%、最大尾端傾角均小於 8.53°，嚴格預設驗收通過。
+Fixed probe 的 Isaac 全參數 actuator readback 與 MuJoCo 實際 draw 均核對一致；這不是把 nominal Isaac 報告拿來配隨機 MuJoCo。
+不同 Isaac export 的 JIT 檔案 byte hash 不同，均追溯到相同 final checkpoint；每次 sim2sim 都使用該次實際 export。
+
+代價與限制：新策略 nominal MuJoCo 峰值傾角約 35.15°（原 DC1600 約 23.16°），
+nominal 跨引擎 XYZ RMSE 為 3.77 cm（原約 1.96 cm）；本次改善是指定 domain 範圍內的任務完成能力，
+不是每項追蹤誤差都更小。Isaac 接觸證據仍是 wheel net-force proxy、沒有非輪 ground-only 記錄，
+故 `complete_contact_evidence=false`；不能宣稱已完成真機或完整接觸安全驗收。
+
+訓練的 domain module SHA 為 `a1c679…`，評估為 `3f3a0b…`：僅補空 reset list／索引型別驗證，
+不改馬達公式、抽樣數值或正常 Isaac 整數索引行為；兩者不是 byte-identical，摘要保留各自完整 hash。
+最終測試 322 passed、7 skipped、141 subtests passed；7 項 Torch 匯出測試另行全部通過。
+訓練與遠端評估程序均已退出。
+
+本機 checkpoint：`outputs/domain-randomization-20261003/training/model_final.pt`；
+含 normalizer 的部署 actor：`outputs/domain-randomization-20261003/candidate-nominal-isaac/actor_normalized.pt`。
+名義部署使用 actor 旁的 `policy_contract.json`；評估某個固定 domain 時才明確指定 `--domain-parameters`。
+
+```bash
+python scripts/eval_tracking_robustness.py \
+  --baseline-policy outputs/sim2sim-fix/dc-motor/1600-isaac/actor_normalized.pt \
+  --baseline-contract outputs/sim2sim-fix/dc-motor/1600-isaac/policy_contract.json \
+  --candidate-policy outputs/domain-randomization-20261003/candidate-nominal-isaac/actor_normalized.pt \
+  --candidate-contract outputs/domain-randomization-20261003/candidate-nominal-isaac/policy_contract.json \
+  --motion-file outputs/tracking-cmu-16_03/motion.npz \
+  --model outputs/sim2sim-cmu-16_03/mujoco_model.xml \
+  --seed 20261004 --random-draws 16 --output-dir outputs/my-paired-validation
+```
+
+驗證器另匯出 `parameters/validation_XXX.json`，可直接交給兩引擎的 `--domain-parameters` 做具名重播。

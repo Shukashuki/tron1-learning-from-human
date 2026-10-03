@@ -12,6 +12,7 @@ import ast
 import hashlib
 import json
 from pathlib import Path
+import sys
 import time
 import warnings
 import xml.etree.ElementTree as ET
@@ -22,6 +23,9 @@ from scipy.spatial.transform import Rotation
 from eval_tracking import contact_events
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from training.tron1_domain_randomization import validate_draw, apply_draw_to_contract, nominal_draws, single_draw
 DEFAULT_MODEL = ROOT / "outputs/sim2sim-cmu-16_03/mujoco_model.xml"
 TASK_SOURCE = ROOT / "training/tron1_tracking.py"
 ROOT_COM_LINK = np.array([0.04576, 0.00014, -0.16398])
@@ -112,6 +116,13 @@ def validate_contract(contract):
     clip = np.asarray(contract.get("raw_action_clip", []), dtype=float)
     if clip.shape != (2,) or not np.isfinite(clip).all() or clip[0] >= clip[1]:
         raise ValueError("Contract raw_action_clip must have two finite increasing bounds")
+    if "domain_parameters" in contract:
+        if actuator_model != "dc_motor":
+            raise ValueError("Actuator domain randomization requires dc_motor")
+        draw = validate_draw(contract["domain_parameters"])
+        if draw["joint_names"] != contract.get("observed_joint_velocity_order"):
+            raise ValueError("Domain joint order differs from the policy contract")
+        contract = {**contract, "domain_parameters": draw}
     return contract
 
 
@@ -205,7 +216,7 @@ def dc_motor_torque_bounds(joint_vel, saturation_effort, effort_limit, velocity_
 
 
 def action_torques(action, joint_pos, joint_vel, q0, contract):
-    validate_contract(contract)
+    contract = validate_contract(contract)
     action = np.asarray(action, dtype=float).reshape(-1)
     if action.shape != (8,) or not np.isfinite(action).all():
         raise FloatingPointError("Policy must produce exactly eight finite actions")
@@ -221,8 +232,19 @@ def action_torques(action, joint_pos, joint_vel, q0, contract):
     if contract.get("actuator_model", "ideal_pd") == "dc_motor":
         stall = np.r_[np.full(6, contract["leg_saturation_effort_nm"]), np.full(2, contract["wheel_saturation_effort_nm"])]
         speed = np.r_[np.full(6, contract["leg_motor_velocity_limit_rad_s"]), np.full(2, contract["wheel_motor_velocity_limit_rad_s"])]
+        net_guard = effort.copy()
+        domain = contract.get("domain_parameters")
+        if domain is not None:
+            factor = np.asarray(domain["torque_scale"])
+            stall, effort = stall * factor, effort * factor
+            speed *= np.asarray(domain["velocity_scale"])
         lower, upper = dc_motor_torque_bounds(joint_vel, stall, effort, speed)
-        return np.clip(torque, lower, upper)
+        torque = np.clip(torque, lower, upper)
+        if domain is not None:
+            torque[6:] -= np.asarray(domain["wheel_friction_nm"]) * np.tanh(
+                joint_vel[6:] / domain["friction_smoothing_rad_s"])
+            torque = np.clip(torque, -net_guard, net_guard)
+        return torque
     return np.clip(torque, -effort, effort)
 
 
@@ -486,7 +508,7 @@ def load_torchscript(path):
 
 def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
                    contact_threshold_n=5., max_policy_steps=None, no_visual_mesh=False,
-                   isaac_observation_validation=None, contract_path=None):
+                   isaac_observation_validation=None, contract_path=None, domain_parameters=None):
     """Callable policy injection is for tests; CLI always loads a TorchScript actor."""
     import mujoco
     started = time.monotonic()
@@ -495,6 +517,9 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
         raise FileExistsError(f"Preserving existing evaluation results: {output}")
     contract_source = resolve_contract_path(contract_path, policy_path)
     contract = read_contract(contract_source)
+    if domain_parameters is not None:
+        contract = validate_contract(apply_draw_to_contract(contract, domain_parameters))
+    actual_domain = validate_draw(contract.get("domain_parameters", single_draw(nominal_draws(1), 0)))
     reference = MotionReference(motion_file, contract)
     model, removed_visual_geoms = load_model(model_path, no_visual_mesh)
     collision_geoms = configure_model(model, contract)
@@ -563,6 +588,7 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
     motor_model = contract.get("actuator_model", "ideal_pd")
     velocity_bounds = np.array([contract.get("leg_motor_velocity_limit_rad_s", 15.)] * 6
                               + [contract.get("wheel_motor_velocity_limit_rad_s", 100.)] * 2)
+    velocity_bounds *= np.asarray(actual_domain["velocity_scale"])
     speed_exceeded = np.abs(arrays["joint_vel"]) > velocity_bounds
     report = {
         "status": "completed" if termination == "motion_end" else "terminated",
@@ -580,6 +606,10 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
         "contract": contract, "reference_frames": reference.frames,
         "contract_source": str(Path(contract_source).resolve()), "contract_source_sha256": sha256(contract_source),
         "actuator_model": motor_model, "actual_joint_velocity_hard_clipped": False,
+        "domain_parameters": actual_domain,
+        "domain_parameters_resampled_during_episode": False,
+        "domain_parameter_implementation": "scaled DC motor envelope, then smooth wheel axle drag, then nominal net-effort guard",
+        "domain_source_sha256": sha256(ROOT / "training/tron1_domain_randomization.py"),
         "expected_duration_s": reference.duration, "recorded_duration_s": float(data.time),
         "physics_steps": len(physical) - 1, "policy_steps": len(policies),
         "root_com_link_offset_m": ROOT_COM_LINK.tolist(), "compiled_base_com_m": model.body_ipos[measured.base].tolist(),
@@ -629,6 +659,7 @@ def main():
     parser.add_argument("--contract", type=Path,
                         help="Saved JSON contract/manifest; default is actor-adjacent policy_contract.json, else current task physics")
     parser.add_argument("--contact-threshold-n", type=float, default=5.)
+    parser.add_argument("--domain-parameters", type=Path, help="Explicit fixed actuator-domain draw JSON")
     parser.add_argument("--no-visual-mesh", action="store_true", help="In memory, omit only noncolliding visual mesh geometry/assets")
     parser.add_argument("--verify-isaac-trajectory", type=Path,
                         help="Reconstruct and verify all recorded Isaac actor observations before policy deployment")
@@ -645,10 +676,12 @@ def main():
         validation = (verify_isaac_observations(args.verify_isaac_trajectory, args.motion_file, contract_path=contract_path)
                       if args.verify_isaac_trajectory else None)
         policy = load_torchscript(args.policy)
+        domain_parameters = (validate_draw(json.loads(args.domain_parameters.read_text()))
+                             if args.domain_parameters else None)
         result = run_evaluation(policy, args.motion_file, args.model, args.output_dir,
                                 policy_path=args.policy, contact_threshold_n=args.contact_threshold_n,
                                 no_visual_mesh=args.no_visual_mesh, isaac_observation_validation=validation,
-                                contract_path=contract_path)
+                                contract_path=contract_path, domain_parameters=domain_parameters)
     except (RuntimeError, ValueError, FileExistsError) as exc:
         parser.exit(1, f"MuJoCo evaluation error: {exc}\n")
     print(json.dumps({key: result[key] for key in ("status", "termination", "recorded_duration_s",

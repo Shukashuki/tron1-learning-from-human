@@ -12,9 +12,28 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from assess_sim2sim import assess_runs, main, tail_support_fraction
 from compare_tracking import sha256
+from assess_sim2sim import actuator_contract_comparison
+from eval_tracking_mujoco import read_contract, nominal_draws, single_draw
 
 LEGS = [f"{joint}_{side}_Joint" for joint in ("abad", "hip", "knee") for side in ("L", "R")]
 NAMES = LEGS + ["wheel_L_Joint", "wheel_R_Joint"]
+
+
+def test_actual_domains_must_match_not_just_nominal_motor_scalars():
+    import copy
+    nominal = read_contract()
+    draw = single_draw(nominal_draws(1), 0)
+    domain = copy.deepcopy(nominal)
+    domain["domain_parameters"] = draw
+    assert actuator_contract_comparison(nominal, domain)["matched"]
+    draw["torque_scale"][0] = .9
+    draw["is_nominal"] = False
+    result = actuator_contract_comparison(nominal, domain)
+    assert not result["matched"]
+    assert "domain_parameters" in result["mismatched_fields"]
+    assert actuator_contract_comparison(domain, copy.deepcopy(domain))["matched"]
+    domain["domain_parameters"]["wheel_friction_nm"][0] = float("nan")
+    assert not actuator_contract_comparison(domain, domain)["matched"]
 
 
 def write_pair(pair):
@@ -411,3 +430,80 @@ def test_changed_shared_dc_profile_is_not_silently_accepted(paired):
     paired["mujoco"]["contract"]["leg_motor_velocity_limit_rad_s"] = 30.
     result = assess(paired)
     assert "leg_motor_velocity_limit_rad_s" in result["provenance"]["actuator_contract"]["mismatched_fields"]
+
+
+def fixed_domain_pair(pair):
+    import copy
+    from training.tron1_domain_randomization import validate_draw, expanded_motor_parameters
+    shared_dc(pair)
+    draw = single_draw(nominal_draws(1), 0)
+    draw.update(torque_scale=[.9] * 8, velocity_scale=[.95] * 8, wheel_friction_nm=[.1, .2])
+    draw = validate_draw(draw)
+    for container in (pair["isaac"], pair["mujoco"], pair["isaac"]["policy_export"], pair["mujoco"]["contract"]):
+        container["domain_parameters"] = copy.deepcopy(draw)
+    values = expanded_motor_parameters(draw)
+    values["axle_friction_nm"] = np.r_[np.zeros(6), draw["wheel_friction_nm"]]
+    pair["isaac"]["domain_randomization_audit"] = {
+        "enabled": True, "mode": "fixed", "all_sampled_parameters_readback_verified": True,
+        "joint_names": list(NAMES), "first16_domain_parameters": [copy.deepcopy(draw)],
+        "actual_first16": {key: [value.tolist()] for key, value in values.items()},
+    }
+    pair["mujoco"]["domain_parameters_resampled_during_episode"] = False
+    return pair
+
+
+def test_fixed_domain_actual_readback_passes_and_old_nominal_remains_compatible(paired):
+    assert assess(paired)["verdict"] == "pass"
+    fixed_domain_pair(paired)
+    assert assess(paired)["verdict"] == "pass"
+    paired["isaac"]["domain_randomization_audit"].pop("actual_first16")
+    assert assess(paired)["verdict"] == "pass"
+
+
+@pytest.mark.parametrize("change", ["missing_report", "wrong_report", "missing_audit", "disabled", "random_mode",
+                                   "not_verified", "wrong_names", "empty_draws", "wrong_audit_draw", "bad_readback",
+                                   "missing_readback_key", "nonfinite_readback", "malformed_audit", "malformed_draw"])
+def test_isaac_fixed_domain_evidence_fails_closed(paired, change):
+    fixed_domain_pair(paired)
+    report = paired["isaac"]
+    audit = report["domain_randomization_audit"]
+    if change == "missing_report": report.pop("domain_parameters")
+    elif change == "wrong_report": report["domain_parameters"] = single_draw(nominal_draws(1), 0)
+    elif change == "missing_audit": report.pop("domain_randomization_audit")
+    elif change == "disabled": audit["enabled"] = False
+    elif change == "random_mode": audit["mode"] = "random"
+    elif change == "not_verified": audit["all_sampled_parameters_readback_verified"] = False
+    elif change == "wrong_names": audit["joint_names"] = list(reversed(NAMES))
+    elif change == "empty_draws": audit["first16_domain_parameters"] = []
+    elif change == "wrong_audit_draw": audit["first16_domain_parameters"] = [single_draw(nominal_draws(1), 0)]
+    elif change == "bad_readback": audit["actual_first16"]["effort_limit_nm"][0][0] = 80.
+    elif change == "missing_readback_key": audit["actual_first16"].pop("saturation_effort_nm")
+    elif change == "nonfinite_readback": audit["actual_first16"]["axle_friction_nm"][0][6] = float("nan")
+    elif change == "malformed_audit": report["domain_randomization_audit"] = None
+    elif change == "malformed_draw": report["domain_parameters"] = []
+    result = assess(paired)
+    assert "provenance.isaac_actual_fixed_domain_verified" in result["fail_reasons"]
+    json.dumps(result, allow_nan=False)
+
+
+@pytest.mark.parametrize("change", ["missing", "wrong", "malformed", "resampled", "resample_missing"])
+def test_mujoco_fixed_domain_actual_report_required(paired, change):
+    fixed_domain_pair(paired)
+    report = paired["mujoco"]
+    if change == "missing": report.pop("domain_parameters")
+    elif change == "wrong": report["domain_parameters"] = single_draw(nominal_draws(1), 0)
+    elif change == "malformed": report["domain_parameters"] = {"joint_names": NAMES}
+    elif change == "resampled": report["domain_parameters_resampled_during_episode"] = True
+    elif change == "resample_missing": report.pop("domain_parameters_resampled_during_episode")
+    result = assess(paired)
+    assert "provenance.mujoco_actual_fixed_domain_verified" in result["fail_reasons"]
+    json.dumps(result, allow_nan=False)
+
+
+def test_actual_nonnominal_report_cannot_hide_behind_nominal_contracts(paired):
+    fixed_domain_pair(paired)
+    paired["isaac"]["policy_export"].pop("domain_parameters")
+    paired["mujoco"]["contract"].pop("domain_parameters")
+    result = assess(paired)
+    assert "provenance.isaac_actual_fixed_domain_verified" in result["fail_reasons"]
+    assert "provenance.mujoco_actual_fixed_domain_verified" in result["fail_reasons"]

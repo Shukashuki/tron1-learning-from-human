@@ -1,0 +1,8 @@
+{
+  "joint_names": ["abad_L_Joint", "abad_R_Joint", "hip_L_Joint", "hip_R_Joint", "knee_L_Joint", "knee_R_Joint", "wheel_L_Joint", "wheel_R_Joint"],
+  "torque_scale": [0.925, 0.925, 0.925, 0.925, 0.925, 0.925, 0.925, 0.925],
+  "velocity_scale": [0.925, 0.925, 0.925, 0.925, 0.925, 0.925, 0.925, 0.925],
+  "wheel_friction_nm": [0.15, 0.15],
+  "friction_smoothing_rad_s": 0.5,
+  "is_nominal": false
+}

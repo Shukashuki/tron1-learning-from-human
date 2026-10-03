@@ -60,6 +60,9 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--smoke-steps", type=int, default=8)
     parser.add_argument("--resume", type=Path)
+    domains = parser.add_mutually_exclusive_group()
+    domains.add_argument("--domain-randomization", choices=("none", "motor-v1"), default="none")
+    domains.add_argument("--domain-profile", type=Path, help="Explicit bounded domain-randomization JSON profile")
     from isaaclab.app import AppLauncher
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
@@ -79,14 +82,18 @@ def main():
         from isaaclab.envs import ManagerBasedRLEnv
         from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper
         from rsl_rl.runners import OnPolicyRunner
-        sys.path.insert(0, str(ROOT / "training"))
-        from tron1_tracking import make_env_cfg, observation_action_contract
+        sys.path.insert(0, str(ROOT))
+        from training.tron1_tracking import make_env_cfg, observation_action_contract
+        from training.tron1_domain_randomization import default_profile, validate_profile, domain_randomization_audit
 
-        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device)
+        profile = (validate_profile(json.loads(args.domain_profile.read_text())) if args.domain_profile else
+                   default_profile(args.seed) if args.domain_randomization == "motor-v1" else None)
+        cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, dr_profile=profile)
         cfg.seed = args.seed
         env = ManagerBasedRLEnv(cfg=cfg)
         wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
         contract = observation_action_contract()
+        contract["domain_randomization"] = profile if profile else "disabled; nominal actuator parameters"
         obs, _ = wrapped.reset()
         for group, size in (("policy", contract["actor_dim"]), ("critic", contract["critic_dim"])):
             if tuple(obs[group].shape) != (args.num_envs, size):
@@ -115,7 +122,8 @@ def main():
             "motion_sha256": sha256(args.motion_file),
             "asset_file": str(args.asset_path.resolve()), "asset_sha256": sha256(args.asset_path),
             "source_sha256": {str(path.relative_to(ROOT)): sha256(path) for path in
-                              (ROOT / "training/tron1_tracking.py", Path(__file__).resolve())},
+                              (ROOT / "training/tron1_tracking.py", ROOT / "training/tron1_domain_randomization.py",
+                               Path(__file__).resolve())},
             "num_envs": args.num_envs, "iterations_requested": args.iterations,
             "seed": args.seed, "smoke_steps_passed": args.smoke_steps,
             "joint_names": env.scene["robot"].joint_names,
@@ -123,6 +131,9 @@ def main():
             "reference_name_mapping": env.command_manager.get_term("motion").reference_name_mapping,
             "contract": contract, "resume": str(args.resume) if args.resume else None,
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
+            "domain_randomization_profile": profile,
+            "domain_profile_file_sha256": sha256(args.domain_profile) if args.domain_profile else None,
+            "domain_randomization_initial_audit": domain_randomization_audit(env),
             "evaluation_required": "Separate deterministic rollout from frame 0, without airborne resets",
         }
         write_json(output / "manifest.json", manifest)
@@ -142,6 +153,7 @@ def main():
                       last_iteration=runner.current_learning_iteration,
                       training_environment_steps=runner.tot_timesteps,
                       checkpoint=str(output / "model_final.pt"))
+        write_json(output / "domain_randomization_final_audit.json", domain_randomization_audit(env))
         print("TRON1_TRAINING_COMPLETED", json.dumps(report), flush=True)
     except BaseException as exc:
         report.update(status="failed", error=f"{type(exc).__name__}: {exc}",

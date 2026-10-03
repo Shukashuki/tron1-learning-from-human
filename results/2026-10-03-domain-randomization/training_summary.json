@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "status": "training_completed",
+  "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+  "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+  "domain_randomization": {
+    "profile": {
+      "schema_version": 1,
+      "mode": "random",
+      "seed": 42,
+      "torque_scale_range": [
+        0.85,
+        1
+      ],
+      "velocity_scale_range": [
+        0.85,
+        1
+      ],
+      "wheel_friction_nm_range": [
+        0,
+        0.3
+      ],
+      "nominal_probability": 0.2,
+      "friction_smoothing_rad_s": 0.5
+    },
+    "sampling": "Independent per-joint torque and no-load-speed factors and per-wheel axle friction, sampled at episode resets; held fixed within each episode.",
+    "nominal_mixture": "A whole-environment nominal draw has probability 0.2 per reset.",
+    "parameters_hidden_from_actor": true,
+    "force_order": "DC electrical torque-speed envelope, then subtract wheel_friction_nm*tanh(actual_joint_velocity/0.5), then fixed nominal net-effort guard.",
+    "hardware_parameter_ratings_verified": false
+  },
+  "training": {
+    "status": "training_completed",
+    "num_envs": 2048,
+    "iterations_requested": 600,
+    "elapsed_seconds": 484.3799940124154,
+    "last_iteration": 2199,
+    "training_environment_steps": 29491200,
+    "seed": 42,
+    "rollout_steps_per_environment_per_update": 24,
+    "policy_frequency_hz": 50,
+    "physics_frequency_hz": 200,
+    "smoke_steps_passed": 8,
+    "resumed_checkpoint_iteration": 1600,
+    "resumed_checkpoint_sha256": "5d917d34cb92c3ddba8ba2828e97c75dd615b84bacf98a830b58b02bd5e4051c"
+  },
+  "selected_checkpoint": {
+    "filename": "model_final.pt",
+    "iteration": 2199,
+    "sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+    "selection_rule": "Predesignated final checkpoint of the bounded 600-update run, not selected by paired-test performance."
+  },
+  "configured_parameter_limits": {
+    "torque_scale_range": [
+      0.85,
+      1
+    ],
+    "no_load_speed_scale_range": [
+      0.85,
+      1
+    ],
+    "wheel_axle_friction_nm_range": [
+      0,
+      0.3
+    ],
+    "friction_smoothing_rad_s": 0.5,
+    "leg_effort_and_stall_torque_nm_range": [
+      68,
+      80
+    ],
+    "wheel_effort_and_stall_torque_nm_range": [
+      10.2,
+      12
+    ],
+    "leg_no_load_speed_rad_s_range": [
+      12.75,
+      15
+    ],
+    "wheel_no_load_speed_rad_s_range": [
+      85,
+      100
+    ],
+    "leg_net_effort_guard_nm": 80,
+    "wheel_net_effort_guard_nm": 12,
+    "solver_joint_velocity_limit_rad_s": 1000,
+    "rigid_body_max_angular_speed_rad_s": 100,
+    "legacy_joint_friction_coefficient": 0
+  },
+  "training_audits": {
+    "initial": {
+      "nominal_environment_count": 428,
+      "dc_overspeed_cache_verified": true,
+      "all_sampled_parameters_readback_verified": true,
+      "parameters_hidden_from_actor": true,
+      "actual_parameter_min_max": {
+        "effort_limit_nm": [
+          10.200469017028809,
+          80
+        ],
+        "saturation_effort_nm": [
+          10.200469017028809,
+          80
+        ],
+        "velocity_limit_rad_s": [
+          12.750093460083008,
+          100
+        ],
+        "velocity_at_effort_limit_rad_s": [
+          25.500186920166016,
+          200
+        ],
+        "axle_friction_nm": [
+          0,
+          0.2999624013900757
+        ],
+        "net_effort_guard_nm": [
+          12,
+          80
+        ],
+        "nominal_effort_limit_nm": [
+          12,
+          80
+        ],
+        "nominal_saturation_effort_nm": [
+          12,
+          80
+        ],
+        "nominal_velocity_limit_rad_s": [
+          15,
+          100
+        ]
+      },
+      "reset_count_min_max": [
+        2,
+        4
+      ]
+    },
+    "final": {
+      "nominal_environment_count": 425,
+      "dc_overspeed_cache_verified": true,
+      "all_sampled_parameters_readback_verified": true,
+      "parameters_hidden_from_actor": true,
+      "actual_parameter_min_max": {
+        "effort_limit_nm": [
+          10.201362609863281,
+          80
+        ],
+        "saturation_effort_nm": [
+          10.201362609863281,
+          80
+        ],
+        "velocity_limit_rad_s": [
+          12.750055313110352,
+          100
+        ],
+        "velocity_at_effort_limit_rad_s": [
+          25.500110626220703,
+          200
+        ],
+        "axle_friction_nm": [
+          0,
+          0.2997620105743408
+        ],
+        "net_effort_guard_nm": [
+          12,
+          80
+        ],
+        "nominal_effort_limit_nm": [
+          12,
+          80
+        ],
+        "nominal_saturation_effort_nm": [
+          12,
+          80
+        ],
+        "nominal_velocity_limit_rad_s": [
+          15,
+          100
+        ]
+      },
+      "reset_count_min_max": [
+        109,
+        127
+      ]
+    },
+    "legacy_joint_friction_all_environments_verified_zero": true,
+    "scope_note": "Initial audit follows startup smoke/reset activity. Min/max values aggregate environments and joint groups. Nominal counts are snapshots, not cumulative episode counts."
+  },
+  "smoke": {
+    "status": "training_completed",
+    "num_envs": 64,
+    "iterations_requested": 2,
+    "elapsed_seconds": 21.679489228874445,
+    "last_iteration": 1601,
+    "training_environment_steps": 3072,
+    "smoke_steps_passed": 8,
+    "initial_audit": {
+      "nominal_environment_count": 14,
+      "dc_overspeed_cache_verified": true,
+      "all_sampled_parameters_readback_verified": true,
+      "parameters_hidden_from_actor": true,
+      "actual_parameter_min_max": {
+        "effort_limit_nm": [
+          10.218676567077637,
+          80
+        ],
+        "saturation_effort_nm": [
+          10.218676567077637,
+          80
+        ],
+        "velocity_limit_rad_s": [
+          12.753241539001465,
+          100
+        ],
+        "velocity_at_effort_limit_rad_s": [
+          25.50648307800293,
+          200
+        ],
+        "axle_friction_nm": [
+          0,
+          0.29607388377189636
+        ],
+        "net_effort_guard_nm": [
+          12,
+          80
+        ],
+        "nominal_effort_limit_nm": [
+          12,
+          80
+        ],
+        "nominal_saturation_effort_nm": [
+          12,
+          80
+        ],
+        "nominal_velocity_limit_rad_s": [
+          15,
+          100
+        ]
+      },
+      "reset_count_min_max": [
+        2,
+        3
+      ]
+    },
+    "final_audit": {
+      "nominal_environment_count": 16,
+      "dc_overspeed_cache_verified": true,
+      "all_sampled_parameters_readback_verified": true,
+      "parameters_hidden_from_actor": true,
+      "actual_parameter_min_max": {
+        "effort_limit_nm": [
+          10.218676567077637,
+          80
+        ],
+        "saturation_effort_nm": [
+          10.218676567077637,
+          80
+        ],
+        "velocity_limit_rad_s": [
+          12.753241539001465,
+          100
+        ],
+        "velocity_at_effort_limit_rad_s": [
+          25.50648307800293,
+          200
+        ],
+        "axle_friction_nm": [
+          0,
+          0.29979854822158813
+        ],
+        "net_effort_guard_nm": [
+          12,
+          80
+        ],
+        "nominal_effort_limit_nm": [
+          12,
+          80
+        ],
+        "nominal_saturation_effort_nm": [
+          12,
+          80
+        ],
+        "nominal_velocity_limit_rad_s": [
+          15,
+          100
+        ]
+      },
+      "reset_count_min_max": [
+        2,
+        4
+      ]
+    }
+  },
+  "source_provenance": {
+    "training_domain_module_sha256": "a1c679d50bc0c1c4a6a107f45bbb0336ca6ec182b721689b3515bb2419b75290",
+    "evaluation_domain_module_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+    "sources_are_byte_identical": false,
+    "difference_description": "The evaluation version adds empty-list handling and index validation; it is a different source artifact. No byte-identical source claim is made.",
+    "training_source_sha256": {
+      "training/tron1_tracking.py": "f3ef3f74c2cb803f48b9f61ffb2523a3501aea4a8ac01b1133fe55557cf6898c",
+      "training/tron1_domain_randomization.py": "a1c679d50bc0c1c4a6a107f45bbb0336ca6ec182b721689b3515bb2419b75290",
+      "scripts/train_tracking.py": "a23c48818cebc1ef7293094f8e8c78ef9ccf5a7bfd1953a19e7f47011d2dc7c6"
+    },
+    "motion_sha256": "c637459a21edb10a768b28aca129bbc81058a6e01a7b74e6956a9ba435cacca2",
+    "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e"
+  },
+  "artifact_sha256": {
+    "training": {
+      "model_final.pt": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+      "manifest.json": "b4d4606a572895ec899fa30a5e87d362eeb27b6717672fb1fe59e803ce5a5a6a",
+      "runner_config.json": "3c302e4d11f5fd7bbe42b4182fc1743c99d250888ee32400d4bf0c9dc8f80c2c",
+      "run_status.json": "6f7759f8a8a343443118608824d4e0cbac0841619caca62ecf7fb3c02d542d1b",
+      "domain_randomization_final_audit.json": "1780e2a75f04aeeea38a59b115184fc13533451c722ab12bd7df59da0fa80368"
+    },
+    "smoke": {
+      "manifest.json": "f2afc39b4d1abdfe811d780aa2883c091356dba0f35d729af15dae6cdb3cf24d",
+      "run_status.json": "724b0841e3a852c7983b72bf383fe43444d98ecdc8c21235bd5cc2c232b49d42",
+      "domain_randomization_final_audit.json": "29039f748b460f0807ea8f0f27c5e83a22467a3a3d57468d684a77d23a485a4b"
+    }
+  },
+  "hardware_ready": false,
+  "robustness_claimed_by_training_summary": false,
+  "jump_success_claimed_by_training": false,
+  "paired_evaluation_status": "completed_separate_report",
+  "paired_evaluation_report": "paired_validation.json",
+  "limitations": [
+    "One training seed and one bounded training run.",
+    "Training completion and parameter readback do not establish improved robustness or sim2real transfer.",
+    "No weights, raw trajectories, per-environment samples, host identifiers, or absolute paths are included."
+  ]
+}

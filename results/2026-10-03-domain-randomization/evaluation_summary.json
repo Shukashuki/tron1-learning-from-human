@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "status": "evaluations_completed",
+  "candidate_selection": {
+    "checkpoint_iteration": 2199,
+    "checkpoint_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+    "selection_rule": "Predesignated final checkpoint of the bounded 600-update run, not selected by paired-test performance.",
+    "best_checkpoint_selected_from_validation": false
+  },
+  "sim2sim": {
+    "nominal": {
+      "public_assessment_report": "nominal_sim2sim.json",
+      "assessment_verdict": "pass",
+      "complete_contact_evidence": false,
+      "checkpoint_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+      "actor_sha256": "29528af6094a2636701fac1d6f9bc2fa786533a40b2c1a968eb27c6e5cc2c1ea",
+      "source_hashes": {
+        "isaac_report_sha256": "9dc775d63798d011a69b3eaa9b858b2924744016fd5c39eb8cda33b026706bbe",
+        "mujoco_report_sha256": "e26c01f17c2b8cc2cfb9dbb87691df7e09f9de43e7c1f60d6cc2d67e2eca088d",
+        "comparison_report_sha256": "6bf71efe439b3114563f5941112a55784ef79fe930ce63f41da7f268ef7a1edc",
+        "assessment_report_sha256": "1f62cabad44d7ad8eeb4abbada24bafc318997bde96e52f1170ab0737dbd59d6",
+        "public_assessment_sha256": "1f62cabad44d7ad8eeb4abbada24bafc318997bde96e52f1170ab0737dbd59d6"
+      },
+      "cross_engine_errors": {
+        "duration_s": 4.419999999999928,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "base_position_rmse_m": 0.03770494294325956,
+        "base_z_rmse_m": 0.006671563729924993,
+        "leg_joint_rmse_rad": 0.02643091886842295
+      },
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "velocity_scale": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "wheel_friction_nm": [
+          0,
+          0
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": true
+      },
+      "isaac": {
+        "verdict": "pass",
+        "recorded_duration_s": 4.42,
+        "completed_full_reference": true,
+        "base_link_height_gain_m": 0.34384697675704956,
+        "max_overall_tilt_deg": 34.070552825927734,
+        "final_tilt_deg": 8.383868217468262,
+        "selected_flight": {
+          "takeoff_s": 1.54,
+          "no_contact_end_s": 2.04,
+          "no_contact_duration_s": 0.5,
+          "landing_s": 2.24,
+          "right_censored": false
+        },
+        "tail_seconds": 0.5,
+        "max_tail_tilt_deg": 8.397839546203613,
+        "tail_two_wheel_support_fraction": 1,
+        "contact_force_source": "net_force_proxy_including_possible_self_contact",
+        "nonwheel_ground_contact_status": "unavailable",
+        "complete_contact_evidence": false
+      },
+      "mujoco": {
+        "verdict": "pass",
+        "recorded_duration_s": 4.419999999999928,
+        "completed_full_reference": true,
+        "base_link_height_gain_m": 0.3526828753857798,
+        "max_overall_tilt_deg": 35.14990598661184,
+        "final_tilt_deg": 8.249593669404918,
+        "selected_flight": {
+          "takeoff_s": 1.5149999999999897,
+          "no_contact_end_s": 2.029999999999979,
+          "no_contact_duration_s": 0.5149999999999892,
+          "landing_s": 2.4749999999999694,
+          "right_censored": false
+        },
+        "tail_seconds": 0.5,
+        "max_tail_tilt_deg": 8.258356608807132,
+        "tail_two_wheel_support_fraction": 1,
+        "contact_force_source": "ground_only",
+        "nonwheel_ground_contact_status": "confirmed_absent",
+        "complete_contact_evidence": true
+      }
+    },
+    "fixed": {
+      "public_assessment_report": "fixed_sim2sim.json",
+      "assessment_verdict": "pass",
+      "complete_contact_evidence": false,
+      "checkpoint_sha256": "4104672a4fe415aee28fdb1fba4fabc033ec1c28b457216d98adfa4e00f0aed0",
+      "actor_sha256": "3ed1e8f2850bf541699917b629a08b8e301f35fa62a86813c20bab7627fb4e74",
+      "source_hashes": {
+        "isaac_report_sha256": "81e481d5b9500fce8e93770870f9c4a7ed3d96cf8ad004aae9f6bafbf47ff05d",
+        "mujoco_report_sha256": "3581acc7b14089efc0ea81b5201fb7891195f0706fbf89f27bfcbcea4f66a14f",
+        "comparison_report_sha256": "a10fc81acb0831ae26e12a4c767217db3b9a3f6e033e2fd55ae68e3be09bb08f",
+        "assessment_report_sha256": "2997d79c4d04feab1110bbde1b80090db03683860d651b2bdf0fed42cadb243d",
+        "public_assessment_sha256": "2997d79c4d04feab1110bbde1b80090db03683860d651b2bdf0fed42cadb243d"
+      },
+      "cross_engine_errors": {
+        "duration_s": 4.419999999999928,
+        "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+        "base_position_rmse_m": 0.05667578456732195,
+        "base_z_rmse_m": 0.015833803924495713,
+        "leg_joint_rmse_rad": 0.04408511305518447
+      },
+      "domain_parameters": {
+        "joint_names": [
+          "abad_L_Joint",
+          "abad_R_Joint",
+          "hip_L_Joint",
+          "hip_R_Joint",
+          "knee_L_Joint",
+          "knee_R_Joint",
+          "wheel_L_Joint",
+          "wheel_R_Joint"
+        ],
+        "torque_scale": [
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925
+        ],
+        "velocity_scale": [
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925,
+          0.925
+        ],
+        "wheel_friction_nm": [
+          0.15,
+          0.15
+        ],
+        "friction_smoothing_rad_s": 0.5,
+        "is_nominal": false
+      },
+      "isaac": {
+        "verdict": "pass",
+        "recorded_duration_s": 4.42,
+        "completed_full_reference": true,
+        "base_link_height_gain_m": 0.3027840256690979,
+        "max_overall_tilt_deg": 34.0438346862793,
+        "final_tilt_deg": 8.49726676940918,
+        "selected_flight": {
+          "takeoff_s": 1.54,
+          "no_contact_end_s": 2.02,
+          "no_contact_duration_s": 0.48,
+          "landing_s": 2.04,
+          "right_censored": false
+        },
+        "tail_seconds": 0.5,
+        "max_tail_tilt_deg": 8.522146224975586,
+        "tail_two_wheel_support_fraction": 1,
+        "contact_force_source": "net_force_proxy_including_possible_self_contact",
+        "nonwheel_ground_contact_status": "unavailable",
+        "complete_contact_evidence": false
+      },
+      "mujoco": {
+        "verdict": "pass",
+        "recorded_duration_s": 4.419999999999928,
+        "completed_full_reference": true,
+        "base_link_height_gain_m": 0.3102733151433612,
+        "max_overall_tilt_deg": 35.243350795809455,
+        "final_tilt_deg": 8.277289004607995,
+        "selected_flight": {
+          "takeoff_s": 1.5299999999999894,
+          "no_contact_end_s": 2.0149999999999793,
+          "no_contact_duration_s": 0.4849999999999899,
+          "landing_s": 2.494999999999969,
+          "right_censored": false
+        },
+        "tail_seconds": 0.5,
+        "max_tail_tilt_deg": 8.286744312245219,
+        "tail_two_wheel_support_fraction": 1,
+        "contact_force_source": "ground_only",
+        "nonwheel_ground_contact_status": "confirmed_absent",
+        "complete_contact_evidence": true
+      }
+    }
+  },
+  "paired_validation": {
+    "report": "paired_validation.json",
+    "draws": "validation_draws.json",
+    "status": "completed",
+    "kind": "paired_fixed_draw_validation",
+    "engine": "MuJoCo",
+    "seed": 20261004,
+    "thresholds": {
+      "min_height_gain_m": 0.2,
+      "min_flight_s": 0.2,
+      "min_tail_support_fraction": 0.9,
+      "tail_seconds": 0.5,
+      "max_tail_tilt_deg": 30,
+      "contact_threshold_n": 5
+    },
+    "counts": {
+      "nominal": {
+        "draw_count": 1,
+        "baseline_pass_count": 1,
+        "candidate_pass_count": 1,
+        "candidate_only_pass": 0,
+        "baseline_only_pass": 0,
+        "both_pass": 1,
+        "both_fail": 0
+      },
+      "random_only": {
+        "draw_count": 16,
+        "baseline_pass_count": 0,
+        "candidate_pass_count": 15,
+        "candidate_only_pass": 15,
+        "baseline_only_pass": 0,
+        "both_pass": 0,
+        "both_fail": 1
+      }
+    },
+    "baseline_checkpoint_sha256": "5d917d34cb92c3ddba8ba2828e97c75dd615b84bacf98a830b58b02bd5e4051c",
+    "baseline_actor_sha256": "5aedd64370a99e64d1b41ca0a4fb4c49a977ce404bb1fa0ca998816e0a83a4ae",
+    "candidate_actor_sha256": "29528af6094a2636701fac1d6f9bc2fa786533a40b2c1a968eb27c6e5cc2c1ea",
+    "raw_report_sha256": "0a0d9f4a474f84250b408d976cb371ce5d31e22c576208c2c5fc5cd9cbb39d57",
+    "public_report_sha256": "0a0d9f4a474f84250b408d976cb371ce5d31e22c576208c2c5fc5cd9cbb39d57",
+    "draw_manifest_sha256": "6fc37d030a4bf108af53597a61029551e951dc4eee85d702a442caade2183ff0",
+    "candidate_failures": [
+      {
+        "id": "validation_007",
+        "verdict": "fail",
+        "fail_reasons": [
+          "completed_full_reference",
+          "full_recorded_duration",
+          "no_early_termination",
+          "sustained_flight_followed_by_landing",
+          "stable_two_wheel_tail_support",
+          "stable_tail_tilt"
+        ],
+        "recorded_duration_s": 1.9999999999999793,
+        "termination_terms": [
+          "ee_body_pos"
+        ],
+        "base_link_height_gain_m": 0.2626558786314992,
+        "report_sha256": "692c800ff77496bbb95c5adeeef52a1c1c0b40b5a701703121e2d6a888c4a3de",
+        "domain_parameters_sha256": "d857d98ac56927b4df71591cf59017f5422fc7cd30be01aa9e0d8d5a79107434"
+      }
+    ],
+    "population_success_rate_estimate": false
+  },
+  "nominal_tilt_tradeoff": {
+    "engine": "MuJoCo",
+    "baseline_max_overall_tilt_deg": 23.159706514628997,
+    "candidate_max_overall_tilt_deg": 35.149905986611856,
+    "maximum_overall_tilt_increased": true,
+    "note": "The final DR candidate passes nominal validation but has a larger transient peak tilt; peak tilt and final-half-second stability are different metrics."
+  },
+  "hardware_ready": false,
+  "population_robustness_claimed": false,
+  "limitations": [
+    "Sixteen fixed validation draws and one nominal draw from a single frame-zero initial state; this is not a population success-rate estimate.",
+    "Only the three configured simulated actuator parameter families were varied; no hardware or sim2real validation.",
+    "Each sim2sim case is one deterministic episode per engine. Isaac uses wheel net-force proxy telemetry and lacks non-wheel ground-contact telemetry; its contact-evidence coverage is incomplete.",
+    "Full-clip passes retain original termination predicates. Cross-engine RMSE is clock-aligned, not error against the motion reference."
+  ]
+}

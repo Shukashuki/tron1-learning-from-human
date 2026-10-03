@@ -14,6 +14,8 @@ import numpy as np
 
 from compare_tracking import load_episode, read_json, read_npz, sha256
 from eval_tracking import contact_events
+from eval_tracking_mujoco import validate_draw, nominal_draws, single_draw
+from training.tron1_domain_randomization import expanded_motor_parameters
 
 
 def _check(checks, name, passed, detail=None):
@@ -85,6 +87,14 @@ def actuator_contract_comparison(exported, deployed):
         values = [contract.get("motor_velocity_limit_semantics") for contract in (exported, deployed)]
         fields["motor_velocity_limit_semantics"] = {"isaac": values[0], "mujoco": values[1],
                                                     "matched": all(v == semantics for v in values)}
+    if any("domain_parameters" in c for c in (exported, deployed)):
+        try:
+            nominal = single_draw(nominal_draws(1), 0)
+            draws = [validate_draw(c.get("domain_parameters", nominal)) for c in (exported, deployed)]
+            same_domain = (models == ["dc_motor", "dc_motor"] and draws[0] == draws[1])
+        except (ValueError, TypeError, KeyError):
+            same_domain = False
+        fields["domain_parameters"] = {"matched": bool(same_domain)}
     mismatches = [name for name, field in fields.items() if not field["matched"]]
     return {"matched": not mismatches, "mismatched_fields": mismatches, "fields": fields,
             "dc_motor_involved": is_dc,
@@ -111,6 +121,58 @@ def legacy_friction_audit_valid(isaac, exported):
     after = np.asarray(audit.get("after_first_environment"))
     return bool(after.shape == (8,) and after.dtype.kind in "iuf" and np.isfinite(after).all()
                 and np.all(after == 0.))
+
+
+def runtime_domain_evidence(isaac, mujoco):
+    """Require actual fixed-domain evidence whenever any source is nonnominal.
+
+    Historical nominal artifacts may omit the new telemetry. Malformed new
+    domain metadata never silently falls back to nominal or raises out of the
+    assessor. The report and actuator readback must corroborate the contract.
+    """
+    nominal = single_draw(nominal_draws(1), 0)
+    sources = (isaac.get("policy_export", {}), mujoco.get("contract", {}), isaac, mujoco)
+    draws, malformed = [], False
+    for source in sources:
+        value = source.get("domain_parameters")
+        try:
+            draws.append(nominal if value is None else validate_draw(value))
+        except (ValueError, TypeError, KeyError, IndexError):
+            draws.append(None)
+            malformed = True
+    required = malformed or any(d is not None and not d["is_nominal"] for d in draws)
+    if not required:
+        return {"required": False, "isaac_valid": True, "mujoco_valid": True}
+    isaac_valid = mujoco_valid = False
+    try:
+        expected_i, expected_m, actual_i, actual_m = draws
+        audit = isaac.get("domain_randomization_audit", {})
+        isaac_valid = (expected_i is not None and actual_i == expected_i
+                       and isaac.get("domain_parameters") is not None
+                       and audit.get("enabled") is True and audit.get("mode") == "fixed"
+                       and audit.get("all_sampled_parameters_readback_verified") is True
+                       and audit.get("joint_names") == expected_i["joint_names"]
+                       and validate_draw(audit["first16_domain_parameters"][0]) == expected_i)
+        if isaac_valid and "actual_first16" in audit:
+            readback = audit["actual_first16"]
+            expected = expanded_motor_parameters(expected_i)
+            expected["axle_friction_nm"] = np.r_[np.zeros(6), expected_i["wheel_friction_nm"]]
+            for key, values in expected.items():
+                recorded = np.asarray(readback[key], dtype=float)
+                if (recorded.ndim != 2 or recorded.shape[0] < 1 or recorded.shape[1] != 8
+                        or not np.isfinite(recorded[0]).all()
+                        or not np.allclose(recorded[0], values, rtol=1e-6, atol=1e-6)):
+                    isaac_valid = False
+                    break
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError):
+        isaac_valid = False
+    try:
+        mujoco_valid = (draws[1] is not None and draws[3] == draws[1]
+                        and mujoco.get("domain_parameters") is not None
+                        and mujoco.get("domain_parameters_resampled_during_episode") is False)
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError):
+        mujoco_valid = False
+    return {"required": True, "isaac_valid": bool(isaac_valid), "mujoco_valid": bool(mujoco_valid)}
 
 
 def check_provenance(isaac_dir, mujoco_dir, isaac, mujoco, actor_path=None):
@@ -147,6 +209,10 @@ def check_provenance(isaac_dir, mujoco_dir, isaac, mujoco, actor_path=None):
     if actuator["dc_motor_involved"]:
         _check(checks, "legacy_joint_friction_cleared_and_audited", legacy_friction_audit_valid(isaac, exported))
         _check(checks, "actual_joint_velocities_not_hard_clipped", mujoco.get("actual_joint_velocity_hard_clipped") is False)
+    domains = runtime_domain_evidence(isaac, mujoco)
+    if domains["required"]:
+        _check(checks, "isaac_actual_fixed_domain_verified", domains["isaac_valid"])
+        _check(checks, "mujoco_actual_fixed_domain_verified", domains["mujoco_valid"])
     _check(checks, "matching_reference_length", isaac.get("reference_frames")
            == mujoco.get("reference_frames") and isinstance(isaac.get("reference_frames"), int)
            and isaac["reference_frames"] > 1)
