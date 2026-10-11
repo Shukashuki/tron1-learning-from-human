@@ -294,8 +294,11 @@ def main():
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--terrain-file", type=Path, help="Must match the terrain used for training")
     parser.add_argument("--task-profile", type=Path, help="Must match the checkpoint drift task/material contract")
-    parser.add_argument("--deployment-leg-kp", type=float, default=None,
-                        help="Explicit zero-shot common leg-Kp diagnostic (100–500); original task profile must still match training")
+    gain_diagnostics = parser.add_mutually_exclusive_group()
+    gain_diagnostics.add_argument("--deployment-leg-kp", type=float, default=None,
+                                 help="Explicit zero-shot common leg-Kp diagnostic (100–500); original profile must match training")
+    gain_diagnostics.add_argument("--deployment-leg-kd", type=float, default=None,
+                                 help="Explicit zero-shot common leg-Kd diagnostic (5–13); original profile must match training")
     parser.add_argument("--verify-unmasked-device", action="store_true",
                         help="Opt-in strict native PhysX/Torch/tensor CUDA-ordinal readback audit; requires no CUDA_VISIBLE_DEVICES mask")
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
@@ -308,11 +311,17 @@ def main():
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
     deployment_leg_kp = getattr(args, "deployment_leg_kp", None)
+    deployment_leg_kd = getattr(args, "deployment_leg_kd", None)
     if deployment_leg_kp is not None:
         if not math.isfinite(deployment_leg_kp) or not 100. <= deployment_leg_kp <= 500.:
             parser.error("deployment-leg-kp must be finite and between 100 and 500")
         if args.physics_dt_s is not None or args.domain_parameters is not None:
             parser.error("The single-factor leg-Kp diagnostic cannot combine physics refinement or actuator-domain overrides")
+    if deployment_leg_kd is not None:
+        if not math.isfinite(deployment_leg_kd) or not 5. <= deployment_leg_kd <= 13.:
+            parser.error("deployment-leg-kd must be finite and between 5 and 13")
+        if deployment_leg_kp is not None or args.physics_dt_s is not None or args.domain_parameters is not None:
+            parser.error("The single-factor leg-Kd diagnostic cannot combine Kp, physics refinement or actuator-domain overrides")
     if args.num_envs < 1 or args.contact_threshold_n <= 0:
         parser.error("num-envs and contact-threshold-n must be positive")
     for name in ("motion_file", "asset_path", "checkpoint", "runner_config"):
@@ -373,6 +382,26 @@ def main():
             nominal_contract = apply_task_profile_to_contract(observation_action_contract(), task_profile)
             task_profile, controller_gain_diagnostic = prepare_deployment_gain_diagnostic(
                 task_profile, nominal_contract, trained_manifest, deployment_leg_kp,
+                reference_sha256=sha256(args.motion_file))
+            controller_gain_diagnostic.update(
+                original_manifest_sha256=sha256(training_manifest_path), checkpoint_sha256=sha256(args.checkpoint))
+            validate_deployment_gain_diagnostic(
+                apply_deployment_gain_diagnostic_to_contract(nominal_contract, controller_gain_diagnostic),
+                trained_manifest, original_manifest_sha256=sha256(training_manifest_path),
+                checkpoint_sha256=sha256(args.checkpoint))
+        if deployment_leg_kd is not None:
+            if trained_manifest is None:
+                raise ValueError("The zero-shot leg-Kd diagnostic requires the original checkpoint training manifest")
+            if trained_manifest.get("asset_sha256") != sha256(args.asset_path):
+                raise ValueError("The zero-shot leg-Kd diagnostic must retain the trained robot asset")
+            from training.tron1_controller_damping_diagnostic import (
+                prepare_deployment_gain_diagnostic, apply_deployment_gain_diagnostic_to_contract,
+                validate_deployment_gain_diagnostic,
+            )
+            from training.tron1_drift import apply_task_profile_to_contract
+            nominal_contract = apply_task_profile_to_contract(observation_action_contract(), task_profile)
+            task_profile, controller_gain_diagnostic = prepare_deployment_gain_diagnostic(
+                task_profile, nominal_contract, trained_manifest, deployment_leg_kd,
                 reference_sha256=sha256(args.motion_file))
             controller_gain_diagnostic.update(
                 original_manifest_sha256=sha256(training_manifest_path), checkpoint_sha256=sha256(args.checkpoint))

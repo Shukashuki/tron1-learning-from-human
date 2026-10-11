@@ -874,3 +874,126 @@ def test_gain_diagnostic_requires_valid_original_and_effective_gain_proof(gain_d
     with pytest.raises(ValueError, match="leg gain"):
         publish_fixture(gain_diagnostic)
     assert not gain_diagnostic[-1].exists()
+
+
+@pytest.fixture
+def damping_diagnostic(gain_diagnostic):
+    """Independent Kd-only diagnostic, using the unchanged original fixture."""
+    from training.tron1_controller_damping_diagnostic import (
+        prepare_deployment_gain_diagnostic, apply_deployment_gain_diagnostic_to_contract,
+    )
+    root = gain_diagnostic[0]
+    manifest_path = root / "training/manifest.json"
+    manifest = publish.read_json(manifest_path)
+    prior = publish.read_json(root / "isaac/policy_contract.json")
+    nominal = prior["controller_gain_diagnostic"]["original_nominal_contract"]
+    effective_profile, audit = prepare_deployment_gain_diagnostic(
+        manifest["task_profile"], nominal, manifest, 12., reference_sha256=manifest["motion_sha256"])
+    audit.update(original_manifest_sha256=publish.sha256(manifest_path),
+                 checkpoint_sha256=publish.sha256(root / "training/model_final.pt"))
+    contract = apply_deployment_gain_diagnostic_to_contract(nominal, audit)
+    export_fields = ("training_domain_randomization", "reference_file_sha256", "actor_file",
+                     "actor_includes_observation_normalizer", "actor_output_is_unclipped",
+                     "actor_observation_groups", "checkpoint_sha256", "export_validation_max_abs_error")
+    contract.update({key: prior[key] for key in export_fields})
+    contract["domain_randomization"] = "disabled during evaluation; fixed actuator parameters"
+    write_json(root / "isaac/policy_contract.json", contract)
+    isaac = publish.read_json(root / "isaac/report.json")
+    isaac.update(policy_export=copy.deepcopy(contract), task_profile=effective_profile,
+                 controller_gain_diagnostic=copy.deepcopy(audit))
+    isaac["contact_material_audit"]["leg_pd_gain_readback"] = {"kp_range": [500., 500.], "kd_range": [12., 12.]}
+    write_json(root / "isaac/report.json", isaac)
+    mujoco = publish.read_json(root / "mujoco/report.json")
+    mujoco["contract"] = copy.deepcopy(contract)
+    write_json(root / "mujoco/report.json", mujoco)
+    reassess(gain_diagnostic)
+    return gain_diagnostic
+
+
+def test_kd_diagnostic_publishes_original_and_effective_gains_without_training(damping_diagnostic):
+    original_bytes = (damping_diagnostic[0] / "training/manifest.json").read_bytes()
+    summary = publish_fixture(damping_diagnostic)
+    assert summary["experiment_kind"] == "zero_shot_controller_damping_diagnostic"
+    assert summary["additional_training_updates"] == 0
+    assert summary["controller_gain_change"] == {"parameter": "leg_kd", "trained_leg_kd": 10.,
+                                                  "deployment_leg_kd": 12., "unchanged_leg_kp": 500.}
+    assert summary["controller_gain_diagnostic"]["scope"] == "zero_shot_common_leg_kd"
+    assert summary["original_training_task_profile"].get("leg_kd", 10.) == 10.
+    assert summary["effective_deployment_task_profile"]["leg_kd"] == 12.
+    assert summary["task_profile"].get("leg_kp", 500.) == 500.
+    assert summary["training"]["completed_requested_iterations"] == 3
+    assert summary["training"]["reported_run_status"]["training_environment_steps"] == 144
+    assert summary["input_sha256"]["controller_gain_helper"] == publish.sha256(
+        ROOT / "training/tron1_controller_damping_diagnostic.py")
+    assert summary["input_sha256"]["controller_gain_original_validation_dependency"] == publish.sha256(
+        ROOT / "training/tron1_controller_gain_diagnostic.py")
+    assert (damping_diagnostic[0] / "training/manifest.json").read_bytes() == original_bytes
+    assert not list(damping_diagnostic[-1].rglob("*.pt")) and not list(damping_diagnostic[-1].rglob("*.npz"))
+
+
+def test_kp_diagnostic_does_not_add_kd_only_fields(gain_diagnostic):
+    summary = publish_fixture(gain_diagnostic)
+    assert summary["experiment_kind"] == "zero_shot_controller_gain_diagnostic"
+    assert "controller_gain_change" not in summary
+    assert "controller_gain_original_validation_dependency" not in summary["input_sha256"]
+
+
+@pytest.mark.parametrize("scope", [None, "", "zero_shot_both_leg_gains", "zero_shot_common_leg_KD"])
+def test_publisher_rejects_unknown_or_mixed_gain_scope(gain_diagnostic, scope):
+    change_gain_contract(gain_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__("scope", scope))
+    with pytest.raises(ValueError, match="Unknown single-gain diagnostic scope"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("additional_training_updates", 1), ("additional_training_updates", False),
+    ("original_manifest_sha256", "0" * 64), ("checkpoint_sha256", "0" * 64),
+    ("helper_sha256", "0" * 64), ("original_validation_dependency_sha256", "0" * 64),
+    ("trained_leg_kd", 12.), ("deployment_leg_kd", True), ("deployment_leg_kd", 13.1),
+    ("unchanged_leg_kp", 400.), ("global_stability_claimed", True),
+    ("hardware_ready", True), ("statistical_robustness_claimed", True),
+    ("unexpected_success_claim", True),
+])
+def test_kd_diagnostic_rejects_forged_metadata(damping_diagnostic, field, value):
+    change_gain_contract(damping_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(field, value))
+    with pytest.raises(ValueError):
+        publish_fixture(damping_diagnostic)
+    assert not damping_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("leg_kp", 400.), ("wheel_torque_scale_nm", 10.), ("physics_dt", .0025),
+    ("domain_parameters", {}), ("physics_clock_refinement", {}),
+])
+def test_kd_diagnostic_does_not_authorize_second_gain_or_other_controls(damping_diagnostic, field, value):
+    change_gain_contract(damping_diagnostic, lambda contract: contract.__setitem__(field, value))
+    with pytest.raises(ValueError):
+        publish_fixture(damping_diagnostic)
+    assert not damping_diagnostic[-1].exists()
+
+
+def test_kd_diagnostic_rejects_matching_second_gain_change_in_contract_and_profile(damping_diagnostic):
+    def change(contract):
+        contract["leg_kp"] = 400.
+        contract["task_profile"]["leg_kp"] = 400.
+    change_gain_contract(damping_diagnostic, change)
+    with pytest.raises(ValueError):
+        publish_fixture(damping_diagnostic)
+    assert not damping_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("engine,kp,kd", [("training", 500., 12.), ("isaac", 500., 10.), ("isaac", 400., 12.)])
+def test_kd_diagnostic_requires_original_and_actual_live_gains(damping_diagnostic, engine, kp, kd):
+    path = damping_diagnostic[0] / ("training/manifest.json" if engine == "training" else "isaac/report.json")
+    report = publish.read_json(path)
+    report["contact_material_audit"]["leg_pd_gain_readback"] = {"kp_range": [kp, kp], "kd_range": [kd, kd]}
+    write_json(path, report)
+    if engine == "training":
+        change_gain_contract(damping_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(
+            "original_manifest_sha256", publish.sha256(path)))
+    else:
+        reassess(damping_diagnostic)
+    with pytest.raises(ValueError, match="live leg gain"):
+        publish_fixture(damping_diagnostic)
+    assert not damping_diagnostic[-1].exists()

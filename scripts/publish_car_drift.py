@@ -100,7 +100,7 @@ def check_leg_gain_audit(audit, kp, kd, engine):
 
 
 def validate_controller_gain_context(records, files, hashes):
-    """Allow only a hash-pinned, zero-training common-Kp deployment diagnostic.
+    """Allow only a hash-pinned, zero-training single-gain deployment diagnostic.
 
     This branch is explicit; absent diagnostic metadata, the historical strict
     training/deployment profile equality and public schema remain untouched.
@@ -125,11 +125,24 @@ def validate_controller_gain_context(records, files, hashes):
             "Diagnostic requires the original training checkpoint")
     files["original_checkpoint"] = checkpoint
     hashes["original_checkpoint"] = sha256(checkpoint)
-    helper_path = ROOT / "training/tron1_controller_gain_diagnostic.py"
+    scope = contract[key].get("scope")
+    if scope == "zero_shot_common_leg_kp":
+        helper_path = ROOT / "training/tron1_controller_gain_diagnostic.py"
+    elif scope == "zero_shot_common_leg_kd":
+        helper_path = ROOT / "training/tron1_controller_damping_diagnostic.py"
+        dependency = ROOT / "training/tron1_controller_gain_diagnostic.py"
+        require(dependency.is_file(), "Original controller validator dependency is unavailable")
+        files["controller_gain_original_validation_dependency"] = dependency
+        hashes["controller_gain_original_validation_dependency"] = sha256(dependency)
+    else:
+        raise ValueError("Unknown single-gain diagnostic scope")
     require(helper_path.is_file(), "Controller diagnostic validator is unavailable")
     files["controller_gain_helper"] = helper_path
     hashes["controller_gain_helper"] = sha256(helper_path)
-    from training.tron1_controller_gain_diagnostic import validate_deployment_gain_diagnostic
+    if scope == "zero_shot_common_leg_kp":
+        from training.tron1_controller_gain_diagnostic import validate_deployment_gain_diagnostic
+    else:
+        from training.tron1_controller_damping_diagnostic import validate_deployment_gain_diagnostic
     audit = validate_deployment_gain_diagnostic(
         contract, manifest, original_manifest_sha256=hashes["manifest"],
         checkpoint_sha256=hashes["original_checkpoint"])
@@ -336,6 +349,13 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
                         "effective_deployment_task_profile": task_profile,
                         "controller_gain_diagnostic": diagnostic})
         summary["training"]["budget_scope"] = "original checkpoint training; no diagnostic training"
+        if diagnostic["scope"] == "zero_shot_common_leg_kd":
+            summary["experiment_kind"] = "zero_shot_controller_damping_diagnostic"
+            summary["controller_gain_change"] = {
+                "parameter": "leg_kd", "trained_leg_kd": diagnostic["trained_leg_kd"],
+                "deployment_leg_kd": diagnostic["deployment_leg_kd"],
+                "unchanged_leg_kp": diagnostic["unchanged_leg_kp"],
+            }
     payloads = {"assessment.json": encode(sanitize(stored, identities)),
                 "reference_audit.json": encode(sanitize(adaptation, identities))}
     if render is not None:

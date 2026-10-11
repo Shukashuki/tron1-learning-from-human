@@ -72,6 +72,8 @@ Trial007 was predeclared as an evaluation-only controller diagnostic, not anothe
 
 The exported actor file is byte-identical to trial004; all actor and normalizer tensors also match its checkpoint. Independent replay checks all 288 actions within 3.17×10⁻⁷; 21 deployment/provenance checks pass, including the separate original/effective gain contracts, unchanged asset/reference/physical model, nominal motors and clock. The parent training budget is retained only as history; trial007 adds zero training updates or transitions. This eliminates continued policy optimization as a difference between these two evaluations, but does not establish a general causal law or statistical robustness. The Kp 400 setting is not adopted; trial004 remains the better, still-failing baseline.
 
+**Trial008 is predeclared, with no outcome yet.** Keep the same frozen trial004 actor and original Kp 500, changing only common deployment Kd from 10 to 12, with zero additional training. A 20% damping increase preserves static holding stiffness. Recorded-state free-mode analysis places the local unsaturated PD stability ratio below 2, unlike the failed Kd 30 trial; contact, actor feedback and clipping are excluded, so this is motivation, not a stability guarantee. The [protocol](config/car_drift_damping_only_trial.json) keeps original assets, contact response, clocks, source windows and every behavior gate. An independent damping-diagnostic module retains the frozen Kp helper and earlier publication compatibility. Original training at 500/10 and actual deployment at 500/12 must be recorded and read back separately. Neither trial007's Kp 400 nor failed trial005/006 weights are used.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
