@@ -2,7 +2,7 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
-## Car drift: trained baseline and sequential retry (2026-10-11)
+## Car drift: failed baselines and stable-gain retry (2026-10-11)
 
 The selected DOA/CARLA `sa_traj34` capture now drives a real TRON1 WF tracking experiment. The adapter keeps the captured XY/heading profile with spatial scale 0.08 and time scale 2, solves bounded support-leg IK at 0.75 m root height, and derives wheel rolling rates without suppressing lateral slip. The 50 Hz reference has 288 frames: 3.74 s captured motion, 1.5 s explicitly synthetic stopping, and a 0.5 s stationary tail. The source starts moving; no extra lateral reset velocity is injected.
 
@@ -10,13 +10,21 @@ Trial001 fine-tuned the common jump checkpoint for 600 updates with 2,048 enviro
 
 **Overall result: FAIL.** Isaac's sampled grounded drift lasts 0.28 s; MuJoCo's longest continuous interval is 0.03 s. Both fail stable-exit sideslip; MuJoCo also fails full/tail two-wheel support. Cross-engine root-position RMSE is 1.85 cm. All observed qualifying drift overlaps the source's drift windows and matches its signed sideslip. No chassis/leg ground impacts occur.
 
-The published first snapshot uses 50 Hz Isaac and 200 Hz MuJoCo contact measurements. A separate 200 Hz Isaac probe preserves every original policy-rate state/action/observation bit-exactly and confirms the 0.28 s drift with uninterrupted wheel support. MuJoCo's micro-gaps are genuine zero-force, absent geometric contacts: each lasts 5 ms, with median clearance 25.7 micrometers. The original baseline files are not replaced by the probe.
+The published first snapshot uses 50 Hz Isaac and 200 Hz MuJoCo contact measurements. A separate 200 Hz Isaac probe preserves every original policy-rate state/action/observation bit-exactly and confirms the 0.28 s drift with uninterrupted wheel support. A freshly exported actor is deployed byte-for-byte to MuJoCo for this fair-rate comparison; its rollout also reproduces the original states/actions/contacts exactly. The assessor now requires matched physics-rate contact clocks, while observation verification still uses the canonical 50 Hz archive. MuJoCo's micro-gaps are genuine zero-force, absent geometric contacts: each lasts 5 ms, with median clearance 25.7 micrometers. The original baseline files are not replaced by the probe.
 
 [Baseline four-panel video](results/2026-10-11-car-drift/trial001/motion_pipeline.mp4) · [Fixed-gate assessment](results/2026-10-11-car-drift/trial001/assessment.json) · [Hash-linked summary](results/2026-10-11-car-drift/trial001/summary.json).
 
+[Fair 200 Hz baseline video](results/2026-10-11-car-drift/trial001-physics/motion_pipeline.mp4) · [Physics-rate assessment](results/2026-10-11-car-drift/trial001-physics/assessment.json).
+
 A declared contact-only ablation uses MuJoCo's documented `solref=[0.02,1]` default instead of the baseline `0.004,1`, which `refsafe` clamps to at least two 5 ms timesteps. It improves support but still fails continuous drift and recovery; friction, margins, gaps and acceptance thresholds are unchanged. This is a diagnostic, not a successful matched-profile sim2sim trial. See [MuJoCo contact solver parameters](https://mujoco.readthedocs.io/en/stable/modeling.html#solver-parameters).
 
-The sequential retry resumes trial001 for another predesignated 600 updates. Its [explicit stop profile](config/car_drift_stop_task.json) tightens speed tracking, increases action smoothing and uses leg PD 500/30 in both engines; it retains three-motor randomization and the same reference. MuJoCo's 20 ms contact compliance is disclosed rather than claimed equivalent to PhysX. Both engines are measured at 200 Hz. Training completion alone will not count as success, and the failed baseline remains visible.
+Trial002 resumes trial001 for another predesignated 600 updates. Its [explicit stop profile](config/car_drift_stop_task.json) tightens speed tracking, increases action smoothing and uses leg PD 500/30 in both engines; it retains three-motor randomization and the same reference. MuJoCo's 20 ms contact compliance is disclosed rather than claimed equivalent to PhysX. Both engines are measured at 200 Hz. **Result: FAIL**, with 18 behavior-gate failures. Isaac's full-episode two-wheel support is 27.00%; MuJoCo's is 18.24%, and it terminates at 2.22 s. The comparison visibly freezes that terminated rollout instead of extrapolating it. [Trial002 video](results/2026-10-11-car-drift/trial002/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial002/assessment.json).
+
+A mass-matrix diagnosis explains why more damping was not stable here. For the unsaturated, semi-implicit sampled PD model, the condition is `dt D + 0.5 dt² K < 2 M`. At `dt=0.005 s` and `Kp=500`, the worst coupled-mode ratio is 1.504 for Kd10 but 4.178 for Kd30, exceeding the limit 2. The estimated uniform-Kd ceiling is 13.71; contact constraints and torque saturation qualify this linear diagnosis, but the actual trial's repeated loss of support is consistent with it.
+
+Contact-only ablations retain friction, zero margins/gaps, the same actor and all acceptance thresholds. At MuJoCo `solref=[0.04,2]`, full/tail support rises to 98.18%/98%, and tail sideslip drops to 4.42°, but continuous grounded drift still reaches only 0.125 s and fails the unchanged 0.20 s gate. Wheel-ground penetration is 1.606 mm RMS and 5.678 mm peak: this is explicitly softer contact, not submillimeter or hardware-identified tire compliance. The ablation is not a matched-profile sim2sim success.
+
+Trial003 is in progress with a predesignated final checkpoint after 600 updates from **trial001**, not the unstable trial002. Its [stable profile](config/car_drift_stable_task.json) restores common PD 500/10, retains precise stopping and action smoothing, and declares the 40 ms/ratio-2 MuJoCo contact calibration. The source/reference, motor randomization, actual-contact definitions and behavior thresholds are unchanged. Success requires the same actor to pass both 200 Hz evaluations; training completion alone does not count.
 
 Prepare the robot reference after capturing the pinned source:
 

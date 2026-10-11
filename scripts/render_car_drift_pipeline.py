@@ -130,6 +130,24 @@ def assessment_equal(stored, fresh):
     return type(stored) is type(fresh) and stored == fresh
 
 
+def load_isaac_playback(isaac_dir, report):
+    """Select validated behavior data while retaining canonical actor identity.
+
+    The assessor's loader rejects malformed/missing declared physics archives;
+    it falls back to policy-rate telemetry only for genuine legacy reports.
+    """
+    from assess_drift import load_isaac_behavior_arrays
+    arrays, path, info = load_isaac_behavior_arrays(isaac_dir, report)
+    return arrays, Path(path), info
+
+
+def render_timeline(end_s, render_fps, playback_speed):
+    """Visual sampling alone; behavioral metrics retain all recorded samples."""
+    if not math.isfinite(playback_speed) or playback_speed <= 0:
+        raise ValueError("Playback speed must be finite and positive")
+    return frame_times(end_s, render_fps), float(render_fps * playback_speed)
+
+
 def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path, assessment_path=None):
     captured_source, robot_reference, isaac_dir, mujoco_dir, model_path = map(Path,
         (captured_source, robot_reference, isaac_dir, mujoco_dir, model_path))
@@ -157,7 +175,11 @@ def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path,
         raise ValueError("Actual policy trajectories use a different reference")
     if reports["isaac_report"].get("terrain") != reports["mujoco_report"].get("terrain"):
         raise ValueError("Recorded policy trajectories use different terrain")
-    source, robot, motion, ia, ma = [read_npz(paths[key]) for key in ("captured_source", "robot_reference", "motion", "isaac", "mujoco")]
+    source, robot, motion, ma = [read_npz(paths[key]) for key in ("captured_source", "robot_reference", "motion", "mujoco")]
+    ia, behavior_path, behavior_info = load_isaac_playback(isaac_dir, reports["isaac_report"])
+    if behavior_info["kind"] == "physics_rate":
+        paths["isaac_physics"] = behavior_path
+        hashes["isaac_physics"] = sha256(behavior_path)
     car = CarClip(source)
     mapping = validate_mapping(car, robot, motion, adaptation["calibration_and_adaptation"])
     reference = PoseClip(motion["time_s"], motion["qpos_mujoco"][:, :3], motion["qpos_mujoco"][:, 3:7],
@@ -192,7 +214,9 @@ def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path,
             "reference_velocity": motion["body_lin_vel_w"][:, 0], "task_times": motion["time_s"],
             "source_times": motion["demonstration_time_s_estimated"], "source_phases": motion["source_phase"],
             "reference_action_duration_s": len(motion["time_s"]) / float(motion["fps"].item()),
-            "mapping": mapping, "reports": reports, "assessment": assessment, "provenance": provenance, "hashes": hashes}
+            "mapping": mapping, "reports": reports, "assessment": assessment, "provenance": provenance, "hashes": hashes,
+            "behavior_sampling": {"isaac": behavior_info, "mujoco": {"file": "rollout.npz", "sha256": hashes["mujoco"],
+                                    "sample_dt_s": float(np.median(np.diff(mj.times))), "kind": "physics_rate"}}}
 
 
 def _style_chart(ax):
@@ -246,12 +270,12 @@ def _charts(prepared, axes, end_s):
     slip_ax.set_ylabel("Contact-patch lateral slip (m/s)", color=MUTED)
 
 
-def render(prepared, model_path, output, playback_speed=.5):
+def render(prepared, model_path, output, playback_speed=.5, render_fps=50.):
     from eval_tracking_mujoco import load_model
     output = Path(output)
     reference, isaac, mj, car = [prepared[key] for key in ("reference", "isaac", "mujoco", "car")]
     end_s = float(max(prepared["reference_action_duration_s"], isaac.times[-1], mj.times[-1]))
-    timeline = frame_times(end_s)
+    timeline, video_fps = render_timeline(end_s, render_fps, playback_speed)
     model, _ = load_model(model_path, terrain=prepared["reports"]["isaac_report"].get("terrain"))
     if not model.nmesh:
         raise ValueError("Official robot visualization meshes are required")
@@ -329,7 +353,7 @@ def render(prepared, model_path, output, playback_speed=.5):
         mapping = prepared["mapping"]
         fig.text(.03, .067, f"Original adaptation: XY x{mapping['source_spatial_scale']:g}; time x{mapping['source_time_scale']:g}. Captured task segment ends {mapping['source_end_task_s']:.2f}s; source then holds.", fontsize=11, color=MUTED)
         fig.text(.03, .041, "Gold shading: synthetic stop; gray shading: synthetic rest. Gold arrows: heading; pink arrows: travel direction. Source controls are car inputs.", fontsize=11, color=MUTED)
-        fig.text(.03, .015, f"Robot world views share one fixed camera; labeled pose insets follow each root. Playback {playback_speed:g}x; no new physics. Failures freeze at recorded termination.", fontsize=11, color=MUTED)
+        fig.text(.03, .015, f"World views share a fixed camera; pose insets follow each root. Visual sampling {render_fps:g}Hz, playback {playback_speed:g}x; metrics use full recorded telemetry. Zero new physics.", fontsize=11, color=MUTED)
         isaac_outcomes = [v for v in prepared["reports"]["isaac_report"].get("summary", {}).get("episodes", []) if v.get("environment") == 0]
         reasons = (isaac_outcomes[0].get("end_reason", "unknown") if len(isaac_outcomes) == 1 else "unknown",
                    prepared["reports"]["mujoco_report"].get("termination", "unknown"))
@@ -392,7 +416,7 @@ def render(prepared, model_path, output, playback_speed=.5):
         fig.savefig(output / "final.png", dpi=100, facecolor=BG)
         width, height = fig.canvas.get_width_height()
         video = output / "motion_pipeline.mp4"
-        writer = imageio_ffmpeg.write_frames(str(video), (width, height), fps=50 * playback_speed,
+        writer = imageio_ffmpeg.write_frames(str(video), (width, height), fps=video_fps,
                     codec="libx264", pix_fmt_out="yuv420p", quality=8, macro_block_size=1,
                     output_params=["-movflags", "+faststart"])
         writer.send(None)
@@ -416,6 +440,9 @@ def render(prepared, model_path, output, playback_speed=.5):
             "task_verdict": assessment["verdict"], "assessment": assessment, "same_actor_provenance": prepared["provenance"],
             "source_hashes": prepared["hashes"], "source_provenance": prepared["reports"]["adaptation"]["provenance"],
             "assessment_sha256": prepared["hashes"]["assessment"],
+            "behavior_sampling": prepared["behavior_sampling"],
+            "behavior_recorded_samples": {"isaac": len(isaac.times), "mujoco": len(mj.times)},
+            "canonical_isaac_trajectory_role": "50Hz actor observation/normalizer identity only; declared physics archive supplies behavior when present",
             "original_adaptation": prepared["reports"]["adaptation"]["calibration_and_adaptation"],
             "mapping": mapping, "task_end_s": end_s, "source_time_mapping": "original demonstration_time_s_estimated; task/time_scale during capture, then constant source endpoint; no fitted alignment",
             "source_panel": "original captured world XY/yaw; native metric scale; schematic car outline; its own fixed topview",
@@ -425,7 +452,8 @@ def render(prepared, model_path, output, playback_speed=.5):
             "pose_closeup_insets": {"labeled": True, "camera": "independently follows each recorded/reference root; no trajectory coordinates changed",
                                      "distance": float(close_camera.distance), "azimuth": float(close_camera.azimuth), "elevation": float(close_camera.elevation)},
             "camera": {"lookat": camera.lookat.tolist(), "distance": float(camera.distance), "azimuth": float(camera.azimuth), "elevation": float(camera.elevation)},
-            "video_resolution": [width, height], "video_frames": len(timeline), "video_fps": 50 * playback_speed,
+            "video_resolution": [width, height], "video_frames": len(timeline), "video_fps": video_fps,
+            "time_sampling_fps": float(render_fps), "metrics_downsampled_for_rendering": False,
             "playback_speed": playback_speed, "video_sha256": sha256(video),
             "overview_sha256": sha256(output / "overview.png"), "final_sha256": sha256(output / "final.png"),
             "contact_overview_sha256": sha256(output / "contact_overview.png"), "hardware_ready": False,
@@ -456,16 +484,19 @@ def main(argv=None):
     parser.add_argument("--assessment", type=Path, help="Default: Isaac directory's parent/assessment.json; must match fresh offline assessment")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--playback-speed", type=float, default=.5)
+    parser.add_argument("--render-fps", type=float, default=50., help="Visual samples per task second; 25 halves mesh views while retaining full-rate metric telemetry")
     args = parser.parse_args(argv)
     if not math.isfinite(args.playback_speed) or args.playback_speed <= 0:
         parser.error("playback-speed must be finite and positive")
+    if not math.isfinite(args.render_fps) or args.render_fps <= 0:
+        parser.error("render-fps must be finite and positive")
     if args.output_dir.exists() and any(args.output_dir.iterdir()):
         parser.error("Use a new or empty output directory; existing renders are preserved")
     prepared = prepare(args.captured_source, args.robot_reference, args.isaac_dir, args.mujoco_dir, args.model, args.assessment)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     report = {"status": "rendering", "simulation_steps": 0}
     try:
-        report = render(prepared, args.model, args.output_dir, args.playback_speed)
+        report = render(prepared, args.model, args.output_dir, args.playback_speed, args.render_fps)
         (args.output_dir / "index.html").write_text('''<!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>TRON1 captured car drift comparison</title>
 <style>body{background:#0a1220;color:#e2e8f0;font:16px system-ui;margin:2rem}video,img{width:100%;max-width:1920px}a{color:#38bdf8}</style>

@@ -70,7 +70,14 @@ Four of six tasks pass the predefined gates in both engines, with the turning-ju
 
 [Video gallery](results/2026-10-03-motion-pipeline-suite/index.html) · [Metrics and assessments](results/2026-10-03-motion-suite/summary.json) · [Detailed experiment log and reproduction instructions](EXPERIMENT_LOG.md)
 
-Car drift, trial001: **sim2sim FAIL** after 600 PPO updates. Isaac's 50 Hz samples show a 0.28 s qualifying drift interval; MuJoCo's 200 Hz measurements fragment into at most 0.03 s intervals because of real contact micro-gaps. Both track the route but fail stable-exit sideslip. This first trial has unequal contact sampling rates; a physics-rate retry is in progress. [Four-panel video](results/2026-10-11-car-drift/trial001/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial001/assessment.json) · [Reference audit](results/2026-10-11-car-drift/trial001/reference_audit.json).
+Car drift uses actual ground-contact measurements at **200 Hz in both engines**. The same-actor baseline fails: Isaac sustains 0.28 s of qualifying drift, but MuJoCo reaches only 0.03 s because of real contact micro-gaps; both fail stable-exit sideslip. A higher-damping retry also fails, with MuJoCo terminating at 2.22 s. Historical snapshots remain available; the original 50 Hz Isaac baseline is not overwritten.
+
+| Car-drift trial | Result | Four-panel video / assessment |
+|---|---|---|
+| Baseline, common PD 500/10 | Fail; continuous drift and exit do not pass in both engines | [Watch](results/2026-10-11-car-drift/trial001-physics/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial001-physics/assessment.json) |
+| Stop retry, common PD 500/30 | Fail; unstable wheel support, early MuJoCo termination | [Watch](results/2026-10-11-car-drift/trial002/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial002/assessment.json) |
+
+A stable-gain retry is in progress. Its explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Training completion is not sim2sim success. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
 
 Drift validation requires forward motion at least 0.4 m/s, sideslip at least 8°, both wheels bearing ground contact and measured contact-patch lateral slip at least 0.04 m/s, concurrently for 0.20 s, followed by stable stopping. Spins, flight and reference playback do not pass. The source starts already rolling; its approximate clock is reconstructed from a CSV without timestamps. [Captured car preview](results/2026-10-11-car-drift-source/source_preview.mp4) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
 

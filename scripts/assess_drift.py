@@ -123,6 +123,112 @@ def _series(arrays, key, engine):
     return values
 
 
+def _finite_timestep(value, label):
+    array = np.asarray(value)
+    if array.size != 1 or array.dtype.kind not in "iuf":
+        raise ValueError(f"{label} must be one finite positive timestep")
+    number = float(array.reshape(-1)[0])
+    if not np.isfinite(number) or number <= 0:
+        raise ValueError(f"{label} must be one finite positive timestep")
+    return number
+
+
+def _uniform_clock(arrays, expected_dt, label):
+    times = np.asarray(arrays["time_s"], float)
+    if (times.ndim != 1 or len(times) < 2 or not np.isfinite(times).all()
+            or abs(times[0]) > 1e-9
+            or not np.allclose(np.diff(times), expected_dt, atol=1e-9, rtol=0)):
+        raise ValueError(f"{label} timestamps must begin at zero and increment by the declared timestep")
+    return times
+
+
+def load_isaac_behavior_arrays(isaac_dir, report):
+    """Select hash-verified physical telemetry while preserving actor provenance.
+
+    The canonical ``trajectory.npz`` remains the 50 Hz actor-observation
+    verification source. Legacy policy-rate arrays can still be inspected but
+    cannot satisfy the paired physics-contact sampling gate. A declared yet
+    invalid physical archive raises an error; it never falls back to 50 Hz.
+    """
+    isaac_dir = Path(isaac_dir)
+    canonical_path = isaac_dir / "trajectory.npz"
+    if "physics_trajectory_file" not in report:
+        arrays = read_npz(canonical_path)
+        times = np.asarray(arrays["time_s"], float)
+        load_episode(arrays, "Isaac")
+        dt = float(np.median(np.diff(times)))
+        return arrays, canonical_path, {"file": canonical_path.name, "sha256": sha256(canonical_path),
+                                         "sample_dt_s": dt, "kind": "legacy_policy_rate"}
+    if report["physics_trajectory_file"] != "physics_trajectory.npz":
+        raise ValueError("Declared physics trajectory must be exactly physics_trajectory.npz")
+    path = isaac_dir / "physics_trajectory.npz"
+    actual_sha = sha256(path)
+    if report.get("physics_trajectory_sha256") != actual_sha:
+        raise ValueError("Isaac physics trajectory SHA differs from its evaluation report")
+    arrays = read_npz(path)
+    metadata = report.get("physics_recording")
+    if not isinstance(metadata, dict):
+        raise ValueError("Isaac physics trajectory requires complete recording metadata")
+    dt = _finite_timestep(report.get("physics_dt_s"), "Isaac report physics_dt_s")
+    exported = report.get("policy_export", {})
+    for value, label in ((exported.get("physics_dt"), "exported physics_dt"),
+                         (arrays.get("physics_dt_s"), "archive physics_dt_s"),
+                         (metadata.get("sample_dt_s"), "recording sample_dt_s")):
+        if not np.isclose(_finite_timestep(value, label), dt, atol=1e-12, rtol=0):
+            raise ValueError("Isaac physical sampling timesteps disagree")
+    times = _uniform_clock(arrays, dt, "Isaac physics")
+    if (isinstance(metadata.get("samples"), bool) or not isinstance(metadata.get("samples"), int)
+            or metadata["samples"] != len(times)):
+        raise ValueError("Isaac physics recording sample count differs from the archive")
+    if type(metadata.get("initial_state_samples")) is not int or metadata["initial_state_samples"] != 1:
+        raise ValueError("Isaac physical recording must contain exactly one initial state")
+    for flag in ("terminal_states_before_reset", "same_counter_reset_and_forward_updates_excluded",
+                 "first_episode_only_valid_mask"):
+        if metadata.get(flag) is not True:
+            raise ValueError(f"Isaac physical recording requires {flag}=true")
+    counters = np.asarray(arrays.get("simulation_step_counter"))
+    if (counters.shape != times.shape or counters.dtype.kind not in "iu"
+            or np.any(np.diff(counters) != 1)
+            or not np.allclose(times, (counters - counters[0]) * dt, atol=1e-9, rtol=0)):
+        raise ValueError("Isaac physical timestamps require consecutive simulator counters")
+    valid = np.asarray(arrays.get("valid_mask"))
+    terminal = np.asarray(arrays.get("terminal_sample"))
+    if (valid.ndim != 2 or valid.shape[0] != len(times) or valid.dtype.kind != "b"
+            or terminal.shape != valid.shape or terminal.dtype.kind != "b"):
+        raise ValueError("Isaac physical valid masks and terminal flags must be aligned booleans")
+    outcomes = report.get("summary", {}).get("episodes", [])
+    for env_index in range(valid.shape[1]):
+        prefix = np.flatnonzero(valid[:, env_index])
+        if not len(prefix) or not np.array_equal(prefix, np.arange(len(prefix))):
+            raise ValueError("Isaac physical evidence needs contiguous first-episode valid prefixes")
+        ended = np.flatnonzero(terminal[:, env_index])
+        outcome = [value for value in outcomes if value.get("environment") == env_index]
+        finished = bool(len(outcome) == 1 and outcome[0].get("end_reason") in ("timeout", "early_termination"))
+        if ((len(ended) and (len(ended) != 1 or ended[0] != prefix[-1]))
+                or (finished and len(ended) != 1)):
+            raise ValueError("Isaac physical terminal must be the last valid pre-reset state")
+    load_episode(arrays, "Isaac")
+    # Tie the additional behavior file to the already-verified policy rollout.
+    # Command phase advances after each decimation interval, so phase IDs are
+    # intentionally excluded from this snapshot comparison.
+    canonical = read_npz(canonical_path)
+    policy_dt = _finite_timestep(exported.get("physics_dt"), "exported physics_dt") * int(exported.get("decimation", 0))
+    if policy_dt <= 0:
+        raise ValueError("Exported decimation must be positive")
+    canonical_times = _uniform_clock(canonical, policy_dt, "Isaac policy")
+    indices = np.rint(canonical_times / dt).astype(int)
+    if (len(times) != (len(canonical_times) - 1) * int(exported["decimation"]) + 1
+            or np.any(indices >= len(times)) or not np.allclose(times[indices], canonical_times, atol=1e-9, rtol=0)):
+        raise ValueError("Isaac physics and policy snapshot clocks disagree")
+    if not np.array_equal(valid[indices], canonical.get("valid_mask")):
+        raise ValueError("Isaac physics and policy first-episode masks disagree")
+    for key in ("root_position_m", "root_quaternion_wxyz", "root_linear_velocity_w_m_s", "joint_position_rad"):
+        physical, policy = np.asarray(arrays[key])[indices], np.asarray(canonical[key])
+        if physical.shape != policy.shape or not np.allclose(physical, policy, atol=1e-9, rtol=0, equal_nan=True):
+            raise ValueError(f"Isaac physics and canonical policy snapshots disagree for {key}")
+    return arrays, path, {"file": path.name, "sha256": actual_sha, "sample_dt_s": dt, "kind": "physics_rate"}
+
+
 def reference_episode(reference):
     fps = float(np.asarray(reference["fps"]).reshape(-1)[0])
     if not np.isfinite(fps) or fps <= 0:
@@ -349,7 +455,48 @@ def assess_runs(isaac_dir, mujoco_dir, reference_file):
               "wheel_torque_limit_nm", "physics_dt", "decimation", "policy_fps", "raw_action_clip", "actuator_model")
     mismatches = [key for key in fields if key not in exported or key not in deployed or exported[key] != deployed[key]]
     _check(checks, "matching_actuator_and_clock_contract", not mismatches, mismatches)
-    arrays = {"isaac": read_npz(isaac_dir / "trajectory.npz"), "mujoco": read_npz(mujoco_dir / "rollout.npz")}
+    arrays = {"mujoco": read_npz(mujoco_dir / "rollout.npz")}
+    behavior_evidence = {}
+    sampling_errors = []
+    try:
+        arrays["isaac"], _, behavior_evidence["isaac"] = load_isaac_behavior_arrays(isaac_dir, isaac)
+    except (ValueError, KeyError, TypeError, IndexError, OSError) as exc:
+        behavior_evidence["isaac"] = {"file": isaac.get("physics_trajectory_file", "trajectory.npz"),
+                                       "kind": "invalid_physics_evidence", "error": str(exc)}
+        sampling_errors.append("Isaac: " + str(exc))
+    mujoco_path = mujoco_dir / "rollout.npz"
+    try:
+        mj_dt = _finite_timestep(arrays["mujoco"].get("physics_dt_s"), "MuJoCo archive physics_dt_s")
+        _uniform_clock(arrays["mujoco"], mj_dt, "MuJoCo physics")
+        if not np.isclose(mj_dt, _finite_timestep(deployed.get("physics_dt"), "MuJoCo contract physics_dt"),
+                          atol=1e-12, rtol=0):
+            raise ValueError("MuJoCo physical sampling differs from its exported contract")
+        if mujoco.get("physics_stepped") is not True:
+            raise ValueError("MuJoCo evidence must record actual physics stepping")
+        behavior_evidence["mujoco"] = {"file": mujoco_path.name, "sha256": sha256(mujoco_path),
+                                        "sample_dt_s": mj_dt, "kind": "physics_rate"}
+    except (ValueError, KeyError, TypeError, IndexError) as exc:
+        behavior_evidence["mujoco"] = {"file": mujoco_path.name, "sha256": sha256(mujoco_path),
+                                        "kind": "invalid_physics_evidence", "error": str(exc)}
+        sampling_errors.append("MuJoCo: " + str(exc))
+    sampling_match = not sampling_errors
+    for key, report in (("isaac", isaac), ("mujoco", mujoco)):
+        info = behavior_evidence[key]
+        if info.get("kind") != "physics_rate" or not np.isclose(info.get("sample_dt_s", 0.), .005, atol=1e-12, rtol=0):
+            sampling_match = False
+            sampling_errors.append(f"{key} must supply genuine 200 Hz physics-rate contact evidence")
+        if report.get("wheel_lateral_contact_slip_evidence_kind") != "actual_ground_contact_points":
+            sampling_match = False
+            sampling_errors.append(f"{key} must identify actual ground contact-point slip measurements")
+    try:
+        exported_dt_matches = np.isclose(_finite_timestep(exported.get("physics_dt"), "exported physics_dt"),
+                                        .005, atol=1e-12, rtol=0)
+    except ValueError:
+        exported_dt_matches = False
+    if not exported_dt_matches:
+        sampling_match = False
+        sampling_errors.append("Both recorded clocks must equal the exported 0.005s physics timestep")
+    _check(checks, "same_physics_contact_sampling_clock", sampling_match, sampling_errors)
     results = {}
     for key, engine, report in (("isaac", "Isaac", isaac), ("mujoco", "MuJoCo", mujoco)):
         try:
@@ -368,14 +515,18 @@ def assess_runs(isaac_dir, mujoco_dir, reference_file):
     return {"schema_version": 1, "task": "captured_car_drift", "verdict": "fail" if failed else "pass",
             "failed_checks": failed, "thresholds": dict(THRESHOLDS),
             "threshold_policy": "Fixed before policy drift evaluation outcomes; no relaxation based on results.",
-            "provenance": provenance, "provenance_checks": checks, "common_window": common, **results,
+            "provenance": provenance, "provenance_checks": checks, "behavior_evidence": behavior_evidence,
+            "contact_sampling_policy": "Both engines must record actual contact evidence at the exported 200 Hz physics clock; legacy 50 Hz Isaac behavior cannot pass the paired gate.",
+            "common_window": common, **results,
             "assessor_source_sha256": sha256(__file__), "reference_sha256": sha256(reference_file),
-            "complete_contact_evidence": all(v["complete_contact_evidence"] for v in results.values()),
+            "complete_contact_evidence": sampling_match and all(v["complete_contact_evidence"] for v in results.values()),
             "safety_verified": False, "hardware_ready": False, "statistical_robustness_benchmark": False,
             "limitations": ["One first episode per engine; this is not a measured robustness probability.",
                             "Contact support and contiguous drift duration use held samples on the actual logged clock.",
                             "Near-rest sideslip is undefined and excluded below the fixed speed threshold.",
                             "Contact-patch slip must be recorded by each engine; it is never inferred from base velocity.",
+                            "Canonical 50 Hz Isaac trajectory verifies actor observations; separately hash-verified 200 Hz physical telemetry determines behavior and contact gates.",
+                            "Legacy Isaac policy-rate records remain inspectable but unequal physical contact sampling is a failed paired gate.",
                             "Missing nonwheel contact telemetry leaves complete contact evidence false.",
                             "Common-window RMSE is diagnostic and uses no phase shift, spatial alignment or extrapolation."]}
 

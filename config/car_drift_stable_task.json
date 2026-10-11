@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "description": "Stable-PD retry from trial001: keep common gains 500/10 inside the 5 ms coupled-mode stability bound, precise stopping and smoother actions. Explicit MuJoCo soft/overdamped normal-contact calibration (40 ms, ratio 2); no margin/gap or acceptance-threshold changes. Contact compliance is not hardware-identified or claimed identical to PhysX."
+}

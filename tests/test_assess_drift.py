@@ -10,7 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from assess_drift import (THRESHOLDS, assess_episode, assess_runs, duration_mean,
-                          intervals, main, sideslip)
+                          intervals, load_isaac_behavior_arrays, main, sideslip)
 from compare_tracking import sha256
 
 LEGS = [f"{joint}_{side}_Joint" for joint in ("abad", "hip", "knee") for side in ("L", "R")]
@@ -73,6 +73,31 @@ def isaac_fixture(data, report, *, invalid_tail=0):
     return arrays, result
 
 
+def synthetic_physics_fixture(data):
+    """Synthetic schema-only 200 Hz fixture, not simulated physical evidence."""
+    old_times = data["time_s"]
+    times = np.arange((len(old_times) - 1) * 4 + 1) * .005
+    held = np.minimum(np.arange(len(times)) // 4, len(old_times) - 1)
+    result = {}
+    for key, value in data.items():
+        if key in ("time_s", "action_observation"):
+            continue
+        if value.shape and value.shape[0] == len(old_times):
+            if value.dtype.kind in "biu":
+                result[key] = value[held].copy()
+            else:
+                flat = value.reshape(len(old_times), -1)
+                result[key] = np.column_stack([np.interp(times, old_times, column) for column in flat.T]).reshape(
+                    len(times), *value.shape[1:])
+        else:
+            result[key] = value.copy()
+    result["root_quat_wxyz"] /= np.linalg.norm(result["root_quat_wxyz"], axis=-1, keepdims=True)
+    result["time_s"] = times
+    result["physics_dt_s"] = np.array(.005)
+    result["action_observation"] = np.zeros((len(old_times) - 1, 51))
+    return result
+
+
 def run(data, reference, report, engine="MuJoCo"):
     return assess_episode(data, reference, engine=engine, report=report)
 
@@ -118,6 +143,58 @@ def test_missing_contact_patch_evidence_never_passes(key):
     assert result["verdict"] == "fail"
     assert "sustained_grounded_contact_patch_drift" in result["failed_checks"]
     assert not result["complete_contact_evidence"]
+
+
+def test_legacy_policy_rate_can_be_inspected_but_cannot_pass_paired_physics_gate(paired):
+    report = paired["isaac_report"]
+    for key in ("physics_trajectory_file", "physics_trajectory_sha256", "physics_dt_s", "physics_recording"):
+        del report[key]
+    (paired["isaac"] / "report.json").write_text(json.dumps(report))
+    arrays, path, info = load_isaac_behavior_arrays(paired["isaac"], report)
+    assert path.name == "trajectory.npz"
+    assert info["kind"] == "legacy_policy_rate"
+    assert info["sample_dt_s"] == pytest.approx(.02)
+    assert len(arrays["time_s"]) == 152
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["isaac"]["verdict"] == "pass"
+    assert result["verdict"] == "fail"
+    assert "provenance.same_physics_contact_sampling_clock" in result["failed_checks"]
+    assert not result["complete_contact_evidence"]
+
+
+def test_physics_contact_gaps_cannot_be_hidden_by_clean_50hz_samples(paired):
+    path = paired["isaac"] / "physics_trajectory.npz"
+    with np.load(path, allow_pickle=False) as d:
+        arrays = {key: d[key].copy() for key in d.files}
+    indexes = np.arange(len(arrays["time_s"]))
+    gaps = (indexes % 4 == 1) & (arrays["time_s"] >= .6) & (arrays["time_s"] < 1.)
+    arrays["wheel_ground_contact_count"][gaps, 0, 0] = 0
+    arrays["wheel_lateral_contact_slip_m_s"][gaps, 0, 0] = 0
+    np.savez(path, **arrays)
+    paired["isaac_report"]["physics_trajectory_sha256"] = sha256(path)
+    (paired["isaac"] / "report.json").write_text(json.dumps(paired["isaac_report"]))
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["provenance_checks"]["same_physics_contact_sampling_clock"]["passed"]
+    assert "sustained_grounded_contact_patch_drift" in result["isaac"]["failed_checks"]
+    assert result["isaac"]["metrics"]["maximum_contiguous_drift_s"] < .02
+
+
+@pytest.mark.parametrize("corruption", ["sampling_dt", "physics_claim", "point_claim"])
+def test_mujoco_clock_or_pose_proxy_claim_cannot_pass_matched_physics_gate(paired, corruption):
+    if corruption == "sampling_dt":
+        path = paired["mujoco"] / "rollout.npz"
+        with np.load(path, allow_pickle=False) as d:
+            arrays = {key: d[key].copy() for key in d.files}
+        arrays["physics_dt_s"] = np.array(.02)
+        np.savez(path, **arrays)
+    elif corruption == "physics_claim":
+        paired["mujoco_report"]["physics_stepped"] = False
+    else:
+        paired["mujoco_report"]["wheel_lateral_contact_slip_evidence_kind"] = "wheel_bottom_pose_proxy"
+    (paired["mujoco"] / "report.json").write_text(json.dumps(paired["mujoco_report"]))
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["verdict"] == "fail"
+    assert "provenance.same_physics_contact_sampling_clock" in result["failed_checks"]
 
 
 @pytest.mark.parametrize("kind", ["no_side_slip", "too_slow", "reverse", "center_slip_only", "one_wheel", "flight", "split_runs", "short_run"])
@@ -291,13 +368,29 @@ def paired(tmp_path):
     np.savez(motion, **reference)
     (idir / "actor_normalized.pt").write_bytes(b"synthetic identity only, never loaded")
     np.savez(idir / "trajectory.npz", **ia)
-    np.savez(mdir / "rollout.npz", **data)
+    physical = synthetic_physics_fixture(data)
+    pa, _ = isaac_fixture(physical, report)
+    pa["physics_dt_s"] = np.array(.005)
+    pa["policy_dt_s"] = np.array(.02)
+    pa["simulation_step_counter"] = np.arange(len(pa["time_s"]), dtype=int)
+    pa["terminal_sample"] = np.zeros_like(pa["valid_mask"])
+    pa["terminal_sample"][-1] = True
+    np.savez(idir / "physics_trajectory.npz", **pa)
+    np.savez(mdir / "rollout.npz", **physical)
     ir["simulator"] = "IsaacLab/PhysX"
     ir["motion_file_sha256"] = sha256(motion)
     ir["policy_export"].update(actor_file="actor_normalized.pt", actor_includes_observation_normalizer=True,
                                reference_file_sha256=sha256(motion))
+    ir.update(physics_trajectory_file="physics_trajectory.npz",
+              physics_trajectory_sha256=sha256(idir / "physics_trajectory.npz"), physics_dt_s=.005,
+              wheel_lateral_contact_slip_evidence_kind="actual_ground_contact_points",
+              physics_recording={"sample_dt_s": .005, "samples": len(pa["time_s"]), "initial_state_samples": 1,
+                                 "terminal_states_before_reset": True,
+                                 "same_counter_reset_and_forward_updates_excluded": True,
+                                 "first_episode_only_valid_mask": True})
     mr = {**report, "engine": "MuJoCo", "motion_sha256": sha256(motion),
           "policy_sha256": sha256(idir / "actor_normalized.pt"), "policy_kind": "normalized_torchscript_actor",
+          "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points",
           "isaac_observation_validation": {"status": "passed", "observations_checked": 151, "max_abs_error": 1e-7,
               "trajectory_sha256": sha256(idir / "trajectory.npz")}}
     for directory, metadata in ((idir, ir), (mdir, mr)):
@@ -311,6 +404,10 @@ def test_paired_same_actor_grounded_drift_has_common_clock_rmse(paired):
     assert result["common_window"]["base_position_rmse_m"] == 0.
     assert result["common_window"]["leg_joint_rmse_rad"] == 0.
     assert result["common_window"]["wheel_angles_compared"] is False
+    assert result["provenance_checks"]["same_physics_contact_sampling_clock"]["passed"]
+    assert result["behavior_evidence"]["isaac"]["file"] == "physics_trajectory.npz"
+    assert result["behavior_evidence"]["isaac"]["kind"] == "physics_rate"
+    assert result["behavior_evidence"]["mujoco"]["sample_dt_s"] == .005
 
 
 @pytest.mark.parametrize("failure", ["actor", "reference", "observations", "wheel_order", "actuator"])
@@ -341,3 +438,84 @@ def test_cli_preserves_existing_assessment_and_serializes_all_evidence(paired, t
     with pytest.raises(FileExistsError):
         main(args)
     assert output.read_bytes() == before
+
+
+def test_behavior_loader_selects_physics_and_returns_verified_metadata(paired):
+    arrays, path, info = load_isaac_behavior_arrays(paired["isaac"], paired["isaac_report"])
+    assert path == paired["isaac"] / "physics_trajectory.npz"
+    assert info == {"file": "physics_trajectory.npz", "sha256": sha256(path),
+                    "sample_dt_s": .005, "kind": "physics_rate"}
+    assert len(arrays["time_s"]) == 605
+    np.testing.assert_allclose(np.diff(arrays["time_s"]), .005)
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["provenance"]["isaac_trajectory_sha256"] == sha256(paired["isaac"] / "trajectory.npz")
+    assert result["behavior_evidence"]["isaac"]["sha256"] != result["provenance"]["isaac_trajectory_sha256"]
+
+
+@pytest.mark.parametrize("corruption", ["file", "sha", "report_dt", "export_dt", "archive_dt", "metadata_dt",
+                                        "samples", "initial_states", "no_metadata", "reset_flag", "terminal_flag",
+                                        "valid_mask_flag", "irregular_time", "counter_gap", "counter_duplicate",
+                                        "missing_terminal", "early_terminal", "revalidated_episode", "policy_pose"])
+def test_bad_declared_physics_evidence_never_falls_back_to_policy_rate(paired, corruption):
+    report = paired["isaac_report"]
+    path = paired["isaac"] / "physics_trajectory.npz"
+    with np.load(path, allow_pickle=False) as d:
+        arrays = {key: d[key].copy() for key in d.files}
+    archive_changed = False
+    if corruption == "file":
+        report["physics_trajectory_file"] = "../trajectory.npz"
+    elif corruption == "sha":
+        report["physics_trajectory_sha256"] = "0" * 64
+    elif corruption == "report_dt":
+        report["physics_dt_s"] = .02
+    elif corruption == "export_dt":
+        report["policy_export"]["physics_dt"] = .01
+    elif corruption == "archive_dt":
+        arrays["physics_dt_s"] = np.array(.02)
+        archive_changed = True
+    elif corruption == "metadata_dt":
+        report["physics_recording"]["sample_dt_s"] = .02
+    elif corruption == "samples":
+        report["physics_recording"]["samples"] -= 1
+    elif corruption == "initial_states":
+        report["physics_recording"]["initial_state_samples"] = 2
+    elif corruption == "no_metadata":
+        del report["physics_recording"]
+    elif corruption in ("reset_flag", "terminal_flag", "valid_mask_flag"):
+        field = {"reset_flag": "same_counter_reset_and_forward_updates_excluded",
+                 "terminal_flag": "terminal_states_before_reset", "valid_mask_flag": "first_episode_only_valid_mask"}[corruption]
+        report["physics_recording"][field] = False
+    elif corruption == "irregular_time":
+        arrays["time_s"][10] += .001
+        archive_changed = True
+    elif corruption == "counter_gap":
+        arrays["simulation_step_counter"][10:] += 1
+        archive_changed = True
+    elif corruption == "counter_duplicate":
+        arrays["simulation_step_counter"][10] -= 1
+        archive_changed = True
+    elif corruption == "missing_terminal":
+        arrays["terminal_sample"][:] = False
+        archive_changed = True
+    elif corruption == "early_terminal":
+        arrays["terminal_sample"][:] = False
+        arrays["terminal_sample"][100] = True
+        archive_changed = True
+    elif corruption == "revalidated_episode":
+        arrays["valid_mask"][100] = False
+        archive_changed = True
+    else:
+        arrays["root_position_m"][::4, 0, 0] += .01
+        archive_changed = True
+    if archive_changed:
+        np.savez(path, **arrays)
+        report["physics_trajectory_sha256"] = sha256(path)
+    (paired["isaac"] / "report.json").write_text(json.dumps(report))
+    with pytest.raises((ValueError, KeyError)):
+        load_isaac_behavior_arrays(paired["isaac"], report)
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["verdict"] == "fail"
+    assert not result["provenance_checks"]["same_physics_contact_sampling_clock"]["passed"]
+    assert result["behavior_evidence"]["isaac"]["kind"] == "invalid_physics_evidence"
+    assert "valid_recorded_episode_evidence" in result["isaac"]["failed_checks"]
+    assert not result["complete_contact_evidence"]

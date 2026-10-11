@@ -104,6 +104,11 @@ def validate_render(render_dir, input_hashes, reference_audit):
     }
     source_hashes = report.get("source_hashes", {})
     require(isinstance(source_hashes, dict), "Render source_hashes must be a mapping")
+    if "isaac_physics_trajectory" in input_hashes:
+        expected["isaac_physics"] = input_hashes["isaac_physics_trajectory"]
+    else:
+        require("isaac_physics" not in source_hashes,
+                "Render selects Isaac physics evidence absent from this trial report")
     for key, expected_hash in expected.items():
         require(source_hashes.get(key) == expected_hash, f"Render {key} source SHA does not match this trial")
     media = {}
@@ -135,6 +140,18 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
         require(path.is_file() and path.stat().st_size > 0, f"Missing or empty {key} evidence")
     hashes = {key: sha256(path) for key, path in files.items()}
     records = {key: read_json(path) for key, path in files.items() if path.suffix == ".json"}
+    isaac_report = records["isaac_report"]
+    if "physics_trajectory_file" in isaac_report:
+        require(isaac_report["physics_trajectory_file"] == "physics_trajectory.npz",
+                "Isaac physics trajectory must use the local physics_trajectory.npz evidence file")
+        from assess_drift import load_isaac_behavior_arrays
+        _, physics_path, physics_info = load_isaac_behavior_arrays(trial_dir / "isaac", isaac_report)
+        require(physics_info.get("kind") == "physics_rate",
+                "Isaac physics trajectory was not validated as physics-rate evidence")
+        files["isaac_physics_trajectory"] = Path(physics_path)
+        hashes["isaac_physics_trajectory"] = sha256(physics_path)
+        require(physics_info.get("sha256") == hashes["isaac_physics_trajectory"],
+                "Validated Isaac physics trajectory SHA differs from the actual input")
     stored = records["assessment"]
     fresh = assess_runs(trial_dir / "isaac", trial_dir / "mujoco", files["motion"])
     require(encode(stored) == encode(fresh), "Supplied assessment differs from freshly assessed current evidence")
@@ -201,14 +218,22 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
         "training": training_budget(manifest, optional.get("run_status"), optional.get("runner")),
         "task_profile": task_profile, "contact_material_audits": material,
         "same_actor_provenance": provenance,
+        "behavior_evidence": stored.get("behavior_evidence"),
+        "provenance_checks": stored.get("provenance_checks"),
         "engines": {engine: pick(stored[engine], ("verdict", "failed_checks", "metrics", "checks",
             "contact_patch_slip_evidence_available", "wheel_ground_contact_evidence_available", "nonwheel_contact_evidence_available",
             "complete_contact_evidence")) for engine in ("isaac", "mujoco")},
         "evaluation": {
             "isaac": pick(isaac, ("terminal_states_captured_before_auto_reset", "reference_state_initialization_during_evaluation",
-                                  "wheel_contact_slip_evidence", "contact_slip_module_sha256", "evaluator_source_sha256", "task_source_sha256")),
+                                  "wheel_contact_slip_evidence", "contact_slip_module_sha256", "evaluator_source_sha256", "task_source_sha256",
+                                  "physics_trajectory_file", "physics_trajectory_sha256", "physics_dt_s", "physics_recording",
+                                  "contact_slip_measurement", "wheel_lateral_contact_slip_evidence_kind",
+                                  "contact_slip_helper_sha256", "drift_module_sha256")),
             "mujoco": pick(mujoco, ("physics_stepped", "root_state_writes", "hidden_resets", "contact_slip_evidence_kind",
-                                    "contact_slip_module_sha256", "evaluator_source_sha256", "task_source_sha256", "model_sha256")),
+                                    "contact_slip_module_sha256", "evaluator_source_sha256", "task_source_sha256", "model_sha256",
+                                    "physics_dt_s", "policy_dt_s", "physics_recording", "contact_slip_measurement",
+                                    "wheel_lateral_contact_slip_evidence_kind", "contact_slip_helper_sha256",
+                                    "nonwheel_ground_contact_recorded")),
         },
         "common_window": stored.get("common_window"), "complete_contact_evidence": stored.get("complete_contact_evidence", False),
         "rendered_comparison_included": render is not None,
@@ -253,8 +278,9 @@ def main():
     parser.add_argument("--render-dir", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
-    print(json.dumps(publish_trial(args.trial_dir, args.reference_dir, args.output_dir, args.render_dir),
-                     indent=2, allow_nan=False))
+    summary = publish_trial(args.trial_dir, args.reference_dir, args.output_dir, args.render_dir)
+    print(json.dumps({"status": summary["status"], "verdict": summary["verdict"],
+                      "output_dir": str(args.output_dir)}, allow_nan=False))
 
 
 if __name__ == "__main__":

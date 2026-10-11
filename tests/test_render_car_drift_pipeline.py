@@ -117,6 +117,47 @@ def test_assessment_comparison_allows_only_numeric_roundoff_and_exact_hashes_gat
     assert not render.assessment_equal({"error": np.nan}, {"error": np.nan})
 
 
+def test_visual_sampling_can_halve_mesh_frames_without_changing_half_speed_clock():
+    fifty, fps_fifty = render.render_timeline(5.76, 50., .5)
+    twentyfive, fps_twentyfive = render.render_timeline(5.76, 25., .5)
+    np.testing.assert_allclose(twentyfive, fifty[::2])
+    assert len(fifty) == 289 and len(twentyfive) == 145
+    assert fps_fifty == 25. and fps_twentyfive == 12.5
+    assert twentyfive[-1] == pytest.approx(5.76)
+    assert (twentyfive[1] - twentyfive[0]) * fps_twentyfive == pytest.approx(.5)
+
+
+@pytest.mark.parametrize("fps,speed", [(0., .5), (-25., .5), (np.nan, .5), (np.inf, .5), (25., 0.), (25., np.nan)])
+def test_invalid_visual_sampling_and_playback_speed_are_rejected(fps, speed):
+    with pytest.raises(ValueError):
+        render.render_timeline(5.76, fps, speed)
+
+
+def test_isaac_behavior_selection_uses_validated_physics_archive_and_full_rate_samples(monkeypatch, tmp_path):
+    import assess_drift
+    arrays = {"time_s": np.arange(9) * .005, "distinct_physics_signal": np.arange(9)}
+    path = tmp_path / "physics_trajectory.npz"
+    info = {"file": "physics_trajectory.npz", "sha256": "a" * 64, "sample_dt_s": .005, "kind": "physics_rate"}
+    calls = []
+    def loader(directory, report):
+        calls.append((directory, report))
+        return arrays, path, info
+    monkeypatch.setattr(assess_drift, "load_isaac_behavior_arrays", loader, raising=False)
+    output_arrays, output_path, output_info = render.load_isaac_playback(tmp_path, {"physics_trajectory_file": path.name})
+    assert output_arrays is arrays and output_path == path and output_info is info
+    assert len(output_arrays["time_s"]) == 9
+    assert calls == [(tmp_path, {"physics_trajectory_file": path.name})]
+
+
+def test_isaac_declared_malformed_physics_archive_never_silently_falls_back(monkeypatch, tmp_path):
+    import assess_drift
+    def loader(directory, report):
+        raise ValueError("Physics archive SHA mismatch")
+    monkeypatch.setattr(assess_drift, "load_isaac_behavior_arrays", loader, raising=False)
+    with pytest.raises(ValueError, match="SHA mismatch"):
+        render.load_isaac_playback(tmp_path, {"physics_trajectory_file": "physics_trajectory.npz"})
+
+
 def test_renderer_never_integrates_physics_and_does_refresh_forward_kinematics():
     tree = ast.parse(Path(render.__file__).read_text())
     calls = [node.func.attr for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)]

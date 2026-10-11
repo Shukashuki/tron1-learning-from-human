@@ -80,11 +80,13 @@ def trial(tmp_path):
                "termination_terms": ["motion_end"], "early_terminated": False}
     isaac = {"simulator": "IsaacLab/PhysX", "motion_file_sha256": publish.sha256(motion),
              "policy_export": contract, "task_profile": profile, "reference_frames": 50,
+             "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points",
              "contact_material_audit": isaac_material(), "terminal_states_captured_before_auto_reset": True,
              "reference_state_initialization_during_evaluation": False,
              "summary": {"episodes": [{**outcome, "environment": 0, "end_reason": "timeout"}]},
              "host": "private-gpu-node", "note": "ssh researcher@10.20.30.40 and /home/researcher/run"}
     mujoco = {"engine": "MuJoCo", "motion_sha256": publish.sha256(motion), "policy_sha256": publish.sha256(actor),
+              "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points",
               "policy_kind": "normalized_torchscript_actor", "contract": copy.deepcopy(contract),
               "reference_frames": 50, "termination": "motion_end", "physics_stepped": True,
               "root_state_writes": 1, "hidden_resets": 0, **outcome,
@@ -137,7 +139,69 @@ def add_render(fixture):
               "final_sha256": publish.sha256(render / "final.png"),
               "contact_overview_sha256": publish.sha256(render / "contact_overview.png")}
     report["source_hashes"]["captured_source"] = "c" * 64
+    isaac = publish.read_json(trial / "isaac/report.json")
+    if "physics_trajectory_file" in isaac:
+        report["source_hashes"]["isaac_physics"] = publish.sha256(trial / "isaac" / isaac["physics_trajectory_file"])
     write_json(render / "render_report.json", report)
+
+
+def add_physics_recording(fixture):
+    """Generated clock-valid telemetry; these arrays are never physics evidence."""
+    trial, reference, _, _ = fixture
+    physical_times = np.arange(201) / 200.
+
+    def resample(path):
+        with np.load(path, allow_pickle=False) as archive:
+            arrays = {key: archive[key].copy() for key in archive.files}
+        old_times = arrays["time_s"]
+        indices = np.searchsorted(old_times, physical_times, side="right") - 1
+        for key, value in list(arrays.items()):
+            if key == "time_s" or value.shape[:1] != old_times.shape or key == "action_observation":
+                continue
+            if value.dtype.kind == "f" and "slip" not in key:
+                columns = value.reshape((len(old_times), -1))
+                arrays[key] = np.column_stack([np.interp(physical_times, old_times, column)
+                                              for column in columns.T]).reshape((201, *value.shape[1:]))
+            else:
+                arrays[key] = value[indices]
+        arrays["time_s"] = physical_times
+        quaternion_key = "root_quaternion_wxyz" if "root_quaternion_wxyz" in arrays else "root_quat_wxyz"
+        quaternion = arrays[quaternion_key]
+        quaternion /= np.linalg.norm(quaternion, axis=-1, keepdims=True)
+        return arrays
+
+    physical = resample(trial / "isaac/trajectory.npz")
+    physical.update({
+        "physics_dt_s": np.array(.005), "policy_dt_s": np.array(.02),
+        "simulation_step_counter": np.arange(201, dtype=np.int64) + 900,
+        "action_observation": np.zeros((201, 1, 51)),
+        "actions_raw": np.zeros((201, 1, 8)), "actions_clipped": np.zeros((201, 1, 8)),
+        "action_was_applied": np.r_[False, np.ones(200, dtype=bool)][:, None],
+        "reference_frame_for_action": np.clip((np.arange(201) - 1) // 4, 0, 49)[:, None],
+        "terminal_sample": np.r_[np.zeros(200, dtype=bool), True][:, None],
+    })
+    physics_path = trial / "isaac/physics_trajectory.npz"
+    np.savez(physics_path, **physical)
+    report_path = trial / "isaac/report.json"
+    report = publish.read_json(report_path)
+    report.update({
+        "physics_trajectory_file": physics_path.name,
+        "physics_trajectory_sha256": publish.sha256(physics_path), "physics_dt_s": .005,
+        "physics_recording": {
+            "sample_dt_s": .005, "samples": 201, "time_source": "relative simulator physics-step counter",
+            "hook": "after original scene.update at each incremented simulator counter during wrapped.step",
+            "initial_state_samples": 1, "terminal_states_before_reset": True,
+            "same_counter_reset_and_forward_updates_excluded": True, "first_episode_only_valid_mask": True,
+            "observations": "actual policy pre-action observations held across four physics substeps; validate actor only with trajectory.npz",
+            "primary_policy_trajectory_file": "trajectory.npz", "policy_sample_dt_s": .02,
+        },
+    })
+    write_json(report_path, report)
+    mujoco = resample(trial / "mujoco/rollout.npz")
+    mujoco["physics_dt_s"] = np.array(.005)
+    mujoco["policy_dt_s"] = np.array(.02)
+    np.savez(trial / "mujoco/rollout.npz", **mujoco)
+    reassess(fixture)
 
 
 def publish_fixture(fixture, include_render=False):
@@ -347,7 +411,165 @@ def test_standalone_cli_imports_training_package_when_cwd_is_outside_repository(
         "--output-dir", str(trial[-1]),
     ], cwd=tmp_path, capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stderr
-    summary = json.loads(result.stdout)
+    message = json.loads(result.stdout)
+    assert set(message) == {"status", "verdict", "output_dir"}
+    assert message["status"] == "assessed_" + message["verdict"]
+    assert message["output_dir"] == str(trial[-1])
+    assert len(result.stdout.splitlines()) == 1
+    summary = publish.read_json(trial[-1] / "summary.json")
     assert summary["same_actor_reference_verified"] is True
     assert summary["actual_physics_rollouts_verified"] is True
     assert (trial[-1] / "summary.json").is_file()
+
+
+def test_physics_rate_evidence_is_hash_linked_but_never_copied(trial):
+    add_physics_recording(trial)
+    result = publish_fixture(trial)
+    physics_path = trial[0] / "isaac/physics_trajectory.npz"
+    assert result["input_sha256"]["isaac_physics_trajectory"] == publish.sha256(physics_path)
+    assert result["input_sha256"]["isaac_trajectory"] == publish.sha256(trial[0] / "isaac/trajectory.npz")
+    assert result["same_actor_provenance"]["isaac_trajectory_sha256"] == result["input_sha256"]["isaac_trajectory"]
+    behavior = result["behavior_evidence"]["isaac"]
+    assert behavior == {"file": "physics_trajectory.npz", "sha256": publish.sha256(physics_path),
+                        "sample_dt_s": .005, "kind": "physics_rate"}
+    assert result["evaluation"]["isaac"]["physics_trajectory_sha256"] == publish.sha256(physics_path)
+    assert result["evaluation"]["isaac"]["physics_recording"]["terminal_states_before_reset"] is True
+    assert result["evaluation"]["isaac"]["physics_dt_s"] == .005
+    assert result["provenance_checks"] == publish.read_json(trial[0] / "assessment.json")["provenance_checks"]
+    assert not list(trial[-1].rglob("*.npz"))
+
+
+def test_physics_rate_render_hash_matches_selected_behavior_archive(trial):
+    add_physics_recording(trial)
+    add_render(trial)
+    result = publish_fixture(trial, include_render=True)
+    render = publish.read_json(trial[-1] / "render_report.json")
+    assert render["source_hashes"]["isaac_physics"] == result["input_sha256"]["isaac_physics_trajectory"]
+    assert render["source_hashes"]["isaac"] == result["input_sha256"]["isaac_trajectory"]
+
+
+def test_summary_preserves_actual_evaluator_contact_source_field_names(trial):
+    add_physics_recording(trial)
+    for engine in ("isaac", "mujoco"):
+        path = trial[0] / engine / "report.json"
+        report = publish.read_json(path)
+        report["contact_slip_helper_sha256"] = "1" * 64
+        report["contact_slip_measurement"] = {"ground_is_stationary": True, "sample_dt_s": .005,
+                                             "aggregation": "normal-force-weighted RMS over active actual ground contact points"}
+        if engine == "isaac":
+            report["drift_module_sha256"] = "2" * 64
+        write_json(path, report)
+    reassess(trial)
+    result = publish_fixture(trial)
+    for engine in ("isaac", "mujoco"):
+        evaluation = result["evaluation"][engine]
+        assert evaluation["contact_slip_helper_sha256"] == "1" * 64
+        assert evaluation["wheel_lateral_contact_slip_evidence_kind"] == "actual_ground_contact_points"
+        assert evaluation["contact_slip_measurement"]["sample_dt_s"] == .005
+    assert result["evaluation"]["isaac"]["drift_module_sha256"] == "2" * 64
+
+
+@pytest.mark.parametrize("change", ["missing", "tampered"])
+def test_missing_or_tampered_render_physics_hash_leaves_no_output(trial, change):
+    add_physics_recording(trial)
+    add_render(trial)
+    path = trial[2] / "render_report.json"
+    render = publish.read_json(path)
+    if change == "missing":
+        del render["source_hashes"]["isaac_physics"]
+    else:
+        render["source_hashes"]["isaac_physics"] = "0" * 64
+    write_json(path, render)
+    with pytest.raises(ValueError, match="Render isaac_physics.*SHA"):
+        publish_fixture(trial, include_render=True)
+    assert not trial[-1].exists()
+
+
+def test_renderer_cannot_select_an_unreported_physics_archive(trial):
+    add_render(trial)
+    path = trial[2] / "render_report.json"
+    render = publish.read_json(path)
+    render["source_hashes"]["isaac_physics"] = "a" * 64
+    write_json(path, render)
+    with pytest.raises(ValueError, match="absent from this trial report"):
+        publish_fixture(trial, include_render=True)
+    assert not trial[-1].exists()
+
+
+@pytest.mark.parametrize("filename", ["../physics_trajectory.npz", "/tmp/physics_trajectory.npz", "renamed.npz", None])
+def test_physics_evidence_filename_must_be_fixed_and_local(trial, filename):
+    add_physics_recording(trial)
+    path = trial[0] / "isaac/report.json"
+    report = publish.read_json(path)
+    report["physics_trajectory_file"] = filename
+    write_json(path, report)
+    with pytest.raises(ValueError, match="local physics_trajectory"):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+def test_missing_selected_physics_evidence_leaves_no_output(trial):
+    add_physics_recording(trial)
+    (trial[0] / "isaac/physics_trajectory.npz").unlink()
+    with pytest.raises((ValueError, FileNotFoundError)):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+def test_changed_physics_archive_cannot_use_old_report_or_assessment(trial):
+    add_physics_recording(trial)
+    path = trial[0] / "isaac/physics_trajectory.npz"
+    with np.load(path, allow_pickle=False) as archive:
+        arrays = {key: archive[key].copy() for key in archive.files}
+    arrays["wheel_ground_contact_count"][30, 0, 0] = 0
+    np.savez(path, **arrays)
+    with pytest.raises(ValueError):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+def test_refreshed_physics_hash_does_not_hide_a_stale_assessment(trial):
+    add_physics_recording(trial)
+    path = trial[0] / "isaac/physics_trajectory.npz"
+    with np.load(path, allow_pickle=False) as archive:
+        arrays = {key: archive[key].copy() for key in archive.files}
+    arrays["wheel_lateral_contact_slip_m_s"][:] = 0.
+    np.savez(path, **arrays)
+    report_path = trial[0] / "isaac/report.json"
+    report = publish.read_json(report_path)
+    report["physics_trajectory_sha256"] = publish.sha256(path)
+    write_json(report_path, report)
+    with pytest.raises(ValueError, match="freshly assessed"):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [("samples", 200), ("sample_dt_s", .02),
+                                        ("initial_state_samples", 2), ("terminal_states_before_reset", False),
+                                        ("same_counter_reset_and_forward_updates_excluded", False),
+                                        ("first_episode_only_valid_mask", False)])
+def test_invalid_physics_recording_audit_cannot_be_published(trial, field, value):
+    add_physics_recording(trial)
+    report_path = trial[0] / "isaac/report.json"
+    report = publish.read_json(report_path)
+    report["physics_recording"][field] = value
+    write_json(report_path, report)
+    with pytest.raises(ValueError):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+def test_physics_archive_is_rehashed_after_preflight_before_output_creation(trial, monkeypatch):
+    add_physics_recording(trial)
+    original = publish.prepare_publication
+
+    def changed_after_preflight(*args, **kwargs):
+        result = original(*args, **kwargs)
+        path = trial[0] / "isaac/physics_trajectory.npz"
+        path.write_bytes(path.read_bytes() + b"changed after successful preflight")
+        return result
+
+    monkeypatch.setattr(publish, "prepare_publication", changed_after_preflight)
+    with pytest.raises(ValueError, match="Input changed.*isaac_physics_trajectory"):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
