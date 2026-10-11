@@ -43,6 +43,20 @@ class ObservationTests(unittest.TestCase):
         self.assertEqual(c["observed_joint_velocity_order"], c["leg_joint_names"] + c["wheel_joint_names"])
         self.assertAlmostEqual(c["physics_dt"] * c["decimation"], 1 / c["policy_fps"])
 
+    def test_supported_finer_clocks_round_trip_without_changing_policy_layout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for dt, decimation in ((.005, 4), (.0025, 8), (.00125, 16)):
+                with self.subTest(dt=dt):
+                    original = read_contract()
+                    c = {**original, "physics_dt": dt, "decimation": decimation}
+                    path = Path(tmp) / "contract.json"
+                    path.write_text(json.dumps(c))
+                    loaded = read_contract(path)
+                    self.assertEqual(loaded, c)
+                    self.assertEqual(loaded["actor_terms"], original["actor_terms"])
+                    self.assertEqual(loaded["leg_kd"], original["leg_kd"])
+                    self.assertAlmostEqual(loaded["physics_dt"] * loaded["decimation"], .02)
+
     def test_observation_slices_and_no_wheel_angle(self):
         state, target = state_and_target()
         q0, previous = np.arange(8.) / 20, np.arange(8.) / 10
@@ -166,6 +180,25 @@ class PreparedAssetTests(unittest.TestCase):
                 self.assertTrue(all(np.isfinite(result[name]).all() for name in result.files
                                     if result[name].dtype.kind in "fiu"))
             self.assertEqual(json.loads((Path(tmp) / "run/report.json").read_text())["policy_kind"], "injected_test_callable")
+
+    def test_finer_integration_keeps_two_actions_and_complete_physical_samples(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for dt, decimation in ((.0025, 8), (.00125, 16)):
+                with self.subTest(dt=dt):
+                    c = {**self.contract, "physics_dt": dt, "decimation": decimation}
+                    output = Path(tmp) / str(decimation)
+                    contract_path = Path(tmp) / f"contract-{decimation}.json"
+                    contract_path.write_text(json.dumps(c))
+                    report = run_evaluation(lambda obs: np.zeros(8), MOTION, DEFAULT_MODEL, output,
+                                            contract_path=contract_path, max_policy_steps=2)
+                    self.assertEqual(report["physics_steps"], 2 * decimation)
+                    self.assertEqual(report["policy_steps"], 2)
+                    self.assertEqual(report["root_state_writes"], 1)
+                    self.assertAlmostEqual(report["recorded_duration_s"], .04)
+                    with np.load(output / "rollout.npz", allow_pickle=False) as arrays:
+                        self.assertEqual(len(arrays["time_s"]), 2 * decimation + 1)
+                        self.assertEqual(arrays["action_observation"].shape, (2, 51))
+                        np.testing.assert_allclose(np.diff(arrays["time_s"]), dt)
 
     def test_nonwheel_ground_evidence_detects_body_contact(self):
         self.measured.initialize()

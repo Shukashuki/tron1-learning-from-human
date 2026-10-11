@@ -14,11 +14,17 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 
 from compare_tracking import (common_window_rmse, load_episode, read_json,
                               read_npz, sha256, validate_provenance)
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from training.tron1_physics_clock import validate_physics_clock
 
 THRESHOLDS = {
     "drift_min_planar_speed_m_s": .4,
@@ -171,6 +177,7 @@ def load_isaac_behavior_arrays(isaac_dir, report):
         raise ValueError("Isaac physics trajectory requires complete recording metadata")
     dt = _finite_timestep(report.get("physics_dt_s"), "Isaac report physics_dt_s")
     exported = report.get("policy_export", {})
+    validate_physics_clock(exported)
     for value, label in ((exported.get("physics_dt"), "exported physics_dt"),
                          (arrays.get("physics_dt_s"), "archive physics_dt_s"),
                          (metadata.get("sample_dt_s"), "recording sample_dt_s")):
@@ -480,22 +487,25 @@ def assess_runs(isaac_dir, mujoco_dir, reference_file):
                                         "kind": "invalid_physics_evidence", "error": str(exc)}
         sampling_errors.append("MuJoCo: " + str(exc))
     sampling_match = not sampling_errors
+    try:
+        exported_clock = validate_physics_clock(exported)
+        deployed_clock = validate_physics_clock(deployed)
+        if exported_clock != deployed_clock:
+            raise ValueError("Both engines must use the same exported physics clock and 50 Hz policy")
+        expected_dt = exported_clock[0]
+    except (ValueError, KeyError, TypeError) as exc:
+        expected_dt = 0.
+        sampling_match = False
+        sampling_errors.append(str(exc))
     for key, report in (("isaac", isaac), ("mujoco", mujoco)):
         info = behavior_evidence[key]
-        if info.get("kind") != "physics_rate" or not np.isclose(info.get("sample_dt_s", 0.), .005, atol=1e-12, rtol=0):
+        if (info.get("kind") != "physics_rate" or expected_dt <= 0
+                or not np.isclose(info.get("sample_dt_s", 0.), expected_dt, atol=1e-12, rtol=0)):
             sampling_match = False
-            sampling_errors.append(f"{key} must supply genuine 200 Hz physics-rate contact evidence")
+            sampling_errors.append(f"{key} must supply genuine physics-rate contact evidence at the same exported clock")
         if report.get("wheel_lateral_contact_slip_evidence_kind") != "actual_ground_contact_points":
             sampling_match = False
             sampling_errors.append(f"{key} must identify actual ground contact-point slip measurements")
-    try:
-        exported_dt_matches = np.isclose(_finite_timestep(exported.get("physics_dt"), "exported physics_dt"),
-                                        .005, atol=1e-12, rtol=0)
-    except ValueError:
-        exported_dt_matches = False
-    if not exported_dt_matches:
-        sampling_match = False
-        sampling_errors.append("Both recorded clocks must equal the exported 0.005s physics timestep")
     _check(checks, "same_physics_contact_sampling_clock", sampling_match, sampling_errors)
     results = {}
     for key, engine, report in (("isaac", "Isaac", isaac), ("mujoco", "MuJoCo", mujoco)):
@@ -516,7 +526,7 @@ def assess_runs(isaac_dir, mujoco_dir, reference_file):
             "failed_checks": failed, "thresholds": dict(THRESHOLDS),
             "threshold_policy": "Fixed before policy drift evaluation outcomes; no relaxation based on results.",
             "provenance": provenance, "provenance_checks": checks, "behavior_evidence": behavior_evidence,
-            "contact_sampling_policy": "Both engines must record actual contact evidence at the exported 200 Hz physics clock; legacy 50 Hz Isaac behavior cannot pass the paired gate.",
+            "contact_sampling_policy": "Both engines must record actual contact evidence at the same exported 200/400/800 Hz physics clock and retain a 50 Hz policy; legacy policy-rate behavior cannot pass the paired gate.",
             "common_window": common, **results,
             "assessor_source_sha256": sha256(__file__), "reference_sha256": sha256(reference_file),
             "complete_contact_evidence": sampling_match and all(v["complete_contact_evidence"] for v in results.values()),
@@ -525,7 +535,7 @@ def assess_runs(isaac_dir, mujoco_dir, reference_file):
                             "Contact support and contiguous drift duration use held samples on the actual logged clock.",
                             "Near-rest sideslip is undefined and excluded below the fixed speed threshold.",
                             "Contact-patch slip must be recorded by each engine; it is never inferred from base velocity.",
-                            "Canonical 50 Hz Isaac trajectory verifies actor observations; separately hash-verified 200 Hz physical telemetry determines behavior and contact gates.",
+                            "Canonical 50 Hz Isaac trajectory verifies actor observations; separately hash-verified physical-rate telemetry determines behavior and contact gates.",
                             "Legacy Isaac policy-rate records remain inspectable but unequal physical contact sampling is a failed paired gate.",
                             "Missing nonwheel contact telemetry leaves complete contact evidence false.",
                             "Common-window RMSE is diagnostic and uses no phase shift, spatial alignment or extrapolation."]}

@@ -20,7 +20,7 @@ from render_tracking import (ACTUAL, BG, MUTED, OTHER, PANEL, REFERENCE, ROOT, T
                              named_qpos, np, plt, read_npz, sha256, terminal_annotation)
 from render_motion_pipeline import frame_times, source_clock
 from render_mink import add_connector
-from assess_drift import assess_runs, sideslip
+from assess_drift import THRESHOLDS, assess_runs, sideslip
 from publish_motion_suite import sanitize
 from compare_tracking import validate_provenance
 
@@ -148,6 +148,26 @@ def render_timeline(end_s, render_fps, playback_speed):
     return frame_times(end_s, render_fps), float(render_fps * playback_speed)
 
 
+def displayed_sideslip_degrees(beta_rad, planar_speed_m_s):
+    """Display-only near-rest mask; all assessment inputs remain unchanged."""
+    beta, speed = np.asarray(beta_rad, float), np.asarray(planar_speed_m_s, float)
+    if (beta.shape != speed.shape or beta.ndim != 1
+            or not np.isfinite(beta).all() or not np.isfinite(speed).all() or np.any(speed < 0)):
+        raise ValueError("Sideslip display requires aligned finite angles and non-negative planar speeds")
+    threshold = THRESHOLDS["sideslip_defined_min_speed_m_s"]
+    return np.where(speed >= threshold, np.degrees(beta), np.nan)
+
+
+def adapted_car_chart_series(source_samples, spatial_scale, time_scale):
+    """Mask the comparison curve using robot-scale, not native car, speed."""
+    scales = np.asarray([spatial_scale, time_scale], float)
+    if not np.isfinite(scales).all() or np.any(scales <= 0):
+        raise ValueError("Source chart adaptation scales must be finite and positive")
+    speed = np.asarray([np.linalg.norm(sample["velocity"]) for sample in source_samples]) * spatial_scale / time_scale
+    beta = np.asarray([sample["beta"] for sample in source_samples])
+    return speed, displayed_sideslip_degrees(beta, speed)
+
+
 def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path, assessment_path=None):
     captured_source, robot_reference, isaac_dir, mujoco_dir, model_path = map(Path,
         (captured_source, robot_reference, isaac_dir, mujoco_dir, model_path))
@@ -198,7 +218,7 @@ def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path,
         if velocity is None:
             raise ValueError("Measured COM velocity is required to display policy sideslip")
         speed, beta = sideslip(clip.quat, velocity)
-        series[key] = {"velocity": velocity, "speed": speed, "beta_deg": np.where(speed >= .1, np.degrees(beta), np.nan),
+        series[key] = {"velocity": velocity, "speed": speed, "beta_deg": displayed_sideslip_degrees(beta, speed),
                        "slip": _telemetry(arrays, "wheel_lateral_contact_slip_m_s", engine, len(clip.times), (2,)),
                        "contacts": _telemetry(arrays, "wheel_ground_contact_count", engine, len(clip.times), (2,))}
     ref_speed, ref_beta = sideslip(reference.quat, motion["body_lin_vel_w"][:, 0])
@@ -210,7 +230,7 @@ def prepare(captured_source, robot_reference, isaac_dir, mujoco_dir, model_path,
                   pose_helpers=sha256(Path(__file__).with_name("render_tracking.py")),
                   clock_helpers=sha256(Path(__file__).with_name("render_motion_pipeline.py")))
     return {"car": car, "reference": reference, "isaac": isaac, "mujoco": mj, "series": series,
-            "reference_speed": ref_speed, "reference_beta_deg": np.where(ref_speed >= .1, np.degrees(ref_beta), np.nan),
+            "reference_speed": ref_speed, "reference_beta_deg": displayed_sideslip_degrees(ref_beta, ref_speed),
             "reference_velocity": motion["body_lin_vel_w"][:, 0], "task_times": motion["time_s"],
             "source_times": motion["demonstration_time_s_estimated"], "source_phases": motion["source_phase"],
             "reference_action_duration_s": len(motion["time_s"]) / float(motion["fps"].item()),
@@ -234,9 +254,11 @@ def _charts(prepared, axes, end_s):
     stop_end = prepared["mapping"]["synthetic_stop_end_task_s"]
     captured_times = prepared["task_times"][prepared["source_phases"] == 0]
     source_samples = [prepared["car"].sample(source_clock(prepared["task_times"], prepared["source_times"], t)) for t in captured_times]
-    beta_ax.plot(captured_times, [np.degrees(v["beta"]) for v in source_samples], color=CAR, ls="--", label="Car source")
     speed_factor = prepared["mapping"]["source_spatial_scale"] / prepared["mapping"]["source_time_scale"]
-    speed_ax.plot(captured_times, [np.linalg.norm(v["velocity"]) * speed_factor for v in source_samples],
+    source_speed, source_beta_deg = adapted_car_chart_series(source_samples,
+        prepared["mapping"]["source_spatial_scale"], prepared["mapping"]["source_time_scale"])
+    beta_ax.plot(captured_times, source_beta_deg, color=CAR, ls="--", label="Car source")
+    speed_ax.plot(captured_times, source_speed,
                   color=CAR, ls="--", label=f"Car speed x{speed_factor:g}")
     for ax, values in ((beta_ax, prepared["reference_beta_deg"]), (speed_ax, prepared["reference_speed"])):
         ax.plot(reference.times, values, color=REFERENCE, label="Kinematic target", lw=1.8)
@@ -266,6 +288,8 @@ def _charts(prepared, axes, end_s):
         ax.set(xlim=(0., end_s), xlabel="Shared task time (s)")
         ax.legend(frameon=False, labelcolor=TEXT, fontsize=8, loc="upper right")
     beta_ax.set_ylabel("COM sideslip beta (deg)", color=MUTED)
+    beta_ax.text(.02, .03, f"Undefined below {THRESHOLDS['sideslip_defined_min_speed_m_s']:g} m/s; gaps are not zero beta",
+                 transform=beta_ax.transAxes, color=MUTED, fontsize=7)
     speed_ax.set_ylabel("Planar COM speed (m/s)", color=MUTED)
     slip_ax.set_ylabel("Contact-patch lateral slip (m/s)", color=MUTED)
 
@@ -454,6 +478,9 @@ def render(prepared, model_path, output, playback_speed=.5, render_fps=50.):
             "camera": {"lookat": camera.lookat.tolist(), "distance": float(camera.distance), "azimuth": float(camera.azimuth), "elevation": float(camera.elevation)},
             "video_resolution": [width, height], "video_frames": len(timeline), "video_fps": video_fps,
             "time_sampling_fps": float(render_fps), "metrics_downsampled_for_rendering": False,
+            "sideslip_display": {"undefined_below_planar_speed_m_s": THRESHOLDS["sideslip_defined_min_speed_m_s"],
+                                 "source_curve_speed": "original car speed times the declared spatial_scale/time_scale",
+                                 "mask_is_display_only": True, "assessment_inputs_changed": False},
             "playback_speed": playback_speed, "video_sha256": sha256(video),
             "overview_sha256": sha256(output / "overview.png"), "final_sha256": sha256(output / "final.png"),
             "contact_overview_sha256": sha256(output / "contact_overview.png"), "hardware_ready": False,
@@ -461,7 +488,7 @@ def render(prepared, model_path, output, playback_speed=.5, render_fps=50.):
                 "Schematic source topview uses captured poses, not reconstructed physical car dynamics.",
                 "Synthetic stop/rest are robot task adaptations, not demonstrated source motion.",
                 "Source controls remain car evidence and are not robot action targets.",
-                "Near-rest COM sideslip is hidden below0.1m/s; the angle is undefined near rest.",
+                f"Near-rest COM sideslip is hidden below {THRESHOLDS['sideslip_defined_min_speed_m_s']:g} m/s; gaps mean undefined, not zero. Source comparison uses robot-scale speed.",
                 "Contact-patch slip is drawn only when both recorded wheels contact the ground; missing telemetry remains missing.",
                 "Early-ended actual trajectories visibly hold their recorded terminal pose; no phase shift or extrapolated dynamics.",
                 "One recorded first episode per engine does not establish statistical robustness."]})

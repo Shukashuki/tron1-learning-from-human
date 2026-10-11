@@ -30,6 +30,26 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def physics_clock_readback(env, cfg, contract):
+    """Verify the live simulator and environment clocks before any rollout."""
+    from training.tron1_physics_clock import validate_physics_clock
+    expected_dt, expected_decimation = validate_physics_clock(contract)
+    values = {
+        "simulator_physics_dt_s": float(env.sim.get_physics_dt()),
+        "environment_physics_dt_s": float(env.physics_dt),
+        "policy_dt_s": float(env.step_dt),
+        "net_contact_sensor_update_period_s": float(env.scene.sensors["contact_forces"].cfg.update_period),
+    }
+    if (any(not math.isfinite(value) for value in values.values())
+            or type(cfg.decimation) is not int or cfg.decimation != expected_decimation
+            or not all(math.isclose(values[key], expected_dt, abs_tol=1e-12, rel_tol=0)
+                       for key in ("simulator_physics_dt_s", "environment_physics_dt_s",
+                                   "net_contact_sensor_update_period_s"))
+            or not math.isclose(values["policy_dt_s"], .02, abs_tol=1e-12, rel_tol=0)):
+        raise RuntimeError("Live evaluation physics clock differs from its declared 50 Hz deployment contract")
+    return {"status": "verified", "decimation": expected_decimation, **values}
+
+
 class PhysicsTrajectoryRecorder:
     """First-episode physical states; independent of policy-rate recording.
 
@@ -277,6 +297,8 @@ def main():
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
     parser.add_argument("--record-physics", action="store_true",
                         help="Also save every physics substep in a separate first-episode physics_trajectory.npz")
+    parser.add_argument("--physics-dt-s", type=float, choices=(.005, .0025, .00125), default=None,
+                        help="Explicit evaluation-only numerical refinement; policy remains 50 Hz and training/task profile unchanged")
     parser.add_argument("--domain-parameters", type=Path,
                         help="One explicit fixed actuator-domain draw JSON; never resample during evaluation")
     AppLauncher.add_app_launcher_args(parser)
@@ -316,6 +338,7 @@ def main():
             from training.tron1_terrain import load_terrain
             terrain_spec = load_terrain(args.terrain_file)
         training_manifest_path = args.checkpoint.parent / "manifest.json"
+        trained_manifest = None
         if training_manifest_path.is_file():
             trained_manifest = json.loads(training_manifest_path.read_text())
             trained_terrain = trained_manifest.get("terrain")
@@ -323,6 +346,16 @@ def main():
                 raise ValueError("Evaluation terrain differs from the checkpoint training manifest")
             if trained_manifest.get("task_profile") != task_profile:
                 raise ValueError("Evaluation drift task/material profile differs from training")
+        if args.physics_dt_s is not None:
+            if trained_manifest is None or not isinstance(trained_manifest.get("contract"), dict):
+                raise ValueError("Explicit physics refinement requires the checkpoint training manifest and its nominal contract")
+            from training.tron1_physics_clock import apply_physics_clock_to_contract
+            nominal_contract = observation_action_contract()
+            if task_profile is not None:
+                from training.tron1_drift import apply_task_profile_to_contract
+                nominal_contract = apply_task_profile_to_contract(nominal_contract, task_profile)
+            refined_contract = apply_physics_clock_to_contract(
+                nominal_contract, args.physics_dt_s, trained_contract=trained_manifest["contract"])
 
         def to_numpy(tensor):
             return tensor.detach().cpu().numpy().copy()
@@ -383,8 +416,13 @@ def main():
         cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, eval_mode=True,
                            dr_profile={"mode": "fixed", "fixed_draw": domain_parameters} if domain_parameters else None,
                            terrain_spec=terrain_spec, task_profile=task_profile)
+        if args.physics_dt_s is not None:
+            from training.tron1_physics_clock import configure_physics_clock
+            configure_physics_clock(cfg, args.physics_dt_s)
         cfg.seed = args.seed
         env = TerminalCaptureEnv(cfg=cfg)
+        clock_readback = (physics_clock_readback(env, cfg, refined_contract)
+                          if args.physics_dt_s is not None else None)
         contact_material_audit = None
         if task_profile is not None:
             from training.tron1_drift import audit_isaac_materials
@@ -544,6 +582,9 @@ def main():
         if task_profile is not None:
             from training.tron1_drift import apply_task_profile_to_contract
             contract = apply_task_profile_to_contract(contract, task_profile)
+        if args.physics_dt_s is not None:
+            contract = apply_physics_clock_to_contract(
+                contract, args.physics_dt_s, trained_contract=trained_manifest["contract"])
         contract["domain_randomization"] = "disabled during evaluation; fixed actuator parameters"
         if terrain_spec is not None:
             contract["terrain"] = terrain_spec
@@ -610,6 +651,9 @@ def main():
             ],
         }
         np.savez_compressed(args.output_dir / "trajectory.npz", **arrays)
+        if args.physics_dt_s is not None:
+            report.update({"physics_clock_refinement": contract["physics_clock_refinement"],
+                           "physics_clock_readback": clock_readback})
         if physics_recorder is not None:
             physical_arrays = physics_recorder.arrays(robot.joint_names, robot.body_names,
                                                        WHEEL_BODY_NAMES, env.step_dt)
@@ -628,7 +672,9 @@ def main():
                     "terminal_states_before_reset": True,
                     "same_counter_reset_and_forward_updates_excluded": True,
                     "first_episode_only_valid_mask": True,
-                    "observations": "actual policy pre-action observations held across four physics substeps; validate actor only with trajectory.npz",
+                    "observations": ("actual policy pre-action observations held across four physics substeps; validate actor only with trajectory.npz"
+                                     if cfg.decimation == 4 else
+                                     f"actual policy pre-action observations held across {cfg.decimation} physics substeps; validate actor only with trajectory.npz"),
                     "primary_policy_trajectory_file": "trajectory.npz",
                     "policy_sample_dt_s": env.step_dt,
                 },

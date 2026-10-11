@@ -73,11 +73,12 @@ def isaac_fixture(data, report, *, invalid_tail=0):
     return arrays, result
 
 
-def synthetic_physics_fixture(data):
-    """Synthetic schema-only 200 Hz fixture, not simulated physical evidence."""
+def synthetic_physics_fixture(data, dt=.005):
+    """Synthetic schema-only physical-clock fixture, not simulated evidence."""
     old_times = data["time_s"]
-    times = np.arange((len(old_times) - 1) * 4 + 1) * .005
-    held = np.minimum(np.arange(len(times)) // 4, len(old_times) - 1)
+    decimation = round(.02 / dt)
+    times = np.arange((len(old_times) - 1) * decimation + 1) * dt
+    held = np.minimum(np.arange(len(times)) // decimation, len(old_times) - 1)
     result = {}
     for key, value in data.items():
         if key in ("time_s", "action_observation"):
@@ -93,7 +94,7 @@ def synthetic_physics_fixture(data):
             result[key] = value.copy()
     result["root_quat_wxyz"] /= np.linalg.norm(result["root_quat_wxyz"], axis=-1, keepdims=True)
     result["time_s"] = times
-    result["physics_dt_s"] = np.array(.005)
+    result["physics_dt_s"] = np.array(dt)
     result["action_observation"] = np.zeros((len(old_times) - 1, 51))
     return result
 
@@ -358,8 +359,10 @@ def test_zero_reference_turn_or_displacement_cannot_hide_missing_intent():
 
 
 @pytest.fixture
-def paired(tmp_path):
+def paired(tmp_path, request):
     data, reference, report = fixture()
+    dt = getattr(request, "param", .005)
+    report["contract"].update(physics_dt=dt, decimation=round(.02 / dt))
     ia, ir = isaac_fixture(data, report)
     idir, mdir = tmp_path / "isaac", tmp_path / "mujoco"
     idir.mkdir()
@@ -368,9 +371,9 @@ def paired(tmp_path):
     np.savez(motion, **reference)
     (idir / "actor_normalized.pt").write_bytes(b"synthetic identity only, never loaded")
     np.savez(idir / "trajectory.npz", **ia)
-    physical = synthetic_physics_fixture(data)
+    physical = synthetic_physics_fixture(data, dt)
     pa, _ = isaac_fixture(physical, report)
-    pa["physics_dt_s"] = np.array(.005)
+    pa["physics_dt_s"] = np.array(dt)
     pa["policy_dt_s"] = np.array(.02)
     pa["simulation_step_counter"] = np.arange(len(pa["time_s"]), dtype=int)
     pa["terminal_sample"] = np.zeros_like(pa["valid_mask"])
@@ -382,9 +385,9 @@ def paired(tmp_path):
     ir["policy_export"].update(actor_file="actor_normalized.pt", actor_includes_observation_normalizer=True,
                                reference_file_sha256=sha256(motion))
     ir.update(physics_trajectory_file="physics_trajectory.npz",
-              physics_trajectory_sha256=sha256(idir / "physics_trajectory.npz"), physics_dt_s=.005,
+              physics_trajectory_sha256=sha256(idir / "physics_trajectory.npz"), physics_dt_s=dt,
               wheel_lateral_contact_slip_evidence_kind="actual_ground_contact_points",
-              physics_recording={"sample_dt_s": .005, "samples": len(pa["time_s"]), "initial_state_samples": 1,
+              physics_recording={"sample_dt_s": dt, "samples": len(pa["time_s"]), "initial_state_samples": 1,
                                  "terminal_states_before_reset": True,
                                  "same_counter_reset_and_forward_updates_excluded": True,
                                  "first_episode_only_valid_mask": True})
@@ -408,6 +411,45 @@ def test_paired_same_actor_grounded_drift_has_common_clock_rmse(paired):
     assert result["behavior_evidence"]["isaac"]["file"] == "physics_trajectory.npz"
     assert result["behavior_evidence"]["isaac"]["kind"] == "physics_rate"
     assert result["behavior_evidence"]["mujoco"]["sample_dt_s"] == .005
+
+
+@pytest.mark.parametrize("paired", [.0025, .00125], indirect=True)
+def test_finer_physical_clocks_require_matching_full_rate_evidence(paired):
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert result["verdict"] == "pass", result["failed_checks"]
+    assert result["provenance_checks"]["same_physics_contact_sampling_clock"]["passed"]
+    assert result["behavior_evidence"]["isaac"]["sample_dt_s"] == paired["isaac_report"]["physics_dt_s"]
+    assert result["thresholds"] == THRESHOLDS
+
+
+@pytest.mark.parametrize("paired", [.0025, .00125], indirect=True)
+def test_finer_clocks_do_not_accept_differently_timed_deployed_contract(paired):
+    paired["mujoco_report"]["contract"].update(physics_dt=.005, decimation=4)
+    (paired["mujoco"] / "report.json").write_text(json.dumps(paired["mujoco_report"]))
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert "provenance.same_physics_contact_sampling_clock" in result["failed_checks"]
+    assert "provenance.matching_actuator_and_clock_contract" in result["failed_checks"]
+
+
+@pytest.mark.parametrize("paired", [.004], indirect=True)
+def test_undeclared_physical_clock_fails_closed(paired):
+    result = assess_runs(paired["isaac"], paired["mujoco"], paired["reference"])
+    assert "provenance.same_physics_contact_sampling_clock" in result["failed_checks"]
+
+
+@pytest.mark.parametrize("dt", [.005, .0025, .00125])
+@pytest.mark.parametrize("duration,passed", [(.195, False), (.2, True)])
+def test_contiguous_drift_threshold_remains_point_two_seconds_at_all_clocks(dt, duration, passed):
+    data, reference, report = fixture()
+    report["contract"].update(physics_dt=dt, decimation=round(.02 / dt))
+    data = synthetic_physics_fixture(data, dt)
+    data["wheel_ground_contact_count"][:] = 0
+    start = round(.7 / dt)
+    end = start + round(duration / dt)
+    data["wheel_ground_contact_count"][start:end] = 1
+    result = run(data, reference, report)
+    assert result["checks"]["sustained_grounded_contact_patch_drift"]["passed"] is passed
+    assert result["metrics"]["maximum_contiguous_drift_s"] == pytest.approx(duration)
 
 
 @pytest.mark.parametrize("failure", ["actor", "reference", "observations", "wheel_order", "actuator"])

@@ -22,7 +22,7 @@ A TRON1-specific adapter uses GMR's two-stage inverse kinematics to generate the
 
 Forward jump, turning jump, sideways jump, and step-up use this GMR pipeline. Rolling stop and crouch instead use explicit wheel-task adaptations: duration is doubled, and displacement or crouch depth is adjusted. They are not unmodified human imitation or direct GMR outputs. See the [reference recipes](config/suite/motion_suite.json).
 
-The car-drift extension uses a captured DOA/CARLA vehicle demonstration, not human mocap or physical-car capture. Vehicle XY is scaled by 0.08 and time by 2, while the heading and sideslip profile are retained. Bounded leg IK supplies an upright, grounded robot reference; wheel spin cancels rolling velocity but allows lateral slip. A disclosed 1.5 s synthetic stop and 0.5 s stationary tail complete the reference. This is a separate task adapter, not GMR applied to a car.
+The car-drift extension uses a captured DOA/CARLA vehicle demonstration, not human mocap or physical-car capture. It shows steering-induced inertia drift without throttle or hand-brake input, starting already moving. Vehicle XY is scaled by 0.08 and time by 2; heading is retained and the differentiated COM sideslip profile is approximately retained (maximum discrepancy 0.396°). Bounded leg IK supplies an upright, grounded robot reference; wheel spin cancels rolling velocity but allows lateral slip. A disclosed 1.5 s synthetic stop and 0.5 s stationary tail complete the reference. This is a separate task adapter, not GMR applied to a car.
 
 ### Reference to learned control
 
@@ -40,7 +40,7 @@ q_{\mathrm{des,leg}} = q_0 + (1.0\;\mathrm{rad})\,a_{\mathrm{leg}},
 \tau_{\mathrm{cmd,wheel}} = (12\;\mathrm{N\,m})\,a_{\mathrm{wheel}}.
 $$
 
-Here, `q₀` is the fixed leg pose at reference frame zero—not the time-varying reference. Leg targets use PD control (`Kp = 500`, `Kd = 10`); wheels use direct torque commands. Applied torques pass through the DC-motor torque–speed envelope and shaft-resistance model, with nominal output limits of 80 N·m for legs and 12 N·m for wheels. These are simulation settings, not verified hardware ratings.
+Here, `q₀` is the fixed leg pose at reference frame zero—not the time-varying reference. Leg targets use PD control (default `Kp = 500`, `Kd = 10`; overrides are recorded per trial); wheels use direct torque commands. Applied torques pass through the DC-motor torque–speed envelope and shaft-resistance model, with nominal output limits of 80 N·m for legs and 12 N·m for wheels. These are simulation settings, not verified hardware ratings.
 
 There is no reference wheel torque: PPO learns wheel actions from tracking rewards and interaction with the simulator. Wheel-center position/velocity remain tracking objectives, but wheel axial rotation is excluded. The [control contract](training/tron1_tracking.py) defines the exact observations and actions.
 
@@ -53,7 +53,7 @@ There is no reference wheel torque: PPO learns wheel actions from tracking rewar
 | Control | 50 Hz policy, 200 Hz physics; 51 actor observations, 8 actions |
 | Budget per motion | 2,048 environments × 600 PPO updates; approximately 29.49 million environment steps; seed 42 |
 
-Each motion has a separate policy fine-tuned from the same previous jump checkpoint, not trained from scratch. We evaluate the predesignated final checkpoint. Training randomizes wheel shaft resistance (0–0.3 N·m), motor no-load speed (0.85–1.00× nominal), and torque capacity (0.85–1.00× nominal). Parameters stay fixed within each episode; 20% of resets use nominal parameters.
+Each CMU motion has a separate policy fine-tuned from the same previous jump checkpoint, not trained from scratch. Car-drift retries use the declared resume checkpoint in the experiment log. We evaluate the predesignated final checkpoint. Training randomizes wheel shaft resistance (0–0.3 N·m), motor no-load speed (0.85–1.00× nominal), and torque capacity (0.85–1.00× nominal). Parameters stay fixed within each episode; 20% of resets use nominal parameters.
 
 Human-motion demonstrations use **human keypoints → kinematic reference → Isaac policy → MuJoCo policy**, with synchronized task time and height curves. The car task substitutes captured vehicle motion in the first panel and plots sideslip, speed and wheel-ground slip. Policy panels replay recorded physics, not reference animation. Adaptations and terminal holds are labeled; all videos use 0.5× playback.
 
@@ -76,9 +76,10 @@ Car drift uses actual ground-contact measurements at **200 Hz in both engines**.
 |---|---|---|
 | Baseline, common PD 500/10 | Fail; continuous drift and exit do not pass in both engines | [Watch](results/2026-10-11-car-drift/trial001-physics/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial001-physics/assessment.json) |
 | Stop retry, common PD 500/30 | Fail; unstable wheel support, early MuJoCo termination | [Watch](results/2026-10-11-car-drift/trial002/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial002/assessment.json) |
+| Stable retry, common PD 500/10 | Isaac passes (0.385 s drift); MuJoCo recovers but reaches only 0.11 s continuous drift, so sim2sim fails | [Watch](results/2026-10-11-car-drift/trial003/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial003/assessment.json) |
 
-A stable-gain retry is in progress. Its explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Training completion is not sim2sim success. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
+The stable retry's explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Six genuine 5 ms contact gaps split its otherwise source-aligned drift. Fixed-policy 400/800 Hz MuJoCo diagnostics do not resolve the contact loss and are not paired successes. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
 
-Drift validation requires forward motion at least 0.4 m/s, sideslip at least 8°, both wheels bearing ground contact and measured contact-patch lateral slip at least 0.04 m/s, concurrently for 0.20 s, followed by stable stopping. Spins, flight and reference playback do not pass. The source starts already rolling; its approximate clock is reconstructed from a CSV without timestamps. [Captured car preview](results/2026-10-11-car-drift-source/source_preview.mp4) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
+Drift validation requires planar speed at least 0.4 m/s with a positive forward component, sideslip at least 8°, both wheels bearing ground contact and measured contact-patch lateral slip at least 0.04 m/s, concurrently for 0.20 s, followed by stable stopping. Spins, flight and reference playback do not pass. The source starts already rolling; its approximate clock is reconstructed from a CSV without timestamps. [Captured car preview](results/2026-10-11-car-drift-source/source_preview.mp4) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
 
 Credits: [CMU data sources and acknowledgment](config/mocap_sources.json), [pinned GMR adapter](config/gmr_retarget_wf.json), [BeyondMimic license](notices/BeyondMimic-LICENCE.txt), and [LimX TRON1 model license](notices/LimX-TRON1-LICENSE.txt). Third-party code, models, and data retain their original terms; raw mocap, robot assets, and checkpoints are not redistributed here.

@@ -2,7 +2,8 @@
 
 One deterministic episode starts at reference frame zero. The floating root is
 initialized once (including reference COM velocities), then evolves exclusively
-through physics. Policy actions run at 50 Hz; explicit joint PD runs at 200 Hz.
+through physics. Policy actions run at 50 Hz; explicit joint PD runs at the
+exported 200, 400 or 800 Hz physics clock.
 No policy normalization is added here: it MUST be inside the TorchScript actor.
 """
 from __future__ import annotations
@@ -98,8 +99,8 @@ def validate_contract(contract):
                 "leg_position_scale", "wheel_torque_scale_nm", "leg_torque_limit_nm", "wheel_torque_limit_nm")
     if any(name not in contract for name in required):
         raise ValueError("Incomplete deployment contract")
-    if (contract["actor_dim"], contract["action_dim"], contract["physics_dt"], contract["decimation"]) != (51, 8, .005, 4):
-        raise ValueError("This evaluator requires the inspected 51->8, 200 Hz / 4 deployment contract")
+    from training.tron1_physics_clock import validate_physics_clock
+    validate_physics_clock(contract)
     actuator_model = contract.get("actuator_model", "ideal_pd")
     if actuator_model not in ("ideal_pd", "dc_motor"):
         raise ValueError(f"Unknown actuator_model: {actuator_model!r}")
@@ -734,7 +735,7 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
              "Legacy IdealPD has no matching PhysX solver velocity brake in MuJoCo; qvel is never clamped."),
             "DC motor parameters are simulation assumptions, not validated manufacturer ratings. The DC model changes training physics.",
             "MuJoCo contact forces are instantaneous constraint forces; Isaac contact sensors may aggregate differently.",
-            "Lateral contact slip uses real contact points and is sampled at 200 Hz; contact patch resolution remains engine-specific.",
+            f"Lateral contact slip uses real contact points sampled at {1. / contract['physics_dt']:g} Hz; contact patch resolution remains engine-specific.",
             "Reference is held for each 20 ms action; training termination predicates are checked before phase advances.",
         ],
     }

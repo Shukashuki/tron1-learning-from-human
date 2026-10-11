@@ -124,6 +124,45 @@ class PhysicsCaptureTests(unittest.TestCase):
         np.testing.assert_allclose(arrays["action_observation"], 0.)
         np.testing.assert_allclose(arrays["root_position_m"], 0.)
 
+    def test_refined_physics_rates_hold_policy_context_and_terminal_states(self):
+        for dt, substeps in ((.005, 4), (.0025, 8), (.00125, 16)):
+            with self.subTest(dt=dt):
+                recorder = PhysicsTrajectoryRecorder(2, dt, 100, snapshot(), np.zeros((2, 51)))
+                for frame, valid in ((0, [True, True]), (1, [False, True])):
+                    recorder.begin_step(np.asarray(valid, dtype=bool), np.full((2, 51), frame + 1.),
+                                        np.full((2, 8), frame + 1.), np.full((2, 8), .1),
+                                        np.full(2, frame, dtype=int))
+                    for offset in range(1, substeps + 1):
+                        counter = 100 + frame * substeps + offset
+                        recorder.capture(counter, snapshot(counter, frame=frame))
+                    # Reset/forward callbacks at the last counter add no row.
+                    self.assertFalse(recorder.capture(counter, snapshot(999.)))
+                    recorder.finish_step(np.asarray([frame == 0, frame == 1]), substeps)
+                arrays = recorder.arrays([f"joint_{i}" for i in range(8)], ["base_Link"], [], .02)
+                self.assertEqual(len(arrays["time_s"]), 2 * substeps + 1)
+                np.testing.assert_allclose(np.diff(arrays["time_s"]), dt)
+                np.testing.assert_allclose(arrays["time_s"][[0, substeps, 2 * substeps]], [0., .02, .04])
+                np.testing.assert_allclose(arrays["action_observation"][1:substeps + 1], 1.)
+                np.testing.assert_allclose(arrays["action_observation"][substeps + 1:, 1], 2.)
+                np.testing.assert_array_equal(arrays["valid_mask"][:, 0], [True] * (substeps + 1) + [False] * substeps)
+                np.testing.assert_array_equal(arrays["terminal_sample"][substeps], [True, False])
+                np.testing.assert_array_equal(arrays["terminal_sample"][-1], [False, True])
+                self.assertEqual(float(arrays["policy_dt_s"]), .02)
+                self.assertEqual(float(arrays["physics_dt_s"]), dt)
+
+    def test_refined_capture_still_rejects_skipped_or_missing_counter(self):
+        for dt, substeps in ((.0025, 8), (.00125, 16)):
+            with self.subTest(dt=dt):
+                recorder = PhysicsTrajectoryRecorder(2, dt, 100, snapshot(), np.zeros((2, 51)))
+                recorder.begin_step(np.ones(2, dtype=bool), np.zeros((2, 51)),
+                                    np.zeros((2, 8)), np.zeros((2, 8)), np.zeros(2, dtype=int))
+                with self.assertRaisesRegex(RuntimeError, "skipped"):
+                    recorder.capture(102, snapshot())
+                for counter in range(101, 100 + substeps):
+                    recorder.capture(counter, snapshot(counter))
+                with self.assertRaisesRegex(RuntimeError, "missed"):
+                    recorder.finish_step(np.zeros(2, dtype=bool), substeps)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,6 +2,7 @@
 import ast
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -125,6 +126,65 @@ def test_visual_sampling_can_halve_mesh_frames_without_changing_half_speed_clock
     assert fps_fifty == 25. and fps_twentyfive == 12.5
     assert twentyfive[-1] == pytest.approx(5.76)
     assert (twentyfive[1] - twentyfive[0]) * fps_twentyfive == pytest.approx(.5)
+
+
+@pytest.mark.parametrize("curve", ["reference", "Isaac", "MuJoCo"])
+def test_reference_and_actual_beta_display_masks_only_assessor_undefined_speed(curve):
+    beta = np.radians([65., 20., -12., 8.])
+    speed = np.array([0., .1 - 1e-10, .1, .4])
+    original_beta, original_speed = beta.copy(), speed.copy()
+    original_thresholds = render.THRESHOLDS.copy()
+    result = render.displayed_sideslip_degrees(beta, speed)
+    assert np.isnan(result[:2]).all(), curve
+    np.testing.assert_allclose(result[2:], [-12., 8.])
+    np.testing.assert_array_equal(beta, original_beta)
+    np.testing.assert_array_equal(speed, original_speed)
+    assert render.THRESHOLDS == original_thresholds
+    assert render.THRESHOLDS["sideslip_defined_min_speed_m_s"] == .1
+    assert render.THRESHOLDS["drift_min_planar_speed_m_s"] == .4
+    assert render.THRESHOLDS["drift_min_contiguous_duration_s"] == .2
+
+
+def test_source_sideslip_mask_uses_declared_robot_scale_speed_not_native_car_speed():
+    samples = [{"velocity": np.array([speed, 0.]), "beta": .2} for speed in [1., 2.5, 10.]]
+    speed, beta_deg = render.adapted_car_chart_series(samples, .08, 2.)
+    np.testing.assert_allclose(speed, [.04, .1, .4])
+    assert np.isnan(beta_deg[0])  # Native car speed 1 m/s is above .1; adapted speed is not.
+    np.testing.assert_allclose(beta_deg[1:], np.degrees(.2))
+    assert [sample["velocity"][0] for sample in samples] == [1., 2.5, 10.]
+
+
+@pytest.mark.parametrize("beta,speed", [([0.], [np.nan]), ([np.inf], [1.]), ([0.], [-.1]), ([0.], [1., 2.])])
+def test_invalid_sideslip_display_inputs_are_rejected(beta, speed):
+    with pytest.raises(ValueError):
+        render.displayed_sideslip_degrees(beta, speed)
+
+
+def test_all_chart_curves_preserve_masked_gaps_and_label_undefined_rest():
+    times = np.array([0., .1, .2])
+    speed = np.array([.04, .1, .4])
+    beta = render.displayed_sideslip_degrees(np.full(3, .2), speed)
+    samples = [{"velocity": np.array([value, 0.]), "beta": .2} for value in [1., 2.5, 10.]]
+    prepared = {"reference": SimpleNamespace(times=times), "isaac": SimpleNamespace(times=times),
+                "mujoco": SimpleNamespace(times=times), "task_times": times, "source_times": times,
+                "source_phases": np.zeros(3, int), "reference_beta_deg": beta, "reference_speed": speed,
+                "car": SimpleNamespace(sample=lambda at: samples[int(round(at * 10))]),
+                "mapping": {"source_end_task_s": .2, "synthetic_stop_end_task_s": .4,
+                            "source_spatial_scale": .08, "source_time_scale": 2.},
+                "series": {key: {"speed": speed, "beta_deg": beta, "slip": np.full((3, 2), .1),
+                                 "contacts": np.ones((3, 2), int)}
+                           for key in ("isaac", "mujoco")}}
+    fig, axes = render.plt.subplots(3)
+    try:
+        render._charts(prepared, axes, .5)
+        curves = {line.get_label(): line for line in axes[0].lines}
+        for label in ("Car source", "Kinematic target", "Isaac", "Mujoco"):
+            values = curves[label].get_ydata()
+            assert np.isnan(values[0])
+            np.testing.assert_allclose(values[1:], np.degrees(.2))
+        assert any("Undefined below 0.1 m/s" in text.get_text() for text in axes[0].texts)
+    finally:
+        render.plt.close(fig)
 
 
 @pytest.mark.parametrize("fps,speed", [(0., .5), (-25., .5), (np.nan, .5), (np.inf, .5), (25., 0.), (25., np.nan)])
