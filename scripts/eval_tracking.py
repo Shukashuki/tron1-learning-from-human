@@ -294,6 +294,8 @@ def main():
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--terrain-file", type=Path, help="Must match the terrain used for training")
     parser.add_argument("--task-profile", type=Path, help="Must match the checkpoint drift task/material contract")
+    parser.add_argument("--deployment-leg-kp", type=float, default=None,
+                        help="Explicit zero-shot common leg-Kp diagnostic (100–500); original task profile must still match training")
     parser.add_argument("--verify-unmasked-device", action="store_true",
                         help="Opt-in strict native PhysX/Torch/tensor CUDA-ordinal readback audit; requires no CUDA_VISIBLE_DEVICES mask")
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
@@ -305,6 +307,12 @@ def main():
                         help="One explicit fixed actuator-domain draw JSON; never resample during evaluation")
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
+    deployment_leg_kp = getattr(args, "deployment_leg_kp", None)
+    if deployment_leg_kp is not None:
+        if not math.isfinite(deployment_leg_kp) or not 100. <= deployment_leg_kp <= 500.:
+            parser.error("deployment-leg-kp must be finite and between 100 and 500")
+        if args.physics_dt_s is not None or args.domain_parameters is not None:
+            parser.error("The single-factor leg-Kp diagnostic cannot combine physics refinement or actuator-domain overrides")
     if args.num_envs < 1 or args.contact_threshold_n <= 0:
         parser.error("num-envs and contact-threshold-n must be positive")
     for name in ("motion_file", "asset_path", "checkpoint", "runner_config"):
@@ -338,6 +346,7 @@ def main():
                              if args.domain_parameters else None)
         from training.tron1_drift import load_task_profile
         task_profile = load_task_profile(args.task_profile) if args.task_profile else None
+        controller_gain_diagnostic = None
         terrain_spec = None
         if args.terrain_file:
             from training.tron1_terrain import load_terrain
@@ -351,6 +360,26 @@ def main():
                 raise ValueError("Evaluation terrain differs from the checkpoint training manifest")
             if trained_manifest.get("task_profile") != task_profile:
                 raise ValueError("Evaluation drift task/material profile differs from training")
+        if deployment_leg_kp is not None:
+            if trained_manifest is None:
+                raise ValueError("The zero-shot leg-Kp diagnostic requires the original checkpoint training manifest")
+            if trained_manifest.get("asset_sha256") != sha256(args.asset_path):
+                raise ValueError("The zero-shot leg-Kp diagnostic must retain the trained robot asset")
+            from training.tron1_controller_gain_diagnostic import (
+                prepare_deployment_gain_diagnostic, apply_deployment_gain_diagnostic_to_contract,
+                validate_deployment_gain_diagnostic,
+            )
+            from training.tron1_drift import apply_task_profile_to_contract
+            nominal_contract = apply_task_profile_to_contract(observation_action_contract(), task_profile)
+            task_profile, controller_gain_diagnostic = prepare_deployment_gain_diagnostic(
+                task_profile, nominal_contract, trained_manifest, deployment_leg_kp,
+                reference_sha256=sha256(args.motion_file))
+            controller_gain_diagnostic.update(
+                original_manifest_sha256=sha256(training_manifest_path), checkpoint_sha256=sha256(args.checkpoint))
+            validate_deployment_gain_diagnostic(
+                apply_deployment_gain_diagnostic_to_contract(nominal_contract, controller_gain_diagnostic),
+                trained_manifest, original_manifest_sha256=sha256(training_manifest_path),
+                checkpoint_sha256=sha256(args.checkpoint))
         if args.physics_dt_s is not None:
             if trained_manifest is None or not isinstance(trained_manifest.get("contract"), dict):
                 raise ValueError("Explicit physics refinement requires the checkpoint training manifest and its nominal contract")
@@ -590,7 +619,10 @@ def main():
                                         arrays["joint_position_rad"]), axis=-1)
         summary = summarize_episodes(arrays, outcomes, reference, args.contact_threshold_n)
         contract = observation_action_contract()
-        if task_profile is not None:
+        if controller_gain_diagnostic is not None:
+            contract = apply_deployment_gain_diagnostic_to_contract(
+                controller_gain_diagnostic["original_nominal_contract"], controller_gain_diagnostic)
+        elif task_profile is not None:
             from training.tron1_drift import apply_task_profile_to_contract
             contract = apply_task_profile_to_contract(contract, task_profile)
         if args.physics_dt_s is not None:
@@ -613,6 +645,10 @@ def main():
             "reference_file_sha256": sha256(args.motion_file), "checkpoint_sha256": sha256(args.checkpoint),
             "default_joint_position_rad": to_numpy(robot.data.default_joint_pos[0]).tolist(),
         })
+        if controller_gain_diagnostic is not None:
+            validate_deployment_gain_diagnostic(
+                contract, trained_manifest, original_manifest_sha256=sha256(training_manifest_path),
+                checkpoint_sha256=sha256(args.checkpoint))
         if export_validation_max_error > 1e-4:
             raise RuntimeError(f"Evolving-observation actor export validation failed: {export_validation_max_error}")
         report = {
@@ -665,6 +701,8 @@ def main():
         if runtime_device_audit is not None:
             report.update({"runtime_device_audit": runtime_device_audit,
                            "runtime_device_module_sha256": sha256(ROOT / "training/tron1_runtime_device.py")})
+        if controller_gain_diagnostic is not None:
+            report["controller_gain_diagnostic"] = copy.deepcopy(contract["controller_gain_diagnostic"])
         if reward_accumulator is not None:
             report.update({"reward_sampling_audit": reward_accumulator.audit(),
                            "substep_reward_module_sha256": sha256(ROOT / "training/tron1_substep_rewards.py")})

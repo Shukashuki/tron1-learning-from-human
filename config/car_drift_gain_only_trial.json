@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial007",
+  "task": "captured_car_drift",
+  "experiment_type": "zero_shot_common_controller_gain_diagnostic",
+  "baseline_trial": "trial004",
+  "original_training_task_profile": "config/car_drift_contact_task.json",
+  "original_training_task_profile_sha256": "325cf279c699769694fb4934852ce85753b459e09670376b8c2d62d94f7d4e3c",
+  "scientific_change": "Common deployment leg Kp 500 -> 400 in both engines; no policy or optimizer update.",
+  "hypothesis": "A modest stiffness perturbation with a frozen actor can distinguish closed-loop controller effects from continued-PPO optimization effects. No prediction of successful transfer is made.",
+  "motivation": "Trial006's halved stiffness plus continued learning worsened drift timing, wheel unloading, path, height and stopping. This experiment returns to trial004 rather than continuing either failed trial005 or trial006 actor.",
+  "controller_change": {
+    "trained_leg_kp": 500.0,
+    "deployment_leg_kp": 400.0,
+    "unchanged_leg_kd": 10.0,
+    "explicit_cli_option": "--deployment-leg-kp 400",
+    "original_training_manifest_modified": false,
+    "original_training_profile_mismatch_bypassed": false,
+    "original_and_effective_contracts_recorded_separately": true,
+    "tradeoff": "Linear free-mode frequency scales by sqrt(0.8), damping ratio by 1/sqrt(0.8), and same-load static holding error by 1.25; these are not nonlinear contact or trajectory predictions."
+  },
+  "policy": {
+    "predesignated_checkpoint": "trial004/training/model_final.pt",
+    "checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "additional_training_updates": 0,
+    "additional_training_environment_steps": 0,
+    "weights_and_normalizer_changed": false,
+    "selection": "One predesignated actor and one gain value; no gain sweep or best-of-rollout selection."
+  },
+  "activation_prerequisites": [
+    "Publish complete failed trial006 evidence and verify GitHub branch.",
+    "Full regression and strict forged-metadata/stale-gain tests pass; historical publisher artifacts remain byte-identical.",
+    "Original training manifest, checkpoint, profile, motion, asset and controller contract hashes verify without alteration.",
+    "Actual runtime gain readback verifies deployment Kp400/Kd10 before policy use.",
+    "Fresh idle GPU/UUID guard and unmasked native device audit; no other users' jobs modified."
+  ],
+  "unchanged": {
+    "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+    "robot_asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "robot_reference_sha256": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+    "mujoco_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+    "policy_hz": 50,
+    "physics_hz_both_engines": 200,
+    "actor_critic_action_dimensions": [51, 120, 8],
+    "leg_torque_limit_nm": 80.0,
+    "wheel_torque_limit_nm": 12.0,
+    "nominal_motor_parameters": true,
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [0.04, 2.0],
+    "contact_margin_or_gap_changed": false,
+    "all_reward_weights_changed": false,
+    "wheel_vertical_velocity_sampling": "last_substep",
+    "normal_contact_surrogate_parameters_adopted": false
+  },
+  "evaluation": {
+    "episodes_per_engine": 1,
+    "num_envs": 1,
+    "seed": 42,
+    "maximum_stage_wall_time_s": 900,
+    "conditions": "Nominal motors, reference frame zero and its original initial velocity; no added lateral velocity or hidden root writes.",
+    "recording": "Both engines record the complete first episode at actual 200 Hz; ordinary policy clock remains 50 Hz.",
+    "same_actor": "Verify checkpoint/export actor and normalizer tensors, recorded-action replay, same actor bytes and MuJoCo reconstructed observations.",
+    "assessor": "scripts/assess_drift.py, all original thresholds unchanged",
+    "acceptance": "At least 0.20 s uninterrupted forward-moving drift with speed >= 0.4 m/s, abs(sideslip) >= 8 deg, both actual bearing ground contacts and mean lateral patch slip >= 0.04 m/s. All original tracking, support, nonwheel-impact, full-duration and stable-exit checks must also pass.",
+    "source_fidelity": "Separate unchanged source-window overlap and sign diagnostic; no phase shifting and no assertion that these are implemented as assessor gates.",
+    "format": "Captured car -> TRON1 kinematic reference -> Isaac frozen policy -> MuJoCo same frozen policy; retain complete four-panel evidence even on failure.",
+    "interpretation": "Any result concerns this single zero-shot controller setting, not a policy trained at Kp400, hardware readiness or statistical robustness."
+  },
+  "resources": {
+    "mode": "One owned app at a time on authorized remote compute, with no CUDA mask/remapping.",
+    "placement_recorded_separately": true,
+    "non_target_contexts_claimed_absent_or_harmless": false
+  }
+}

@@ -573,3 +573,304 @@ def test_physics_archive_is_rehashed_after_preflight_before_output_creation(tria
     with pytest.raises(ValueError, match="Input changed.*isaac_physics_trajectory"):
         publish_fixture(trial)
     assert not trial[-1].exists()
+
+
+def test_legacy_publication_adds_no_diagnostic_fields_or_inputs(trial):
+    result = publish_fixture(trial)
+    for field in ("controller_gain_diagnostic", "original_training_task_profile",
+                  "effective_deployment_task_profile", "additional_training_updates", "experiment_kind"):
+        assert field not in result
+    assert "budget_scope" not in result["training"]
+    assert "original_checkpoint" not in result["input_sha256"]
+    assert "controller_gain_helper" not in result["input_sha256"]
+
+
+def test_legacy_profile_mismatch_is_not_implicitly_a_gain_diagnostic(trial):
+    paths = [trial[0] / "isaac/policy_contract.json", trial[0] / "isaac/report.json",
+             trial[0] / "mujoco/report.json"]
+    contract = publish.read_json(paths[0])
+    contract["leg_kp"] = 400.
+    contract["task_profile"]["leg_kp"] = 400.
+    write_json(paths[0], contract)
+    isaac, mujoco = [publish.read_json(path) for path in paths[1:]]
+    isaac["policy_export"] = copy.deepcopy(contract)
+    isaac["task_profile"] = copy.deepcopy(contract["task_profile"])
+    mujoco["contract"] = copy.deepcopy(contract)
+    write_json(paths[1], isaac)
+    write_json(paths[2], mujoco)
+    reassess(trial)
+    with pytest.raises(ValueError, match="same drift task"):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+@pytest.mark.parametrize("metadata", [None, False, {}, "diagnostic"])
+def test_unvalidated_diagnostic_marker_never_weakens_legacy_preflight(trial, metadata):
+    path = trial[0] / "isaac/report.json"
+    report = publish.read_json(path)
+    report["controller_gain_diagnostic"] = metadata
+    write_json(path, report)
+    reassess(trial)
+    with pytest.raises(ValueError, match="explicit controller gain"):
+        publish_fixture(trial)
+    assert not trial[-1].exists()
+
+
+@pytest.fixture
+def gain_diagnostic(trial):
+    """Full-controller fixture; the checkpoint/actor bytes are never executed."""
+    from training.tron1_controller_gain_diagnostic import (
+        prepare_deployment_gain_diagnostic, apply_deployment_gain_diagnostic_to_contract,
+    )
+    from training.tron1_domain_randomization import default_profile
+    add_physics_recording(trial)
+    root = trial[0]
+    checkpoint = root / "training/model_final.pt"
+    checkpoint.write_bytes(b"original synthetic checkpoint, never loaded")
+    manifest_path = root / "training/manifest.json"
+    manifest = publish.read_json(manifest_path)
+    profile = manifest["task_profile"]
+    profile["mujoco_contact_solref"] = [.04, 2.]
+    manifest["asset_sha256"] = "1" * 64
+    nominal = {**read_contract(), "task_profile": copy.deepcopy(profile)}
+    manifest["contract"] = {**copy.deepcopy(nominal), "domain_randomization": default_profile(42)}
+    manifest["domain_randomization_profile"] = default_profile(42)
+    manifest["contact_material_audit"]["leg_pd_gain_readback"] = {"kp_range": [500., 500.], "kd_range": [10., 10.]}
+    write_json(manifest_path, manifest)
+    effective_profile, audit = prepare_deployment_gain_diagnostic(
+        profile, nominal, manifest, 400., reference_sha256=manifest["motion_sha256"])
+    audit.update(original_manifest_sha256=publish.sha256(manifest_path),
+                 checkpoint_sha256=publish.sha256(checkpoint))
+    contract = apply_deployment_gain_diagnostic_to_contract(nominal, audit)
+    contract.update(domain_randomization="disabled during evaluation; fixed actuator parameters",
+                    training_domain_randomization=manifest["domain_randomization_profile"],
+                    reference_file_sha256=manifest["motion_sha256"], actor_file="actor_normalized.pt",
+                    actor_includes_observation_normalizer=True, actor_output_is_unclipped=True,
+                    actor_observation_groups=["policy"], checkpoint_sha256=publish.sha256(checkpoint),
+                    export_validation_max_abs_error=0.)
+    write_json(root / "isaac/policy_contract.json", contract)
+    isaac = publish.read_json(root / "isaac/report.json")
+    isaac.update(policy_export=copy.deepcopy(contract), task_profile=effective_profile,
+                 checkpoint_sha256=publish.sha256(checkpoint), controller_gain_diagnostic=copy.deepcopy(audit),
+                 asset_root_file_sha256=manifest["asset_sha256"])
+    isaac["contact_material_audit"]["leg_pd_gain_readback"] = {"kp_range": [400., 400.], "kd_range": [10., 10.]}
+    write_json(root / "isaac/report.json", isaac)
+    mujoco = publish.read_json(root / "mujoco/report.json")
+    mujoco["contract"] = copy.deepcopy(contract)
+    mujoco["model_sha256"] = "2" * 64
+    mujoco["domain_parameters"] = {"is_nominal": True, "joint_names": contract["observed_joint_velocity_order"],
+                                   "torque_scale": [1.] * 8, "velocity_scale": [1.] * 8,
+                                   "wheel_friction_nm": [0., 0.]}
+    mujoco["contact_material_audit"].update(explicit_contact_solref=[.04, 2.],
+                                            compiled_solref_ranges=[[.04, .04], [2., 2.]],
+                                            contact_margin_and_gap_changed=False)
+    write_json(root / "mujoco/report.json", mujoco)
+    for relative in ("adaptation.json", "motion.json"):
+        path = trial[1] / relative
+        record = publish.read_json(path)
+        record["model_sha256"] = mujoco["model_sha256"]
+        write_json(path, record)
+    reassess(trial)
+    return trial
+
+
+def change_gain_contract(fixture, change):
+    """Change both claimed deployments consistently, then refresh assessment."""
+    root = fixture[0]
+    contract = publish.read_json(root / "isaac/policy_contract.json")
+    change(contract)
+    write_json(root / "isaac/policy_contract.json", contract)
+    isaac = publish.read_json(root / "isaac/report.json")
+    isaac.update(policy_export=copy.deepcopy(contract), task_profile=copy.deepcopy(contract["task_profile"]),
+                 controller_gain_diagnostic=copy.deepcopy(contract["controller_gain_diagnostic"]))
+    write_json(root / "isaac/report.json", isaac)
+    mujoco = publish.read_json(root / "mujoco/report.json")
+    mujoco["contract"] = copy.deepcopy(contract)
+    write_json(root / "mujoco/report.json", mujoco)
+    reassess(fixture)
+
+
+def test_zero_shot_gain_diagnostic_preserves_original_training_and_effective_deployment(gain_diagnostic):
+    root, _, _, output = gain_diagnostic
+    original_bytes = (root / "training/manifest.json").read_bytes()
+    result = publish_fixture(gain_diagnostic)
+    assert (root / "training/manifest.json").read_bytes() == original_bytes
+    assert result["experiment_kind"] == "zero_shot_controller_gain_diagnostic"
+    assert result["additional_training_updates"] == 0
+    assert "leg_kp" not in result["original_training_task_profile"]
+    assert result["effective_deployment_task_profile"]["leg_kp"] == 400.
+    assert result["controller_gain_diagnostic"]["trained_leg_kp"] == 500.
+    assert result["controller_gain_diagnostic"]["deployment_leg_kp"] == 400.
+    assert result["controller_gain_diagnostic"]["additional_training_updates"] == 0
+    assert result["training"]["completed_requested_iterations"] == 3
+    assert result["training"]["reported_run_status"]["training_environment_steps"] == 144
+    assert result["training"]["budget_scope"] == "original checkpoint training; no diagnostic training"
+    assert result["input_sha256"]["original_checkpoint"] == publish.sha256(root / "training/model_final.pt")
+    assert result["input_sha256"]["manifest"] == result["controller_gain_diagnostic"]["original_manifest_sha256"]
+    assert result["input_sha256"]["controller_gain_helper"] == result["controller_gain_diagnostic"]["helper_sha256"]
+    assert not list(output.rglob("*.pt")) and not list(output.rglob("*.npz"))
+    text = "\n".join(path.read_text() for path in output.glob("*.json"))
+    for forbidden in ("private-gpu-node", "researcher", "10.20.30.40", "/home/", "/data/"):
+        assert forbidden not in text
+
+
+@pytest.mark.parametrize("field,value", [
+    ("schema_version", True), ("scope", "trained_policy"), ("additional_training_updates", 1),
+    ("additional_training_updates", False), ("original_manifest_sha256", "0" * 64),
+    ("checkpoint_sha256", "0" * 64), ("helper_sha256", "0" * 64),
+    ("reference_sha256", "0" * 64), ("trained_leg_kp", 400.),
+    ("unchanged_leg_kd", 30.), ("deployment_leg_kp", 250.),
+    ("effective_profile_sha256", "0" * 64), ("training_at_deployment_gain_claimed", True),
+    ("hardware_ready", True), ("statistical_robustness_claimed", True),
+])
+def test_forged_gain_diagnostic_metadata_cannot_be_published(gain_diagnostic, field, value):
+    change_gain_contract(gain_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(field, value))
+    with pytest.raises(ValueError):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("leg_kd", 20.), ("wheel_torque_scale_nm", 11.), ("leg_torque_limit_nm", 70.),
+    ("leg_position_scale", .5), ("raw_action_clip", [-.5, .5]),
+    ("domain_parameters", {}), ("physics_clock_refinement", {}),
+])
+def test_gain_diagnostic_does_not_authorize_other_controller_changes(gain_diagnostic, field, value):
+    change_gain_contract(gain_diagnostic, lambda contract: contract.__setitem__(field, value))
+    with pytest.raises(ValueError):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("mutation", [
+    lambda profile: profile.__setitem__("contact_friction", .2),
+    lambda profile: profile["reward_weights"].__setitem__("speed", 2.),
+    lambda profile: profile.__setitem__("wheel_vertical_velocity_sampling", "all_substeps_mean"),
+    lambda profile: profile.__setitem__("mujoco_contact_solref", [.02, 1.]),
+])
+def test_gain_diagnostic_rejects_contact_reward_or_sampling_profile_changes(gain_diagnostic, mutation):
+    change_gain_contract(gain_diagnostic, lambda contract: mutation(contract["task_profile"]))
+    with pytest.raises(ValueError):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("engine,kp,kd", [("training", 400., 10.), ("isaac", 500., 10.), ("isaac", 400., 30.)])
+def test_gain_diagnostic_rejects_stale_live_gain_readbacks(gain_diagnostic, engine, kp, kd):
+    path = gain_diagnostic[0] / ("training/manifest.json" if engine == "training" else "isaac/report.json")
+    report = publish.read_json(path)
+    report["contact_material_audit"]["leg_pd_gain_readback"] = {"kp_range": [kp, kp], "kd_range": [kd, kd]}
+    write_json(path, report)
+    if engine == "training":
+        change_gain_contract(gain_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(
+            "original_manifest_sha256", publish.sha256(path)))
+    else:
+        reassess(gain_diagnostic)
+    with pytest.raises(ValueError, match="live leg gain"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+def test_gain_diagnostic_metadata_must_match_both_deployments(gain_diagnostic):
+    path = gain_diagnostic[0] / "mujoco/report.json"
+    report = publish.read_json(path)
+    report["contract"]["controller_gain_diagnostic"]["deployment_leg_kp"] = 300.
+    write_json(path, report)
+    reassess(gain_diagnostic)
+    with pytest.raises(ValueError, match="exactly the same saved contract"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("relative", ["training/model_final.pt", "training/run_status.json", "training/runner_config.json"])
+def test_gain_diagnostic_requires_original_checkpoint_and_training_budget(gain_diagnostic, relative):
+    (gain_diagnostic[0] / relative).unlink()
+    with pytest.raises(ValueError, match="original training"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+def test_gain_diagnostic_checkpoint_is_rehashed_before_public_output(gain_diagnostic, monkeypatch):
+    original = publish.prepare_publication
+    def mutate_after_preflight(*args, **kwargs):
+        prepared = original(*args, **kwargs)
+        path = gain_diagnostic[0] / "training/model_final.pt"
+        path.write_bytes(path.read_bytes() + b"changed")
+        return prepared
+    monkeypatch.setattr(publish, "prepare_publication", mutate_after_preflight)
+    with pytest.raises(ValueError, match="Input changed.*original_checkpoint"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("terrain", {"roughness_m": .01}), ("contact_stiffness", 1e6),
+    ("training_domain_randomization", {}),
+])
+def test_gain_diagnostic_rejects_added_physics_or_fabricated_training_metadata(gain_diagnostic, field, value):
+    change_gain_contract(gain_diagnostic, lambda contract: contract.__setitem__(field, value))
+    with pytest.raises(ValueError):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+def test_gain_diagnostic_rejects_unknown_audit_success_claim(gain_diagnostic):
+    change_gain_contract(gain_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(
+        "hardware_success", True))
+    with pytest.raises(ValueError, match="metadata field"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("engine,field,value", [
+    ("isaac", "asset_root_file_sha256", "3" * 64),
+    ("isaac", "checkpoint_sha256", "3" * 64),
+    ("isaac", "domain_parameters", {"is_nominal": False}),
+    ("mujoco", "domain_parameters", {"is_nominal": True, "torque_scale": [.9] * 8}),
+])
+def test_gain_diagnostic_rejects_changed_assets_checkpoint_or_domain(gain_diagnostic, engine, field, value):
+    path = gain_diagnostic[0] / engine / "report.json"
+    report = publish.read_json(path)
+    report[field] = value
+    write_json(path, report)
+    reassess(gain_diagnostic)
+    with pytest.raises(ValueError):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("explicit_contact_solref", [.02, 1.]),
+    ("compiled_solref_ranges", [[.02, .02], [1., 1.]]),
+    ("contact_margin_and_gap_changed", True),
+    ("contact_margin_and_gap_changed", 0),
+])
+def test_gain_diagnostic_rejects_actual_contact_response_changes(gain_diagnostic, field, value):
+    path = gain_diagnostic[0] / "mujoco/report.json"
+    report = publish.read_json(path)
+    report["contact_material_audit"][field] = value
+    write_json(path, report)
+    reassess(gain_diagnostic)
+    with pytest.raises(ValueError, match="contact"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()
+
+
+@pytest.mark.parametrize("engine,value", [
+    ("training", None), ("isaac", None),
+    ("isaac", {"kp_range": [True, True], "kd_range": [10., 10.]}),
+    ("isaac", {"kp_range": [400., 400.], "kd_range": [10., 30.]}),
+])
+def test_gain_diagnostic_requires_valid_original_and_effective_gain_proof(gain_diagnostic, engine, value):
+    path = gain_diagnostic[0] / ("training/manifest.json" if engine == "training" else "isaac/report.json")
+    report = publish.read_json(path)
+    report["contact_material_audit"]["leg_pd_gain_readback"] = value
+    write_json(path, report)
+    if engine == "training":
+        change_gain_contract(gain_diagnostic, lambda contract: contract["controller_gain_diagnostic"].__setitem__(
+            "original_manifest_sha256", publish.sha256(path)))
+    else:
+        reassess(gain_diagnostic)
+    with pytest.raises(ValueError, match="leg gain"):
+        publish_fixture(gain_diagnostic)
+    assert not gain_diagnostic[-1].exists()

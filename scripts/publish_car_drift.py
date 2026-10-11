@@ -86,6 +86,88 @@ def training_budget(manifest, status=None, runner=None):
     return out
 
 
+def check_leg_gain_audit(audit, kp, kd, engine):
+    """Diagnostic-only gain proof; legacy publication requirements are unchanged."""
+    gain = audit.get("leg_pd_gain_readback") if isinstance(audit, dict) else None
+    require(isinstance(gain, dict), f"Missing {engine} live leg gain readback")
+    for key, expected in (("kp_range", kp), ("kd_range", kd)):
+        values = gain.get(key)
+        require(isinstance(values, list) and len(values) == 2
+                and all(isinstance(value, (int, float)) and not isinstance(value, bool)
+                        and math.isfinite(value) and abs(value - expected) <= 1e-6
+                        for value in values),
+                f"{engine} live leg gains differ from the diagnostic contract")
+
+
+def validate_controller_gain_context(records, files, hashes):
+    """Allow only a hash-pinned, zero-training common-Kp deployment diagnostic.
+
+    This branch is explicit; absent diagnostic metadata, the historical strict
+    training/deployment profile equality and public schema remain untouched.
+    """
+    isaac, mujoco, contract, manifest = [records[key] for key in (
+        "isaac_report", "mujoco_report", "contract", "manifest")]
+    key = "controller_gain_diagnostic"
+    candidates = (isaac, mujoco, contract, manifest, mujoco.get("contract", {}),
+                  manifest.get("contract", {}))
+    if not any(isinstance(value, dict) and key in value for value in candidates):
+        return None
+    require(key not in manifest and key not in manifest.get("contract", {}),
+            "Diagnostic must preserve the original training manifest and contract")
+    require(isinstance(contract.get(key), dict), "Missing explicit controller gain diagnostic metadata")
+    require(isaac.get(key) == contract[key], "Isaac diagnostic metadata differs from its saved contract")
+    require(mujoco.get("contract") == contract,
+            "Diagnostic deployments must use exactly the same saved contract")
+    if key in mujoco:
+        require(mujoco[key] == contract[key], "MuJoCo diagnostic metadata differs from its saved contract")
+    checkpoint = files["manifest"].parent / "model_final.pt"
+    require(checkpoint.is_file() and checkpoint.stat().st_size > 0,
+            "Diagnostic requires the original training checkpoint")
+    files["original_checkpoint"] = checkpoint
+    hashes["original_checkpoint"] = sha256(checkpoint)
+    helper_path = ROOT / "training/tron1_controller_gain_diagnostic.py"
+    require(helper_path.is_file(), "Controller diagnostic validator is unavailable")
+    files["controller_gain_helper"] = helper_path
+    hashes["controller_gain_helper"] = sha256(helper_path)
+    from training.tron1_controller_gain_diagnostic import validate_deployment_gain_diagnostic
+    audit = validate_deployment_gain_diagnostic(
+        contract, manifest, original_manifest_sha256=hashes["manifest"],
+        checkpoint_sha256=hashes["original_checkpoint"])
+    require(isaac.get("checkpoint_sha256") == hashes["original_checkpoint"]
+            == contract.get("checkpoint_sha256"),
+            "Diagnostic must evaluate the original training checkpoint")
+    require(records["assessment"].get("provenance_checks", {}).get(
+        "same_physics_contact_sampling_clock", {}).get("passed") is True,
+        "Diagnostic requires paired actual physics-rate contact evidence")
+    trained = manifest.get("contract", {})
+    check_leg_gain_audit(manifest.get("contact_material_audit"),
+                         trained.get("leg_kp"), trained.get("leg_kd"), "Original training Isaac")
+    check_leg_gain_audit(isaac.get("contact_material_audit"),
+                         contract["leg_kp"], contract["leg_kd"], "Diagnostic Isaac")
+    asset_hash = manifest.get("asset_sha256")
+    require(isinstance(asset_hash, str) and re.fullmatch(r"[0-9a-f]{64}", asset_hash)
+            and isaac.get("asset_root_file_sha256") == asset_hash,
+            "Diagnostic Isaac asset differs from the original training asset")
+    require(isaac.get("domain_parameters") is None,
+            "Gain diagnostic cannot combine an Isaac actuator-domain override")
+    domain = mujoco.get("domain_parameters")
+    require(isinstance(domain, dict) and domain.get("is_nominal") is True
+            and domain.get("joint_names") == contract["observed_joint_velocity_order"]
+            and domain.get("torque_scale") == [1.] * contract["action_dim"]
+            and domain.get("velocity_scale") == [1.] * contract["action_dim"]
+            and domain.get("wheel_friction_nm") == [0., 0.],
+            "Gain diagnostic requires actual nominal MuJoCo actuator parameters")
+    contact = mujoco.get("contact_material_audit", {})
+    require(contact.get("contact_margin_and_gap_changed") is False,
+            "Gain diagnostic cannot change contact margin or gap")
+    solref = contract["task_profile"].get("mujoco_contact_solref")
+    if solref is not None:
+        require(contact.get("explicit_contact_solref") == solref
+                and contact.get("compiled_solref_ranges") == [[value, value] for value in solref],
+                "Diagnostic MuJoCo contact response differs from the original task profile")
+    return audit
+
+
 def validate_render(render_dir, input_hashes, reference_audit):
     """Require a freshly hash-linked recorded-rollout render; copy only media."""
     render_dir = Path(render_dir)
@@ -177,7 +259,9 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
         require(adaptation.get("model_sha256") == export.get("model_sha256"),
                 "Reference generation and export use different robot model hashes")
     from training.tron1_drift import validate_task_profile
-    task_profile = validate_task_profile(manifest.get("task_profile"))
+    original_task_profile = validate_task_profile(manifest.get("task_profile"))
+    diagnostic = validate_controller_gain_context(records, files, hashes)
+    task_profile = original_task_profile if diagnostic is None else validate_task_profile(contract.get("task_profile"))
     require(task_profile == contract.get("task_profile") == mujoco.get("contract", {}).get("task_profile")
             == isaac.get("task_profile"), "Training and both deployments must use the same drift task/material profile")
     mu = task_profile["contact_friction"]
@@ -193,6 +277,10 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
         if path.exists():
             require(path.is_file(), f"Invalid optional {name} input")
             files[name], hashes[name], optional[name] = path, sha256(path), read_json(path)
+    if diagnostic is not None:
+        require(training_budget(manifest, optional.get("run_status"), optional.get("runner"))[
+            "requested_budget_completion_verified"] and "runner" in optional,
+            "Diagnostic must retain the completed original training budget evidence")
     render, media = None, {}
     if render_dir is not None:
         render, media, report_path = validate_render(render_dir, hashes, adaptation)
@@ -241,6 +329,13 @@ def prepare_publication(trial_dir, reference_dir, render_dir=None):
         "limitations": stored.get("limitations", []),
         "artifacts": {"assessment": "assessment.json", "reference_audit": "reference_audit.json"},
     }
+    if diagnostic is not None:
+        summary.update({"experiment_kind": "zero_shot_controller_gain_diagnostic",
+                        "additional_training_updates": 0,
+                        "original_training_task_profile": original_task_profile,
+                        "effective_deployment_task_profile": task_profile,
+                        "controller_gain_diagnostic": diagnostic})
+        summary["training"]["budget_scope"] = "original checkpoint training; no diagnostic training"
     payloads = {"assessment.json": encode(sanitize(stored, identities)),
                 "reference_audit.json": encode(sanitize(adaptation, identities))}
     if render is not None:
