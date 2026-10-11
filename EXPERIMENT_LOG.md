@@ -30,6 +30,8 @@ All qualifying drift has the source's sideslip sign, with source-window overlap 
 
 `eval_tracking.py --physics-dt-s` now supports explicit evaluation-only 0.005/0.0025/0.00125 s timesteps, retaining the 50 Hz policy through decimation 4/8/16. It requires the checkpoint's training manifest, preserves the task-profile check, exports nominal-trained/actual-clock metadata and verifies live simulator/environment/sensor readback. The paired assessor requires equal genuine physical-rate archives and matching contracts; none of the behavior thresholds change. Historical 200 Hz snapshots remain unchanged.
 
+Trial004 is training for a predesignated 600 updates from trial003's final checkpoint, with [the contact-stability profile](config/car_drift_contact_task.json). Only two dense penalties are added: weight −1 on the sum of squared leg-target rates in rad²/s², and weight −5 on the sum of squared wheel-link vertical velocities normalized by 0.02 m/s. The latter is link-origin velocity, **not contact-point separation**. All reference/control/material settings and three-motor randomization remain unchanged at 50 Hz policy / 200 Hz physics. Saved-state reconstruction finds Isaac wheel-link vertical RMS of 0.00453/0.00158 m/s despite full support, versus MuJoCo 0.03250/0.02767 m/s, motivating this nonzero training signal. These rewards observe the final physics substep at the policy clock and cannot guarantee uninterrupted support; the same actual-contact gates must verify the final actor. No trial004 success is claimed before evaluation.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
