@@ -79,10 +79,13 @@ Car drift uses actual ground-contact measurements at **200 Hz in both engines**.
 | Stable retry, common PD 500/10 | Isaac passes (0.385 s drift); MuJoCo recovers but reaches only 0.11 s continuous drift, so sim2sim fails | [Watch](results/2026-10-11-car-drift/trial003/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial003/assessment.json) |
 | Contact-stability retry, same PD | Isaac passes (0.45 s drift); MuJoCo reaches 0.15 s, so sim2sim still fails | [Watch](results/2026-10-11-car-drift/trial004/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial004/assessment.json) |
 | All-substep reward retry, same PD | Fail in both; zero qualifying drift, with tracking and stopping regressions | [Watch](results/2026-10-11-car-drift/trial005/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial005/assessment.json) |
+| Lower-stiffness retry, common PD 250/10 | Fail; 0.46 / 0.12 s drift, with worse path, height and stopping | [Watch](results/2026-10-11-car-drift/trial006/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial006/assessment.json) |
 
 The explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Contact-stability shaping reduces leg-command changes and improves cross-engine root RMSE to 1.18 cm, but six genuine 5 ms right-wheel contact gaps still split the drift. Fixed-policy 400/800 Hz MuJoCo diagnostics do not resolve the contact loss and are not paired successes. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
 
 Trial005 tests verified all-substep reward sampling but loses the target behavior: sideslip at speeds ≥0.4 m/s peaks at only 5.59°/5.30°, and stopping also fails. Both engines agree closely but are wrong relative to the reference. Its actor is not adopted; trial004 remains the better, still-failing candidate.
+
+Trial006 resumes trial004 and halves common leg stiffness, retaining its rewards and sampling. It also fails: path RMSE grows to 0.68 / 0.80 m, with more MuJoCo wheel unloading and delayed drift. Its actor is not adopted; neither lower stiffness nor the sampling retry establishes successful transfer.
 
 A separate [wheel-contact diagnostic](results/2026-10-11-car-drift/normal_contact_diagnostic.json) rejects a proposed MuJoCo-to-PhysX spring mapping. A [native-plane check](results/2026-10-11-car-drift/native_plane_diagnostic.json) reduces contact oscillation in the nominal surrogate but still fails identification; neither yields adopted parameters.
 
