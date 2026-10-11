@@ -82,6 +82,7 @@ Car drift uses actual ground-contact measurements at **200 Hz in both engines**.
 | Lower-stiffness retry, common PD 250/10 | Fail; 0.46 / 0.12 s drift, with worse path, height and stopping | [Watch](results/2026-10-11-car-drift/trial006/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial006/assessment.json) |
 | Frozen-actor diagnostic, common deployment PD 400/10 | Isaac passes (0.52 s); MuJoCo reaches only 0.13 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial007/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial007/assessment.json) |
 | Frozen-actor damping diagnostic, common deployment PD 500/12 | Isaac passes (0.43 s); MuJoCo reaches only 0.15 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial008/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial008/assessment.json) |
+| Opposite damping diagnostic, common deployment PD 500/8 | Isaac passes (0.46 s); MuJoCo reaches only 0.145 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial009/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial009/assessment.json) |
 
 The explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Contact-stability shaping reduces leg-command changes and improves cross-engine root RMSE to 1.18 cm, but six genuine 5 ms right-wheel contact gaps still split the drift. Fixed-policy 400/800 Hz MuJoCo diagnostics do not resolve the contact loss and are not paired successes. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
 
@@ -92,6 +93,8 @@ Trial006 resumes trial004 and halves common leg stiffness, retaining its rewards
 Trial007 freezes trial004's actor byte-for-byte and changes only deployment Kp to 400. Tracking and stopping pass in both engines, but MuJoCo's 0.13 s continuous drift still fails. This is a zero-shot controller diagnostic—not a policy trained at Kp 400—and the gain setting is not adopted.
 
 Trial008 retains the same actor weights and normalizer, changing only deployment Kd to 12. Tracking and stopping pass, but MuJoCo still reaches only 0.15 s uninterrupted drift. Its exported file has different serialization bytes; all tensors and all 288 old/new observation outputs match exactly, and both engines use the same actual export. The damping change is not adopted.
+
+Trial009 tests the opposite damping direction, Kd 8, without new training. It also preserves tracking and stopping but fails MuJoCo's continuous-drift gate at 0.145 s. No tested gain change is adopted, and this bounded scalar-gain diagnostic sequence ends here.
 
 A separate [wheel-contact diagnostic](results/2026-10-11-car-drift/normal_contact_diagnostic.json) rejects a proposed MuJoCo-to-PhysX spring mapping. A [native-plane check](results/2026-10-11-car-drift/native_plane_diagnostic.json) reduces contact oscillation in the nominal surrogate but still fails identification; neither yields adopted parameters.
 
