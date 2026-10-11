@@ -30,6 +30,12 @@ def validate_task_profile(profile):
                 raise ValueError(f"Invalid drift task {key}")
     if "wheel_vertical_velocity_weight" in out and "wheel_vertical_velocity_std_m_s" not in out:
         raise ValueError("Wheel vertical-velocity weight requires an explicit wheel_vertical_velocity_std_m_s")
+    if "wheel_vertical_velocity_sampling" in out:
+        if (not isinstance(out["wheel_vertical_velocity_sampling"], str)
+                or out["wheel_vertical_velocity_sampling"] not in ("last_substep", "all_substeps_mean")):
+            raise ValueError("Invalid wheel vertical-velocity sampling mode")
+        if "wheel_vertical_velocity_weight" not in out:
+            raise ValueError("Wheel vertical-velocity sampling requires its explicit reward weight")
     if "mujoco_contact_solref" in out:
         value = out["mujoco_contact_solref"]
         if (not isinstance(value, list) or len(value) != 2
@@ -127,6 +133,20 @@ def wheel_vertical_velocity_penalty(env, std):
     return ((vertical_speed / std) ** 2).sum(-1)
 
 
+def install_drift_reward_sampling(env, profile):
+    """Opt in after any scene observer is installed; historical tasks are no-ops.
+
+    The accumulator reads all refreshed physical substeps, without changing
+    physics, observations or actor calls. It must be closed before removing an
+    earlier scene observer. This does not certify actual ground contact.
+    """
+    profile = validate_task_profile(profile)
+    if profile.get("wheel_vertical_velocity_sampling", "last_substep") != "all_substeps_mean":
+        return None
+    from training.tron1_substep_rewards import install_wheel_vertical_velocity_accumulator
+    return install_wheel_vertical_velocity_accumulator(env)
+
+
 def configure_drift(cfg, profile, eval_mode=False):
     profile = validate_task_profile(profile)
     from isaaclab.managers import RewardTermCfg
@@ -156,9 +176,14 @@ def configure_drift(cfg, profile, eval_mode=False):
         cfg.rewards.drift_leg_target_rate = RewardTermCfg(
             func=leg_target_rate_penalty, weight=profile["leg_target_rate_weight"], params={})
     if "wheel_vertical_velocity_weight" in profile:
+        func = wheel_vertical_velocity_penalty
+        params = {"std": profile["wheel_vertical_velocity_std_m_s"]}
+        if profile.get("wheel_vertical_velocity_sampling", "last_substep") == "all_substeps_mean":
+            from training.tron1_substep_rewards import substep_wheel_vertical_velocity_penalty
+            func = substep_wheel_vertical_velocity_penalty
+            params = {"std_m_s": profile["wheel_vertical_velocity_std_m_s"]}
         cfg.rewards.drift_wheel_vertical_velocity = RewardTermCfg(
-            func=wheel_vertical_velocity_penalty, weight=profile["wheel_vertical_velocity_weight"],
-            params={"std": profile["wheel_vertical_velocity_std_m_s"]})
+            func=func, weight=profile["wheel_vertical_velocity_weight"], params=params)
     if eval_mode:
         from training.tron1_contact_slip import configure_wheel_ground_sensors, configure_nonwheel_ground_sensors
         from training.tron1_tracking import NON_WHEEL_BODY_NAMES

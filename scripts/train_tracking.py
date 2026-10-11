@@ -77,6 +77,7 @@ def main():
     started = time.monotonic()
     report = {"status": "initializing", "jump_success_claimed": False}
     app = env = None
+    reward_accumulator = None
     try:
         launcher = AppLauncher(args)
         app = launcher.app
@@ -100,6 +101,9 @@ def main():
                            dr_profile=profile, terrain_spec=terrain_spec, task_profile=task_profile)
         cfg.seed = args.seed
         env = ManagerBasedRLEnv(cfg=cfg)
+        if task_profile is not None:
+            from training.tron1_drift import install_drift_reward_sampling
+            reward_accumulator = install_drift_reward_sampling(env, task_profile)
         contact_material_audit = None
         if task_profile is not None:
             from training.tron1_drift import audit_isaac_materials
@@ -167,6 +171,9 @@ def main():
             "domain_randomization_initial_audit": domain_randomization_audit(env),
             "evaluation_required": "Separate deterministic rollout from frame 0, without airborne resets",
         }
+        if reward_accumulator is not None:
+            manifest["source_sha256"]["training/tron1_substep_rewards.py"] = sha256(ROOT / "training/tron1_substep_rewards.py")
+            manifest["reward_sampling_audit"] = reward_accumulator.audit()
         write_json(output / "manifest.json", manifest)
         # RSL-RL consumes (pops) class_name fields, so pass a private copy.
         runner = OnPolicyRunner(wrapped, copy.deepcopy(config), log_dir=str(output), device=args.device)
@@ -185,19 +192,29 @@ def main():
                       training_environment_steps=runner.tot_timesteps,
                       checkpoint=str(output / "model_final.pt"))
         write_json(output / "domain_randomization_final_audit.json", domain_randomization_audit(env))
+        if reward_accumulator is not None:
+            write_json(output / "reward_sampling_final_audit.json", reward_accumulator.audit())
         print("TRON1_TRAINING_COMPLETED", json.dumps(report), flush=True)
     except BaseException as exc:
         report.update(status="failed", error=f"{type(exc).__name__}: {exc}",
                       elapsed_seconds=time.monotonic() - started)
         raise
     finally:
-        write_json(output / "run_status.json", report)
-        if env is not None:
-            env.close()
-        if app is not None:
-            # All checkpoints/logs are flushed above. No Replicator capture is
-            # used; its default shutdown path hangs on this headless host.
-            app.close(skip_cleanup=True)
+        try:
+            write_json(output / "run_status.json", report)
+        finally:
+            try:
+                if reward_accumulator is not None:
+                    reward_accumulator.close()
+            finally:
+                try:
+                    if env is not None:
+                        env.close()
+                finally:
+                    if app is not None:
+                        # All checkpoints/logs are flushed above. No Replicator capture is
+                        # used; its default shutdown path hangs on this headless host.
+                        app.close(skip_cleanup=True)
 
 
 if __name__ == "__main__":

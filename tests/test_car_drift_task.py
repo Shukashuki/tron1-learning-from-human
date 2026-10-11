@@ -299,6 +299,74 @@ def test_optional_stop_parameters_leave_historical_drift_defaults_unchanged(conf
     assert not hasattr(cfg.rewards, "drift_wheel_vertical_velocity")
 
 
+@pytest.mark.parametrize("mode", [None, True, False, 0, 1, [], {}, "mean", "", "ALL_SUBSTEPS_MEAN"])
+def test_vertical_velocity_sampling_rejects_invalid_modes(mode):
+    profile = task_profile()
+    profile.update(wheel_vertical_velocity_weight=-5., wheel_vertical_velocity_std_m_s=.02,
+                   wheel_vertical_velocity_sampling=mode)
+    with pytest.raises(ValueError, match="sampling mode"):
+        drift.validate_task_profile(profile)
+
+
+@pytest.mark.parametrize("mode", ["last_substep", "all_substeps_mean"])
+def test_sampling_mode_requires_a_declared_reward_weight_and_scale(mode):
+    profile = task_profile()
+    profile["wheel_vertical_velocity_sampling"] = mode
+    with pytest.raises(ValueError, match="explicit reward weight"):
+        drift.validate_task_profile(profile)
+    profile["wheel_vertical_velocity_weight"] = -5.
+    with pytest.raises(ValueError, match="explicit wheel_vertical_velocity_std"):
+        drift.validate_task_profile(profile)
+
+
+def test_default_sampling_installer_does_not_touch_environment_or_import_helper(monkeypatch):
+    monkeypatch.setitem(sys.modules, "training.tron1_substep_rewards", None)
+    untouched_env = object()
+    assert drift.install_drift_reward_sampling(untouched_env, task_profile()) is None
+    profile = task_profile()
+    profile.update(wheel_vertical_velocity_weight=-5., wheel_vertical_velocity_std_m_s=.02,
+                   wheel_vertical_velocity_sampling="last_substep")
+    assert drift.install_drift_reward_sampling(untouched_env, profile) is None
+
+
+def test_explicit_all_substep_sampling_selects_reward_and_installer(configuration_inputs, monkeypatch):
+    calls = []
+    handler = object()
+    helper = types.ModuleType("training.tron1_substep_rewards")
+    def install(env):
+        calls.append(env)
+        return handler
+    def reward(env, std_m_s):
+        return (env, std_m_s)
+    helper.install_wheel_vertical_velocity_accumulator = install
+    helper.substep_wheel_vertical_velocity_penalty = reward
+    monkeypatch.setitem(sys.modules, "training.tron1_substep_rewards", helper)
+    profile = task_profile()
+    profile.update(wheel_vertical_velocity_weight=-5., wheel_vertical_velocity_std_m_s=.02,
+                   wheel_vertical_velocity_sampling="all_substeps_mean")
+    cfg = extract_configuration_factory()(*configuration_inputs, num_envs=4, task_profile=profile)
+    term = cfg.rewards.drift_wheel_vertical_velocity
+    assert term.func is reward and term.params == {"std_m_s": .02} and term.weight == -5.
+    env = object()
+    assert drift.install_drift_reward_sampling(env, profile) is handler
+    assert calls == [env]
+    contract = drift.apply_task_profile_to_contract(read_contract(), profile)
+    assert validate_contract(contract)["task_profile"] == profile
+    assert (cfg.sim.dt, cfg.decimation, contract["actor_dim"], contract["action_dim"]) == (.005, 4, 51, 8)
+
+
+def test_last_substep_sampling_keeps_existing_reward_function_and_parameters(configuration_inputs):
+    profile = task_profile()
+    profile.update(wheel_vertical_velocity_weight=-5., wheel_vertical_velocity_std_m_s=.02)
+    for explicit in (False, True):
+        if explicit:
+            profile["wheel_vertical_velocity_sampling"] = "last_substep"
+        cfg = extract_configuration_factory()(*configuration_inputs, num_envs=4, task_profile=profile)
+        term = cfg.rewards.drift_wheel_vertical_velocity
+        assert term.func is drift.wheel_vertical_velocity_penalty
+        assert term.params == {"std": .02} and term.weight == -5.
+
+
 @pytest.mark.parametrize("key", ["leg_target_rate_weight", "wheel_vertical_velocity_weight"])
 @pytest.mark.parametrize("value", [-5.001, .001, True, False, None, "-.5", [], np.nan, np.inf, -np.inf])
 def test_optional_contact_robust_penalties_reject_invalid_weights(key, value):

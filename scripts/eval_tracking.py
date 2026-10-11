@@ -317,6 +317,9 @@ def main():
     launcher = AppLauncher(args)
     app = launcher.app
     wrapped = None
+    reward_accumulator = None
+    original_scene_update = None
+    physics_scene_update = None
     started = time.monotonic()
     try:
         import torch
@@ -503,6 +506,11 @@ def main():
                 return result
 
             env.scene.update = physics_scene_update
+        # Install AFTER the physical recorder so both observers chain once.
+        # Sampling costs do not modify physics or add actor/observation calls.
+        if task_profile is not None:
+            from training.tron1_drift import install_drift_reward_sampling
+            reward_accumulator = install_drift_reward_sampling(env, task_profile)
         export_validation_max_error = export_error
         max_steps = frames + int(math.ceil(0.2 / env.step_dt))
         with torch.inference_mode():
@@ -562,9 +570,6 @@ def main():
                 records["reference_frame_for_action"].append(reference_for_action)
                 records["action_was_applied"].append(valid)
                 active[newly_done] = False
-
-        if original_scene_update is not None:
-            env.scene.update = original_scene_update
 
         for env_index in np.flatnonzero(active):
             outcomes[env_index]["end_reason"] = "application_interrupted" if not app.is_running() else "evaluation_step_limit"
@@ -651,6 +656,9 @@ def main():
             ],
         }
         np.savez_compressed(args.output_dir / "trajectory.npz", **arrays)
+        if reward_accumulator is not None:
+            report.update({"reward_sampling_audit": reward_accumulator.audit(),
+                           "substep_reward_module_sha256": sha256(ROOT / "training/tron1_substep_rewards.py")})
         if args.physics_dt_s is not None:
             report.update({"physics_clock_refinement": contract["physics_clock_refinement"],
                            "physics_clock_readback": clock_readback})
@@ -686,18 +694,28 @@ def main():
                           "detected_jump_and_landing_rate": summary["detected_jump_and_landing_rate"],
                           "maximum_base_link_height_gain_m": summary["maximum_base_link_height_gain_m"]}, indent=2), flush=True)
     finally:
-        if wrapped is not None:
-            wrapped.close()
-        if args.headless:
-            # Isaac Sim 5.1's renderer/Replicator cleanup can wait indefinitely
-            # on this remote runtime. All NPZ/JSON/JIT outputs are closed above;
-            # no cameras or Replicator jobs exist in this headless evaluator.
+        # Undo observers in reverse installation order, even on an error.
+        # Never replace an unknown wrapper added by another caller.
+        try:
+            if reward_accumulator is not None:
+                reward_accumulator.close()
+        finally:
             try:
-                app.close(skip_cleanup=True)
-            except TypeError:  # Compatibility with older Sim versions.
-                app.close()
-        else:
-            app.close()
+                if original_scene_update is not None and env.scene.update is physics_scene_update:
+                    env.scene.update = original_scene_update
+                if wrapped is not None:
+                    wrapped.close()
+            finally:
+                if args.headless:
+                    # Isaac Sim 5.1's renderer/Replicator cleanup can wait indefinitely
+                    # on this remote runtime. All NPZ/JSON/JIT outputs are closed above;
+                    # no cameras or Replicator jobs exist in this headless evaluator.
+                    try:
+                        app.close(skip_cleanup=True)
+                    except TypeError:  # Compatibility with older Sim versions.
+                        app.close()
+                else:
+                    app.close()
 
 
 if __name__ == "__main__":
