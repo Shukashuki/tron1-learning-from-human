@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial011",
+  "amendment_type": "resource_only_pre_evaluation",
+  "authority": "The user's newer explicit instruction to use another idle GPU supersedes the previous GPU7-only wait. Root selects idle GPU5, matching the original frozen training/evaluation device; this is not automatic fallback or outcome-based selection.",
+  "supersedes": {
+    "path": "config/car_drift_continuation_eval_gpu7.json",
+    "sha256": "03394179ce50a6620021497cdccc3627f3f52d6a654c7eeb1b7d07acb8ff30d3",
+    "git_commit": "72323dd54575ac35379f04f4883179511e4b87dc",
+    "prior_file_rewritten": false,
+    "any_trial011_evaluation_launched_before_this_amendment": false
+  },
+  "base_protocol": {
+    "path": "config/car_drift_continuation_only_trial.json",
+    "sha256": "efcd7f7cc1e72cbb186d23ca38fbdb4dbf9288abab0e22f0355b205c1d186baf",
+    "training_git_commit": "6343b8a04a2ef8e000b88b0bc08a1eafc41228c6",
+    "training_archive_sha256": "b82fdc920e52f55deedaabdb87b5583fb2f123e3f2ea136bb1ce0c4b787b8de1"
+  },
+  "selected_resource": {
+    "device": "cuda:5",
+    "gpu_index": 5,
+    "gpu_uuid": "GPU-f3fe90b7-ba72-b055-11a3-440d7726d34e",
+    "root_observation_utc": "2026-10-11T23:57:15Z",
+    "observed_memory_used_mib": 6,
+    "observed_utilization_percent": 0,
+    "observed_target_compute_apps": 0,
+    "fresh_idle_guard_required_immediately_before_launch": true,
+    "max_idle_memory_mib": 16,
+    "max_idle_utilization_percent": 0,
+    "no_foreign_target_compute_apps": true,
+    "cuda_visible_devices": null,
+    "no_automatic_fallback": true,
+    "other_user_jobs_modified_or_terminated": false,
+    "all_owned_cross_gpu_context_rows_retained": true,
+    "physical_mapping_verified": false,
+    "non_target_contexts_claimed_absent_or_harmless": false,
+    "idle_check_is_atomic_gpu_reservation": false
+  },
+  "completed_training_unchanged": {
+    "verification_sha256": "e8920c7cb2157d91c86a29e376e8aee9efb52f5a4d69b4c4aa5310e908376026",
+    "final_checkpoint_sha256": "8124cc311503050a0a8c31dd6e51a62a2508c9cb133a6c2da6c2469602b4c6c5",
+    "task_profile_sha256": "325cf279c699769694fb4934852ce85753b459e09670376b8c2d62d94f7d4e3c",
+    "updates": 600,
+    "num_envs": 2048,
+    "rollout_steps_per_update": 24,
+    "seed": 42,
+    "additional_environment_steps": 29491200,
+    "saved_iteration": 4595,
+    "retraining_or_checkpoint_selection_changed": false
+  },
+  "unchanged_execution": {
+    "evaluation_launcher_sha256": "7b82f109df381e517c3ac5922912a463e0a260d4946eedee297144b37305409e",
+    "provenance_v2_script_sha256": "aa81fec12cf83ef04bc5fe6e0c0dd6158e4c8cd23c6787b1810e41fd58f40bd6",
+    "provenance_v2_plan_sha256": "91419c7d12b7bc14660d050e6b344ce8f2b2a631812015aa275dd13e732a04d7",
+    "new_launcher_or_provenance_code_added": false,
+    "policy_hz": 50,
+    "physics_hz_both_engines": 200,
+    "leg_kp_kd": [500.0, 10.0],
+    "episodes_per_engine": 1,
+    "evaluation_motors": "Original nominal parameters",
+    "contract": "Original011 finalactor/export normalizer, reference, assets, contact parameters, initial state, observations and every original assessor/source/tracking/contact/exit gate unchanged. TRAIN5/EVAL5 uses the original frozen guard and V2 proof, never the unused GPU7 application path.",
+    "presentation": "Same full four-panel and contact evidence; preserve initial jump animation and all previous artifacts byte-for-byte."
+  },
+  "limits": "No trial011 behavior outcome has been inspected at declaration. This config launches no application and claims no sim2sim success. The earlier idle observation is not launch authorization without a fresh guard; if selected GPU5 becomes busy, wait rather than switch devices or alter another user's jobs."
+}
