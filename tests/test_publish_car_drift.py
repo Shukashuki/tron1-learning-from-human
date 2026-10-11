@@ -997,3 +997,335 @@ def test_kd_diagnostic_requires_original_and_actual_live_gains(damping_diagnosti
     with pytest.raises(ValueError, match="live leg gain"):
         publish_fixture(damping_diagnostic)
     assert not damping_diagnostic[-1].exists()
+
+
+def reserve_audit(num_envs, point_tracking):
+    """Synthetic metadata matching ORIGINAL761, with the real ten-body layout.
+
+    These constants mirror the recorded smoke schema/mass values, but generated
+    fixture poses, metadata and media are never evidence of an actual experiment.
+    """
+    masses = [9.585000038146973, 1.4689998626708984, 1.4689998626708984,
+              .009999999776482582, 2.299999952316284, 2.299999952316284,
+              1.4900000095367432, 1.4900000095367432, 1.0800000429153442,
+              1.0800000429153442]
+    mass = sum(masses)
+    native_g = -9.8100004196167
+    events = [{"name": "physics_material", "mode": "startup",
+               "function": "isaaclab.envs.mdp.events.randomize_rigid_body_material",
+               "initialized_exact_class_instance": True},
+              {"name": "legacy_joint_friction", "mode": "startup",
+               "function": "training.tron1_tracking.clear_legacy_joint_friction",
+               "initialized_exact_class_instance": False}]
+    if not point_tracking:
+        events.append({"name": "domain_randomization", "mode": "reset",
+                       "function": "training.tron1_domain_randomization.reset_domain_randomization",
+                       "initialized_exact_class_instance": False})
+    return {
+        "schema_version": 1, "settings": {"weight": -1., "scale_fraction": .2},
+        "module_sha256": publish.GROUND_LOAD_RESERVE_SOURCE_PINS["training/tron1_ground_load_reserve.py"],
+        "formula": "sum(exp(-clamp(ground_normal_force_world_z_N,min=0)/(scale_fraction*mg_N)))",
+        "sampling": "last_physics_substep", "physics_dt_s": .005, "policy_dt_s": .02, "decimation": 4,
+        "force_evidence": "filtered ContactSensor.data.force_matrix_w; normal forces only",
+        "sensor_names": ["wheel_L_ground", "wheel_R_ground"],
+        "wheel_body_names": ["wheel_L_Link", "wheel_R_Link"], "sensor_matrix_shape": [num_envs, 1, 1, 3],
+        "ground_collider": {"path": "/World/ground/terrain/GroundPlane/CollisionPlane", "usd_type": "Plane",
+                            "collision_api_verified": True, "native_cooked_geometry_readback_performed": False},
+        "training_contact_point_tracking_required": False,
+        "sensor_track_contact_points": [point_tracking, point_tracking],
+        "native_mass_source": "ArticulationView.get_masses() CPU (N,bodies)",
+        "mass_reduction_dtype": "float64", "cached_mg_dtype": "float32",
+        "mass_kg_range": [mass, mass], "first_environment_link_mass_kg": masses,
+        "mg_N_range": [mass * abs(native_g)] * 2, "configured_gravity_m_s2": [0., 0., -9.81],
+        "native_gravity_m_s2": [0., 0., native_g], "cuda_device": "cuda:5", "num_envs": num_envs,
+        "active_event_identity_audit": events,
+        "startup_force_finite_and_nonnegative_z": True, "startup_loaded_contact_required": False,
+        "loaded_normal_vector_and_raw_aggregate_runtime_smoke_required": True,
+        "raw_normal_forces_thresholded": False, "scale_is_minimum_force": False, "cost_bounds": [0., 2.],
+        "continuous_contact_certified": False, "host_synchronization_free": False,
+        "reset_or_history_state_added": False, "soft_balanced_load_preference": True,
+        "tracking_tradeoff_and_no_hardware_safety_claim": True,
+    }
+
+
+@pytest.fixture
+def load_reserve(trial, monkeypatch):
+    root, reference, _, _ = trial
+    from training.tron1_domain_randomization import default_profile
+    profile = publish.read_json(ROOT / "config/car_drift_contact_task.json")
+    profile["wheel_ground_load_reserve"] = {"weight": -1., "scale_fraction": .2}
+    contract = publish.read_json(root / "isaac/policy_contract.json")
+    native = contract["body_names"][:3] + ["limx_imu"] + contract["body_names"][3:]
+    contract.update(task_profile=copy.deepcopy(profile), actual_body_order=native)
+    write_json(root / "isaac/policy_contract.json", contract)
+    manifest = publish.read_json(root / "training/manifest.json")
+    manifest.update(task_profile=copy.deepcopy(profile), contract=copy.deepcopy(contract), num_envs=2048,
+                    iterations_requested=600, seed=42,
+                    resume_sha256="93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+                    body_names=native, domain_randomization_profile=default_profile(42), asset_sha256="7" * 64,
+                    source_sha256={k: v for k, v in publish.GROUND_LOAD_RESERVE_SOURCE_PINS.items()
+                                   if k != "scripts/eval_tracking.py"})
+    isaac = publish.read_json(root / "isaac/report.json")
+    isaac.update(task_profile=copy.deepcopy(profile), policy_export=copy.deepcopy(contract),
+                 asset_root_file_sha256="7" * 64,
+                 evaluator_source_sha256=publish.GROUND_LOAD_RESERVE_SOURCE_PINS["scripts/eval_tracking.py"],
+                 drift_module_sha256=publish.GROUND_LOAD_RESERVE_SOURCE_PINS["training/tron1_drift.py"],
+                 contact_slip_helper_sha256=publish.GROUND_LOAD_RESERVE_SOURCE_PINS["training/tron1_contact_slip.py"],
+                 ground_load_reserve_module_sha256=publish.GROUND_LOAD_RESERVE_SOURCE_PINS["training/tron1_ground_load_reserve.py"])
+    for report, n, point_tracking in ((manifest, 2048, False), (isaac, 1, True)):
+        material = report["contact_material_audit"]
+        material["leg_pd_gain_readback"] = {"kp_range": [500., 500.], "kd_range": [10., 10.]}
+        material["ground_colliders"][0]["collider"] = "/World/ground/terrain/GroundPlane/CollisionPlane"
+        material["ground_load_reserve"] = reserve_audit(n, point_tracking)
+    write_json(root / "training/manifest.json", manifest)
+    write_json(root / "isaac/report.json", isaac)
+    status = publish.read_json(root / "training/run_status.json")
+    status["num_envs"] = 2048
+    status["iterations_requested"] = 600
+    status["training_environment_steps"] = 600 * 2048 * 24
+    write_json(root / "training/run_status.json", status)
+    mujoco = publish.read_json(root / "mujoco/report.json")
+    mujoco.update(contract=copy.deepcopy(contract), model_sha256="6" * 64,
+                  domain_parameters={"is_nominal": True, "joint_names": contract["observed_joint_velocity_order"],
+                                     "torque_scale": [1.] * 8, "velocity_scale": [1.] * 8,
+                                     "wheel_friction_nm": [0., 0.]})
+    mujoco["contact_material_audit"].update(contact_margin_and_gap_changed=False,
+                                            explicit_contact_solref=[.04, 2.],
+                                            compiled_solref_ranges=[[.04, .04], [2., 2.]])
+    write_json(root / "mujoco/report.json", mujoco)
+    for name in ("adaptation.json", "motion.json"):
+        record = publish.read_json(reference / name)
+        record["model_sha256"] = "5" * 64
+        write_json(reference / name, record)
+    monkeypatch.setattr(publish, "GROUND_LOAD_RESERVE_ASSET_PINS", {
+        "motion": publish.sha256(reference / "motion.npz"),
+        "robot_reference": publish.sha256(reference / "robot_reference.npz"), "asset": "7" * 64,
+        "model": "6" * 64, "reference_model": "5" * 64})
+    add_physics_recording(trial)
+    return trial
+
+
+def load_reserve_inputs(fixture):
+    root, reference, _, _ = fixture
+    files = {"manifest": root / "training/manifest.json", "isaac_report": root / "isaac/report.json",
+             "mujoco_report": root / "mujoco/report.json", "contract": root / "isaac/policy_contract.json",
+             "assessment": root / "assessment.json", "adaptation": reference / "adaptation.json",
+             "export_report": reference / "motion.json", "motion": reference / "motion.npz",
+             "robot_reference": reference / "robot_reference.npz"}
+    hashes = {k: publish.sha256(p) for k, p in files.items()}
+    records = {k: publish.read_json(p) for k, p in files.items() if p.suffix == ".json"}
+    return records, files, hashes
+
+
+def test_load_reserve_context_is_explicit_source_backed_and_preserves_behavior(load_reserve):
+    add_render(load_reserve)
+    assessment = publish.read_json(load_reserve[0] / "assessment.json")
+    summary = publish_fixture(load_reserve, include_render=True)
+    context = summary["ground_load_reserve_context"]
+    assert context["validation_kind"] == "source_backed_validated_startup_context"
+    assert context["settings"] == {"weight": -1., "scale_fraction": .2}
+    assert context["sampling"] == "last_physics_substep_at_50Hz_reward_clock"
+    assert summary["verdict"] == assessment["verdict"]
+    assert summary["failed_checks"] == assessment["failed_checks"]
+    for name in ("behavior_gates_changed", "live_reward_manager_configuration_independently_recorded",
+                 "all_cached_gpu_weight_values_independently_recorded", "full_training_force_validity_independently_proved",
+                 "normal_force_envelope_equivalence_claimed", "native_cooked_geometry_equivalence_claimed",
+                 "continuous_contact_certified", "hardware_ready"):
+        assert context[name] is False
+    assert "force-only" in context["training_sensor_telemetry"]
+    assert "telemetry-only" in context["evaluation_sensor_telemetry"]
+    for name, audit in context["startup_audits"].items():
+        assert len(audit["first_environment_link_mass_kg"]) == 10
+        assert audit["startup_loaded_contact_required"] is False
+        assert audit["sensor_matrix_shape"] == [2048 if name == "training" else 1, 1, 1, 3]
+    for relative, expected in publish.GROUND_LOAD_RESERVE_SOURCE_PINS.items():
+        assert summary["input_sha256"]["ground_load_reserve_source_" + Path(relative).stem] == expected
+    assert len(list(load_reserve[-1].iterdir())) == 8
+    assert not list(load_reserve[-1].rglob("*.npz"))
+
+
+def test_load_reserve_does_not_turn_failure_into_a_pass(load_reserve):
+    path = load_reserve[0] / "mujoco/rollout.npz"
+    with np.load(path, allow_pickle=False) as archive:
+        arrays = {k: archive[k].copy() for k in archive.files}
+    arrays["wheel_lateral_contact_slip_m_s"][:] = 0.
+    np.savez(path, **arrays)
+    reassess(load_reserve)
+    summary = publish_fixture(load_reserve)
+    assert summary["verdict"] == "fail" and summary["behavior_pass"] is False
+    assert "mujoco.sustained_grounded_contact_patch_drift" in summary["failed_checks"]
+    assert summary["ground_load_reserve_context"]["continuous_contact_certified"] is False
+
+
+def test_legacy_publication_has_no_reserve_hashes_fields_or_active_imports(trial, monkeypatch):
+    monkeypatch.setattr(publish, "GROUND_LOAD_RESERVE_SOURCE_PINS", {"training/tron1_ground_load_reserve.py": "0" * 64})
+    records, files, hashes = load_reserve_inputs(trial)
+    old_files, old_hashes = dict(files), dict(hashes)
+    assert publish.validate_ground_load_reserve_context(records, files, hashes) is None
+    assert files == old_files and hashes == old_hashes
+    summary = publish_fixture(trial)
+    assert "ground_load_reserve_context" not in summary
+    assert all(not k.startswith("ground_load_reserve") for k in summary["input_sha256"])
+
+
+@pytest.mark.parametrize("engine", ["manifest", "isaac_report", "mujoco_report"])
+def test_reserve_rejects_orphan_evidence_on_old_profiles(trial, engine):
+    records, files, hashes = load_reserve_inputs(trial)
+    records[engine]["contact_material_audit"]["ground_load_reserve"] = {}
+    with pytest.raises(ValueError, match="Orphan"):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("schema_version", True), ("num_envs", 8), ("num_envs", 2048.), ("decimation", 4.),
+    ("physics_dt_s", .0025), ("policy_dt_s", .01), ("sensor_matrix_shape", [2048, 2, 1, 3]),
+    ("sensor_matrix_shape", [2048, True, 1, 3]), ("sensor_names", ["wheel_R_ground", "wheel_L_ground"]),
+    ("wheel_body_names", ["base_Link", "wheel_R_Link"]), ("sensor_track_contact_points", [True, True]),
+    ("sensor_track_contact_points", [0, 0]), ("sampling", "all_substeps_mean"),
+    ("native_mass_source", "USD authored masses"), ("mass_reduction_dtype", "float32"),
+    ("cached_mg_dtype", "float64"), ("cuda_device", "cpu"), ("cuda_device", "cuda"),
+    ("startup_force_finite_and_nonnegative_z", 1), ("startup_loaded_contact_required", True),
+    ("raw_normal_forces_thresholded", True), ("host_synchronization_free", True),
+    ("continuous_contact_certified", True), ("scale_is_minimum_force", 0),
+    ("cost_bounds", [False, 2.]), ("module_sha256", "0" * 64),
+    ("first_environment_link_mass_kg", [1.] * 9), ("first_environment_link_mass_kg", [1.] * 10),
+    ("mass_kg_range", [22.273, 22.]), ("mass_kg_range", [True, 22.273]),
+    ("mass_kg_range", [float("nan")] * 2), ("mass_kg_range", [float("inf")] * 2),
+    ("mg_N_range", [218., 218.]), ("mg_N_range", [0., 0.]),
+    ("configured_gravity_m_s2", [0., 0., 9.81]), ("native_gravity_m_s2", [0., 1., -9.81]),
+    ("settings", {"weight": True, "scale_fraction": .2}),
+    ("settings", {"weight": -1., "scale_fraction": True}),
+    ("settings", {"weight": -1., "scale_fraction": .1}),
+    ("full_training_force_validity_independently_proved", True),
+])
+def test_reserve_rejects_mutated_startup_metadata(load_reserve, field, value):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    records["manifest"]["contact_material_audit"]["ground_load_reserve"][field] = value
+    with pytest.raises(ValueError):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+    assert not load_reserve[-1].exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("path", "/World/ground"), ("usd_type", "Cube"), ("collision_api_verified", 1),
+    ("native_cooked_geometry_readback_performed", True),
+])
+def test_reserve_does_not_infer_native_cooked_plane(load_reserve, field, value):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    records["isaac_report"]["contact_material_audit"]["ground_load_reserve"]["ground_collider"][field] = value
+    with pytest.raises(ValueError, match="ground filter/schema"):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+
+
+def test_reserve_accepts_audited_mesh_without_native_shape_claim(load_reserve):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    for name in ("manifest", "isaac_report"):
+        records[name]["contact_material_audit"]["ground_load_reserve"]["ground_collider"]["usd_type"] = "Mesh"
+    context = publish.validate_ground_load_reserve_context(records, files, hashes)
+    assert context["native_cooked_geometry_equivalence_claimed"] is False
+
+
+@pytest.mark.parametrize("change", ["extra", "duplicate", "class", "function", "mode", "extra_claim"])
+def test_reserve_rejects_unsafe_event_metadata(load_reserve, change):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    events = records["manifest"]["contact_material_audit"]["ground_load_reserve"]["active_event_identity_audit"]
+    if change == "extra":
+        events.append({"name": "mass_randomization"})
+    elif change == "duplicate":
+        events[1] = copy.deepcopy(events[0])
+    elif change == "class":
+        events[0]["initialized_exact_class_instance"] = 1
+    elif change == "function":
+        events[0]["function"] += "_lookalike"
+    elif change == "extra_claim":
+        events[0]["full_run_mass_unchanged"] = True
+    else:
+        events[0]["mode"] = "reset"
+    with pytest.raises(ValueError, match="event"):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+
+
+@pytest.mark.parametrize("relative", list(publish.GROUND_LOAD_RESERVE_SOURCE_PINS))
+def test_reserve_checks_every_current_source_pin(load_reserve, monkeypatch, relative):
+    original = publish.sha256
+    monkeypatch.setattr(publish, "sha256", lambda path: "0" * 64 if Path(path) == ROOT / relative else original(path))
+    with pytest.raises(ValueError, match="Unsupported reserve source"):
+        publish_fixture(load_reserve)
+    assert not load_reserve[-1].exists()
+
+
+@pytest.mark.parametrize("target", ["source", "eval_module", "training_audit", "eval_audit", "native_bodies", "tracked_bodies",
+                                    "motor", "physics_clock", "old_reward", "new_profile", "model", "margin"])
+def test_reserve_rejects_missing_or_changed_context(load_reserve, target):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    manifest, isaac, mj, contract = [records[k] for k in ("manifest", "isaac_report", "mujoco_report", "contract")]
+    if target == "source":
+        del manifest["source_sha256"]["training/tron1_ground_load_reserve.py"]
+    elif target == "eval_module":
+        del isaac["ground_load_reserve_module_sha256"]
+    elif target in ("training_audit", "eval_audit"):
+        del (manifest if target == "training_audit" else isaac)["contact_material_audit"]["ground_load_reserve"]
+    elif target == "native_bodies":
+        manifest["body_names"] = contract["body_names"]
+    elif target == "tracked_bodies":
+        contract["body_names"] = contract["actual_body_order"]
+    elif target == "motor":
+        mj["domain_parameters"]["torque_scale"][0] = True
+    elif target == "physics_clock":
+        records["assessment"]["provenance_checks"]["same_physics_contact_sampling_clock"]["passed"] = 1
+    elif target == "old_reward":
+        for record in (manifest, isaac, contract, manifest["contract"], mj["contract"]):
+            record["task_profile"]["reward_weights"]["grounded"] = .5
+    elif target == "new_profile":
+        del isaac["task_profile"]["wheel_ground_load_reserve"]
+    elif target == "model":
+        mj["model_sha256"] = "0" * 64
+    else:
+        mj["contact_material_audit"]["contact_margin_and_gap_changed"] = 0
+    with pytest.raises(ValueError):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("iterations_requested", 599), ("iterations_requested", 600.), ("seed", True),
+    ("seed", 43), ("resume_sha256", "0" * 64), ("num_envs", 2048.),
+])
+def test_reserve_requires_the_predeclared_training_parent_and_budget(load_reserve, field, value):
+    records, files, hashes = load_reserve_inputs(load_reserve)
+    records["manifest"][field] = value
+    with pytest.raises(ValueError):
+        publish.validate_ground_load_reserve_context(records, files, hashes)
+
+
+@pytest.mark.parametrize("kind,value", [
+    ("status", "training_running"), ("iterations_requested", 599), ("iterations_requested", 600.),
+    ("num_envs", 2048.), ("training_environment_steps", 600 * 2048 * 24 - 1),
+    ("training_environment_steps", float(600 * 2048 * 24)), ("num_steps_per_env", 23),
+    ("num_steps_per_env", 24.), ("missing_status", None), ("missing_runner", None),
+])
+def test_reserve_rejects_incomplete_or_mistyped_completion_before_output(load_reserve, kind, value):
+    root = load_reserve[0]
+    name = "runner_config.json" if kind in ("num_steps_per_env", "missing_runner") else "run_status.json"
+    path = root / "training" / name
+    if kind.startswith("missing"):
+        path.unlink()  # Remove only the disposable generated fixture evidence.
+    else:
+        record = publish.read_json(path)
+        record[kind] = value
+        write_json(path, record)
+    with pytest.raises(ValueError, match="completed predeclared training"):
+        publish_fixture(load_reserve)
+    assert not load_reserve[-1].exists()
+
+
+def test_reserve_rehashes_approved_sources_immediately_before_output(load_reserve, monkeypatch):
+    original_prepare, original_sha = publish.prepare_publication, publish.sha256
+    helper = ROOT / "training/tron1_ground_load_reserve.py"
+    def prepare_then_simulate_source_change(*args, **kwargs):
+        prepared = original_prepare(*args, **kwargs)
+        monkeypatch.setattr(publish, "sha256", lambda path: "0" * 64 if Path(path) == helper else original_sha(path))
+        return prepared
+    monkeypatch.setattr(publish, "prepare_publication", prepare_then_simulate_source_change)
+    with pytest.raises(ValueError, match="Input changed during publication preflight"):
+        publish_fixture(load_reserve)
+    assert not load_reserve[-1].exists()
