@@ -21,11 +21,15 @@ def validate_task_profile(profile):
             raise ValueError(f"Invalid drift reward {key}")
         if (key == "tilt" and value > 0) or (key != "tilt" and value < 0):
             raise ValueError(f"Invalid drift reward sign: {key}")
-    for key, low, high in (("speed_std_m_s", .03, 1.), ("action_rate_weight", -2., 0.), ("leg_kd", 5., 50.)):
+    for key, low, high in (("speed_std_m_s", .03, 1.), ("action_rate_weight", -2., 0.), ("leg_kd", 5., 50.),
+                           ("leg_target_rate_weight", -5., 0.), ("wheel_vertical_velocity_weight", -5., 0.),
+                           ("wheel_vertical_velocity_std_m_s", .005, .1)):
         if key in out:
             value = out[key]
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not low <= value <= high:
                 raise ValueError(f"Invalid drift task {key}")
+    if "wheel_vertical_velocity_weight" in out and "wheel_vertical_velocity_std_m_s" not in out:
+        raise ValueError("Wheel vertical-velocity weight requires an explicit wheel_vertical_velocity_std_m_s")
     if "mujoco_contact_solref" in out:
         value = out["mujoco_contact_solref"]
         if (not isinstance(value, list) or len(value) != 2
@@ -97,6 +101,32 @@ def tilt_penalty(env):
     return (env.scene["robot"].data.projected_gravity_b[:, :2] ** 2).sum(-1)
 
 
+def leg_target_rate_penalty(env):
+    """Positive leg-only target-rate cost in rad^2/s^2; cfg supplies its sign.
+
+    The action manager receives clipped [-1,1] actions in the tracking wrapper.
+    Its first six actions map to leg targets with the existing 1 rad scale.
+    Reuse its previous-action/reset state; no reward history is maintained.
+    """
+    delta = env.action_manager.action[:, :6] - env.action_manager.prev_action[:, :6]
+    target_rate_rad_s = delta * 1.0 / env.step_dt
+    return (target_rate_rad_s ** 2).sum(-1)
+
+
+def wheel_vertical_velocity_penalty(env, std):
+    """Positive dimensionless flat-drift cost sum((wheel-link vz/std)^2).
+
+    Read world-frame LINK-ORIGIN velocity, not the legacy body/COM alias, on
+    the tensor's current device. Reward evaluation at the 50 Hz policy clock
+    sees the last physics substep only: this cannot certify continuous contact
+    or constrain all intervening substeps. Target vz=0 is specific to flat drift.
+    """
+    robot = env.scene["robot"]
+    ids = [robot.body_names.index(name) for name in ("wheel_L_Link", "wheel_R_Link")]
+    vertical_speed = robot.data.body_link_lin_vel_w[:, ids, 2]
+    return ((vertical_speed / std) ** 2).sum(-1)
+
+
 def configure_drift(cfg, profile, eval_mode=False):
     profile = validate_task_profile(profile)
     from isaaclab.managers import RewardTermCfg
@@ -122,6 +152,13 @@ def configure_drift(cfg, profile, eval_mode=False):
         setattr(cfg.rewards, "drift_" + key, RewardTermCfg(func=funcs[key], weight=weight, params=params))
     if "action_rate_weight" in profile:
         cfg.rewards.action_rate_l2.weight = profile["action_rate_weight"]
+    if "leg_target_rate_weight" in profile:
+        cfg.rewards.drift_leg_target_rate = RewardTermCfg(
+            func=leg_target_rate_penalty, weight=profile["leg_target_rate_weight"], params={})
+    if "wheel_vertical_velocity_weight" in profile:
+        cfg.rewards.drift_wheel_vertical_velocity = RewardTermCfg(
+            func=wheel_vertical_velocity_penalty, weight=profile["wheel_vertical_velocity_weight"],
+            params={"std": profile["wheel_vertical_velocity_std_m_s"]})
     if eval_mode:
         from training.tron1_contact_slip import configure_wheel_ground_sensors, configure_nonwheel_ground_sensors
         from training.tron1_tracking import NON_WHEEL_BODY_NAMES

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "description": "Contact-stability retry from trial003's final checkpoint. Add dimensionally scaled leg-target-rate and wheel-link vertical-velocity penalties, providing dense training signals even when Isaac contacts remain supported. The latter is link-origin velocity, not contact-point separation. Preserve the same reference, 50 Hz policy / 200 Hz physics, gains, motor randomization, friction, explicit soft-contact calibration and all acceptance thresholds. Final checkpoint is predesignated after 600 additional updates. No hardware or statistical robustness claim."
+}

@@ -295,6 +295,123 @@ def test_optional_stop_parameters_leave_historical_drift_defaults_unchanged(conf
     assert cfg.rewards.drift_speed.params["std"] == .35
     assert cfg.rewards.action_rate_l2.weight == -.01
     assert cfg.scene.robot.actuators["legs"].damping == 10.
+    assert not hasattr(cfg.rewards, "drift_leg_target_rate")
+    assert not hasattr(cfg.rewards, "drift_wheel_vertical_velocity")
+
+
+@pytest.mark.parametrize("key", ["leg_target_rate_weight", "wheel_vertical_velocity_weight"])
+@pytest.mark.parametrize("value", [-5.001, .001, True, False, None, "-.5", [], np.nan, np.inf, -np.inf])
+def test_optional_contact_robust_penalties_reject_invalid_weights(key, value):
+    profile = task_profile()
+    profile.update({key: value, "wheel_vertical_velocity_std_m_s": .02})
+    with pytest.raises(ValueError):
+        drift.validate_task_profile(profile)
+
+
+@pytest.mark.parametrize("value", [.004999, .100001, 0., -.01, True, False, None, ".02", [], np.nan, np.inf, -np.inf])
+def test_optional_vertical_speed_std_is_finite_positive_and_bounded(value):
+    profile = task_profile()
+    profile["wheel_vertical_velocity_std_m_s"] = value
+    with pytest.raises(ValueError):
+        drift.validate_task_profile(profile)
+
+
+@pytest.mark.parametrize("weight,std", [(-5., .005), (0., .1), (-.5, .02)])
+def test_contact_robust_profile_accepts_explicit_boundary_values_without_mutation(weight, std):
+    profile = task_profile()
+    profile.update(leg_target_rate_weight=weight, wheel_vertical_velocity_weight=weight,
+                   wheel_vertical_velocity_std_m_s=std)
+    original = copy.deepcopy(profile)
+    validated = drift.validate_task_profile(profile)
+    assert profile == original and validated == original and validated is not profile
+
+
+def test_vertical_speed_weight_requires_explicit_scale_even_when_weight_is_zero():
+    for weight in (-.5, 0.):
+        profile = {**task_profile(), "wheel_vertical_velocity_weight": weight}
+        with pytest.raises(ValueError, match="explicit wheel_vertical_velocity_std_m_s"):
+            drift.validate_task_profile(profile)
+
+
+def test_vertical_speed_std_alone_adds_no_reward_or_default_behavior(configuration_inputs):
+    profile = {**task_profile(), "wheel_vertical_velocity_std_m_s": .02}
+    cfg = extract_configuration_factory()(*configuration_inputs, num_envs=4, task_profile=profile)
+    assert not hasattr(cfg.rewards, "drift_leg_target_rate")
+    assert not hasattr(cfg.rewards, "drift_wheel_vertical_velocity")
+    assert cfg.rewards.action_rate_l2.weight == -.01
+
+
+@pytest.mark.parametrize("enabled", ["leg", "vertical", "both"])
+def test_optional_contact_robust_terms_activate_only_for_their_weight_keys(configuration_inputs, enabled):
+    profile = task_profile()
+    if enabled in ("leg", "both"):
+        profile["leg_target_rate_weight"] = -.5
+    if enabled in ("vertical", "both"):
+        profile.update(wheel_vertical_velocity_weight=-2., wheel_vertical_velocity_std_m_s=.02)
+    cfg = extract_configuration_factory()(*configuration_inputs, num_envs=4, task_profile=profile)
+    assert hasattr(cfg.rewards, "drift_leg_target_rate") == (enabled in ("leg", "both"))
+    assert hasattr(cfg.rewards, "drift_wheel_vertical_velocity") == (enabled in ("vertical", "both"))
+    if enabled in ("leg", "both"):
+        term = cfg.rewards.drift_leg_target_rate
+        assert term.func is drift.leg_target_rate_penalty and term.weight == -.5 and term.params == {}
+    if enabled in ("vertical", "both"):
+        term = cfg.rewards.drift_wheel_vertical_velocity
+        assert term.func is drift.wheel_vertical_velocity_penalty and term.weight == -2.
+        assert term.params == {"std": .02}
+    assert cfg.rewards.action_rate_l2.weight == -.01
+    assert cfg.scene.robot.actuators["legs"].stiffness == 500.
+    assert cfg.scene.robot.actuators["legs"].damping == 10.
+    assert cfg.scene.terrain.physics_material.static_friction == .15
+    assert cfg.sim.dt == .005 and cfg.decimation == 4
+
+
+def test_leg_target_rate_is_physical_leg_only_per_environment_and_has_no_history():
+    # NumPy arrays exercise the same device-neutral tensor slicing/arithmetic.
+    previous = np.array([[.1] * 6 + [-1., 1.], [0.] * 8])
+    action = previous.copy()
+    action[0, :6] += .01
+    action[1, :6] += np.array([.02, -.02, 0., 0., 0., 0.])
+    action[:, 6:] *= -1.  # Arbitrarily large wheel-action changes must not enter this cost.
+    env = NS(action_manager=NS(action=action, prev_action=previous), step_dt=.02)
+    action_before, previous_before = action.copy(), previous.copy()
+    np.testing.assert_allclose(drift.leg_target_rate_penalty(env), [1.5, 2.])
+    env.step_dt = .01
+    np.testing.assert_allclose(drift.leg_target_rate_penalty(env), [6., 8.])
+    np.testing.assert_array_equal(action, action_before)
+    np.testing.assert_array_equal(previous, previous_before)
+    env.action_manager.prev_action = action.copy()
+    np.testing.assert_array_equal(drift.leg_target_rate_penalty(env), np.zeros(2))
+    assert not any("history" in key or "cache" in key for key in vars(env))
+
+
+def test_wheel_vertical_speed_uses_named_link_origins_not_com_or_other_body_motion():
+    class LinkData:
+        body_link_lin_vel_w = np.zeros((2, 4, 3))
+        @property
+        def body_lin_vel_w(self):
+            raise AssertionError("Legacy velocity may be COM; do not read it")
+        @property
+        def body_com_lin_vel_w(self):
+            raise AssertionError("COM velocity is not wheel-link origin velocity")
+    data = LinkData()
+    data.body_link_lin_vel_w[:, :, 0:2] = 500.  # Planar movement is intentionally irrelevant.
+    data.body_link_lin_vel_w[:, 0, 2] = 100.   # Nonwheel vertical motion is irrelevant.
+    data.body_link_lin_vel_w[0, [3, 1], 2] = [.02, -.04]
+    data.body_link_lin_vel_w[1, [3, 1], 2] = [0., .01]
+    robot = NS(body_names=["base_Link", "wheel_R_Link", "hip_L_Link", "wheel_L_Link"], data=data)
+    env = NS(scene={"robot": robot})
+    before = data.body_link_lin_vel_w.copy()
+    np.testing.assert_allclose(drift.wheel_vertical_velocity_penalty(env, std=.02), [5., .25])
+    np.testing.assert_allclose(drift.wheel_vertical_velocity_penalty(env, std=.04), [1.25, .0625])
+    np.testing.assert_array_equal(data.body_link_lin_vel_w, before)
+    assert not any("history" in key or "cache" in key for key in vars(env))
+
+
+def test_vertical_speed_never_falls_back_when_link_velocity_api_is_missing():
+    robot = NS(body_names=["wheel_L_Link", "wheel_R_Link"],
+               data=NS(body_lin_vel_w=np.zeros((1, 2, 3))))
+    with pytest.raises(AttributeError, match="body_link_lin_vel_w"):
+        drift.wheel_vertical_velocity_penalty(NS(scene={"robot": robot}), std=.02)
 
 
 @pytest.mark.parametrize("explicit", [False, True])
