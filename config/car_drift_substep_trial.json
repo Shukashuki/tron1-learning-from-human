@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial005",
+  "task": "captured_car_drift",
+  "hypothesis": "Correcting last-substep vertical-velocity reward aliasing may reduce transferred right-wheel unloading; it is not established as a sufficient explanation of the contact mismatch.",
+  "task_profile": "config/car_drift_substep_task.json",
+  "task_profile_sha256": "6e35d93b3a92523d8eed40198f5b48a261cc6497565c953da4961fa106794a05",
+  "scientific_change_from_trial004": "wheel_vertical_velocity_sampling: last_substep -> all_substeps_mean; description metadata updated",
+  "activation_prerequisite": "Actual Isaac runtime smoke verifies all four refreshed physical substeps, bit-exact quadratic rewards, reset isolation, observer chaining, unchanged dimensions and successful sampler/environment teardown; owned process exit independently confirmed.",
+  "activation_prerequisite_evidence": "results/2026-10-11-car-drift/substep_runtime_diagnostic.json",
+  "training": {
+    "resume_trial": "trial004",
+    "resume_checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "additional_ppo_updates": 600,
+    "num_envs": 2048,
+    "num_steps_per_env_per_update": 24,
+    "seed": 42,
+    "smoke_steps": 8,
+    "domain_randomization": "motor-v1, unchanged episode-fixed shaft friction, speed and torque capacity randomization",
+    "checkpoint_selection": "Predesignated model_final.pt after all 600 updates; no best-of-rollout selection or extra updates based on evaluation.",
+    "maximum_stage_wall_time_s": 3600
+  },
+  "unchanged": {
+    "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+    "robot_asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "reference_sha256": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+    "policy_hz": 50,
+    "physics_hz_both_engines": 200,
+    "actor_critic_action_dimensions": [51, 120, 8],
+    "leg_pd": [500.0, 10.0],
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [0.04, 2.0],
+    "wheel_vertical_velocity_weight": -5.0,
+    "wheel_vertical_velocity_std_m_s": 0.02,
+    "leg_target_rate_weight": -1.0,
+    "wheel_actions": "Normalized direct motor torque with unchanged torque-speed curve and shaft resistance; no car steering or torque copied as robot action targets.",
+    "contact_calibration_adopted_from_surrogate": false
+  },
+  "evaluation": {
+    "episodes_per_engine": 1,
+    "conditions": "Nominal motors, fixed seed42, source reference frame0 and its initial velocity; same exported actor including its learned normalizer.",
+    "recording": "Actual 200 Hz first-episode physical states/contact patches in both engines plus original 50 Hz policy archive; no second-episode states or hidden root writes.",
+    "assessor": "scripts/assess_drift.py, unchanged behavior and reference-progress thresholds",
+    "source_fidelity_diagnostic": "Separately corroborate qualifying drift's overlap with source sideslip windows and matching sign, using the same read-only diagnostic as trial004; these are not implemented as assessor gates.",
+    "primary_gate": "At least 0.20 s contiguous speed>=0.4 m/s, forward component positive, abs(sideslip)>=8 degrees, both actual bearing wheel-ground contacts and measured mean lateral patch slip>=0.04 m/s.",
+    "other_gates": "All existing source fidelity, tracking, two-wheel support, no nonwheel impact, full 5.76 s episode and stable-exit checks must also pass; gaps are not bridged.",
+    "diagnostic_comparison": "Trial004 versus trial005 actual right-wheel unloading count/duration, clearance excursion and full-substep squared vertical velocity; reward improvement alone is not transfer success.",
+    "format": "Captured car -> TRON1 kinematic reference -> Isaac policy -> MuJoCo same policy; full recorded four-panel video and contact timeline, including failure.",
+    "hardware_or_statistical_robustness_claim": false
+  },
+  "resources": {
+    "mode": "One authorized remote RTX4090D app at a time; fresh target idle/UUID guard and unmasked native PhysX/Torch/tensor device audit.",
+    "diagnostic_only_change": "Optional read-only runtime device audit adds no actions, observations, physics steps or control changes.",
+    "cross_gpu_contexts": "All owned GPU context rows are recorded privately; non-target contexts are not claimed absent or harmless.",
+    "other_users_jobs": "Never terminated or altered. Resource placement is recorded separately from scientific settings."
+  }
+}

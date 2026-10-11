@@ -294,6 +294,8 @@ def main():
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--terrain-file", type=Path, help="Must match the terrain used for training")
     parser.add_argument("--task-profile", type=Path, help="Must match the checkpoint drift task/material contract")
+    parser.add_argument("--verify-unmasked-device", action="store_true",
+                        help="Opt-in strict native PhysX/Torch/tensor CUDA-ordinal readback audit; requires no CUDA_VISIBLE_DEVICES mask")
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
     parser.add_argument("--record-physics", action="store_true",
                         help="Also save every physics substep in a separate first-episode physics_trajectory.npz")
@@ -424,6 +426,10 @@ def main():
             configure_physics_clock(cfg, args.physics_dt_s)
         cfg.seed = args.seed
         env = TerminalCaptureEnv(cfg=cfg)
+        runtime_device_audit = None
+        if getattr(args, "verify_unmasked_device", False):
+            from training.tron1_runtime_device import validate_simulation_device
+            runtime_device_audit = validate_simulation_device(env, requested_device=args.device)
         clock_readback = (physics_clock_readback(env, cfg, refined_contract)
                           if args.physics_dt_s is not None else None)
         contact_material_audit = None
@@ -656,6 +662,9 @@ def main():
             ],
         }
         np.savez_compressed(args.output_dir / "trajectory.npz", **arrays)
+        if runtime_device_audit is not None:
+            report.update({"runtime_device_audit": runtime_device_audit,
+                           "runtime_device_module_sha256": sha256(ROOT / "training/tron1_runtime_device.py")})
         if reward_accumulator is not None:
             report.update({"reward_sampling_audit": reward_accumulator.audit(),
                            "substep_reward_module_sha256": sha256(ROOT / "training/tron1_substep_rewards.py")})

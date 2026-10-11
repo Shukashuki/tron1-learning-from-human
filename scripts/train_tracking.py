@@ -62,6 +62,8 @@ def main():
     parser.add_argument("--resume", type=Path)
     parser.add_argument("--terrain-file", type=Path, help="Explicit matched static terrain JSON; default is the existing flat plane")
     parser.add_argument("--task-profile", type=Path, help="Optional explicit drift reference/reward/material contract")
+    parser.add_argument("--verify-unmasked-device", action="store_true",
+                        help="Opt-in strict native PhysX/Torch/tensor CUDA-ordinal readback audit; requires no CUDA_VISIBLE_DEVICES mask")
     domains = parser.add_mutually_exclusive_group()
     domains.add_argument("--domain-randomization", choices=("none", "motor-v1"), default="none")
     domains.add_argument("--domain-profile", type=Path, help="Explicit bounded domain-randomization JSON profile")
@@ -101,6 +103,10 @@ def main():
                            dr_profile=profile, terrain_spec=terrain_spec, task_profile=task_profile)
         cfg.seed = args.seed
         env = ManagerBasedRLEnv(cfg=cfg)
+        runtime_device_audit = None
+        if getattr(args, "verify_unmasked_device", False):
+            from training.tron1_runtime_device import validate_simulation_device
+            runtime_device_audit = validate_simulation_device(env, requested_device=args.device)
         if task_profile is not None:
             from training.tron1_drift import install_drift_reward_sampling
             reward_accumulator = install_drift_reward_sampling(env, task_profile)
@@ -174,6 +180,9 @@ def main():
         if reward_accumulator is not None:
             manifest["source_sha256"]["training/tron1_substep_rewards.py"] = sha256(ROOT / "training/tron1_substep_rewards.py")
             manifest["reward_sampling_audit"] = reward_accumulator.audit()
+        if runtime_device_audit is not None:
+            manifest["runtime_device_audit"] = runtime_device_audit
+            manifest["source_sha256"]["training/tron1_runtime_device.py"] = sha256(ROOT / "training/tron1_runtime_device.py")
         write_json(output / "manifest.json", manifest)
         # RSL-RL consumes (pops) class_name fields, so pass a private copy.
         runner = OnPolicyRunner(wrapped, copy.deepcopy(config), log_dir=str(output), device=args.device)

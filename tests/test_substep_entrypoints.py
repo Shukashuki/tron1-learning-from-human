@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import hashlib
 from pathlib import Path
 import sys
 import types
@@ -321,3 +322,140 @@ def test_train_status_write_failure_still_restores_helper_and_closes_env_app(stu
     assert [event[0] for event in env.events][-4:] == [
         "status-write-error", "helper-close", "env-close", "app-close",
     ]
+
+
+def device_audit_nodes(block):
+    """Select the actual optional gather/init/provenance statements, not copies."""
+    guard = [node for node in block.body if isinstance(node, ast.If)
+             and any(isinstance(child, ast.ImportFrom)
+                     and child.module == "training.tron1_runtime_device" for child in ast.walk(node))]
+    initial = [node for node in block.body if isinstance(node, ast.Assign)
+               and any(isinstance(target, ast.Name) and target.id == "runtime_device_audit"
+                       for target in node.targets) and isinstance(node.value, ast.Constant)
+               and node.value.value is None]
+    artifact = [node for node in block.body if isinstance(node, ast.If)
+                and isinstance(node.test, ast.Compare) and isinstance(node.test.left, ast.Name)
+                and node.test.left.id == "runtime_device_audit"]
+    assert len(guard) == len(initial) == len(artifact) == 1
+    return initial[0], guard[0], artifact[0]
+
+
+def device_setup(namespace, entrypoint):
+    filename = "train_tracking.py" if entrypoint == "train" else "eval_tracking.py"
+    block = main_try(filename)
+    function = "ManagerBasedRLEnv" if entrypoint == "train" else "TerminalCaptureEnv"
+    if entrypoint == "eval":
+        terminal = next(node for node in block.body if isinstance(node, ast.ClassDef)
+                        and node.name == "TerminalCaptureEnv")
+        execute([terminal], namespace)
+    env = next(node for node in block.body if is_assignment_call(node, "env", function))
+    initial, guard, artifact = device_audit_nodes(block)
+    wrapped = next(node for node in block.body if is_assignment_call(node, "wrapped", "RslRlVecEnvWrapper"))
+    runner = next(node for node in block.body if is_assignment_call(node, "runner", "OnPolicyRunner"))
+    # A guard failure must stop before wrapper reset, actor loading, or steps.
+    assert block.body.index(initial) == block.body.index(env) + 1
+    assert block.body.index(guard) == block.body.index(initial) + 1
+    assert env.lineno < initial.lineno < guard.lineno < wrapped.lineno < runner.lineno
+    execute([env, initial, guard, wrapped], namespace)
+    return artifact
+
+
+def install_device_stub(monkeypatch, *, failure=False):
+    calls = []
+    audit = {"status": "verified", "index_scope": "unmasked_cuda_ordinal",
+             "native_and_tensor_device_consistency_verified": True,
+             "physical_mapping_verified": False, "exclusivity_verified": False}
+    module = types.ModuleType("training.tron1_runtime_device")
+
+    def validate(env, **kwargs):
+        calls.append((env, kwargs))
+        env.events.append(("device-audit", env._sim_step_counter))
+        if failure:
+            raise LifecycleError("native device mismatch")
+        return audit
+
+    module.validate_simulation_device = validate
+    monkeypatch.setitem(sys.modules, "training.tron1_runtime_device", module)
+    return calls, audit
+
+
+@pytest.mark.parametrize("entrypoint", ["train", "eval"])
+@pytest.mark.parametrize("option", ["absent", False])
+def test_default_entrypoints_do_not_import_or_call_device_helper(stub_namespace, monkeypatch, entrypoint, option):
+    namespace, _ = stub_namespace
+    calls, _ = install_device_stub(monkeypatch, failure=True)
+    if option != "absent":
+        namespace["args"].verify_unmasked_device = option
+    # device is deliberately absent: disabled/default must not inspect it.
+    assert not hasattr(namespace["args"], "device")
+    device_setup(namespace, entrypoint)
+    assert not calls and namespace["runtime_device_audit"] is None
+    assert "validate_simulation_device" not in namespace
+    assert not any(event[0] == "device-audit" for event in namespace["env"].events)
+
+
+@pytest.mark.parametrize("entrypoint", ["train", "eval"])
+def test_opt_in_entrypoint_audits_requested_cli_device_once_before_wrapper_reset(stub_namespace, monkeypatch, entrypoint):
+    namespace, _ = stub_namespace
+    calls, audit = install_device_stub(monkeypatch)
+    namespace["args"].verify_unmasked_device = True
+    namespace["args"].device = "cuda:3"
+    device_setup(namespace, entrypoint)
+    env = namespace["env"]
+    assert calls == [(env, {"requested_device": "cuda:3"})]
+    assert namespace["runtime_device_audit"] is audit
+    events = [event[0] for event in env.events]
+    assert events.index("device-audit") < events.index("explicit-reset")
+    assert env._sim_step_counter == 0 and "process-action" not in events
+
+
+@pytest.mark.parametrize("entrypoint", ["train", "eval"])
+@pytest.mark.parametrize("enabled", [False, True])
+def test_device_artifact_and_exact_module_hash_only_added_when_enabled(stub_namespace, monkeypatch, entrypoint, enabled):
+    namespace, _ = stub_namespace
+    calls, audit = install_device_stub(monkeypatch)
+    namespace["args"].verify_unmasked_device = enabled
+    namespace["args"].device = "cuda:3"
+    artifact = device_setup(namespace, entrypoint)
+    namespace["ROOT"] = ROOT
+    hashes = []
+
+    def sha256(path):
+        hashes.append(Path(path))
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+    namespace["sha256"] = sha256
+    namespace["manifest"] = {"source_sha256": {"existing": "unchanged"}, "kept": [1, 2]}
+    namespace["report"] = {"existing": "unchanged"}
+    before_manifest, before_report = copy.deepcopy(namespace["manifest"]), copy.deepcopy(namespace["report"])
+    execute([artifact], namespace)
+    path = ROOT / "training/tron1_runtime_device.py"
+    if enabled:
+        assert calls and hashes == [path]
+        expected = hashlib.sha256(path.read_bytes()).hexdigest()
+        if entrypoint == "train":
+            assert namespace["manifest"] == {**before_manifest, "runtime_device_audit": audit,
+                "source_sha256": {**before_manifest["source_sha256"], "training/tron1_runtime_device.py": expected}}
+            assert namespace["report"] == before_report
+        else:
+            assert namespace["report"] == {**before_report, "runtime_device_audit": audit,
+                "runtime_device_module_sha256": expected}
+            assert namespace["manifest"] == before_manifest
+    else:
+        assert not calls and not hashes
+        assert namespace["manifest"] == before_manifest and namespace["report"] == before_report
+
+
+@pytest.mark.parametrize("entrypoint", ["train", "eval"])
+def test_device_validation_failure_stops_before_wrapper_reset_or_policy_steps(stub_namespace, monkeypatch, entrypoint):
+    namespace, handlers = stub_namespace
+    calls, _ = install_device_stub(monkeypatch, failure=True)
+    namespace["args"].verify_unmasked_device = True
+    namespace["args"].device = "cuda:3"
+    with pytest.raises(LifecycleError, match="native device mismatch"):
+        device_setup(namespace, entrypoint)
+    assert calls == [(namespace["env"], {"requested_device": "cuda:3"})]
+    assert "wrapped" not in namespace and "runner" not in namespace
+    assert not handlers and namespace["reward_accumulator"] is None
+    assert namespace["env"]._sim_step_counter == 0
+    assert [event[0] for event in namespace["env"].events] == ["scene", "device-audit"]
