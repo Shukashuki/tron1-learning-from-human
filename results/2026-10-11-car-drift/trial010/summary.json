@@ -1,0 +1,1314 @@
+{
+  "actual_physics_rollouts_verified": true,
+  "artifacts": {
+    "assessment": "assessment.json",
+    "overview": "overview.png",
+    "reference_audit": "reference_audit.json",
+    "render_report": "render_report.json",
+    "video": "motion_pipeline.mp4"
+  },
+  "behavior_evidence": {
+    "isaac": {
+      "file": "physics_trajectory.npz",
+      "kind": "physics_rate",
+      "sample_dt_s": 0.005,
+      "sha256": "6e55ec2f7098cece0984a06f99bc31133d32b96534c26ff77e84d7da099891ec"
+    },
+    "mujoco": {
+      "file": "rollout.npz",
+      "kind": "physics_rate",
+      "sample_dt_s": 0.005,
+      "sha256": "2e7ff585ed32be4e80c39fdc3a8db9d73ded84e4359aa35fcb8af5565d18a4f6"
+    }
+  },
+  "behavior_pass": false,
+  "car_source": {
+    "source_audit_sha256": "ab3061fa87a66058083d9ca9b29f4d1239cbe8bb5afb707dd190cb215b855394",
+    "source_clock_status": "reconstructed_estimate_not_original_timestamps",
+    "source_commit": "05ea8d643ea60b4649a59e2988cd1ae21719f9f4",
+    "source_configuration_sha256": "d2fbbb27b96e57b7208c1a6f588d0dee64b290fc480f845a82bfc87d5a13e0fb",
+    "source_csv_path": "expert_traj/Sa_param5/0928213455param5_traj34_success.csv",
+    "source_csv_sha256": "ab68330e71fb044af6334fbac79a72c0157c88226e79d21cb1ef46d84c948920",
+    "source_id": "sa_traj34",
+    "source_is_physical_car_capture": false,
+    "source_npz_sha256": "41e65c8d8da35312a8855080e03591f0acb3a07da8e7da1f990dd80e1605acf7",
+    "source_repository": "https://github.com/ustcly/DOA"
+  },
+  "common_window": {
+    "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+    "base_axis_rmse_m": [
+      0.028985595843050223,
+      0.008597599652375425,
+      0.0030405690542041714
+    ],
+    "base_position_rmse_m": 0.030386321697970627,
+    "base_z_rmse_m": 0.0030405690542041714,
+    "duration_s": 5.759999999999899,
+    "end_s": 5.759999999999899,
+    "initial_common_base_position_difference_m": 0.0,
+    "initial_common_leg_joint_rmse_rad": 0.0,
+    "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+    "interpolation_knots": 2291,
+    "isaac_environment_index": 0,
+    "leg_joint_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ],
+    "leg_joint_rmse_rad": 0.011876050399288266,
+    "leg_joint_rmse_rad_by_name": {
+      "abad_L_Joint": 0.012575638044060514,
+      "abad_R_Joint": 0.00856248886775305,
+      "hip_L_Joint": 0.012336967427619805,
+      "hip_R_Joint": 0.007662299198547469,
+      "knee_L_Joint": 0.013660261086081643,
+      "knee_R_Joint": 0.014739953305043511
+    },
+    "start_s": 0.0,
+    "wheel_angles_compared": false
+  },
+  "complete_contact_evidence": true,
+  "contact_material_audits": {
+    "isaac": {
+      "expected_friction": 0.15,
+      "ground_audit": "USD-bound material; robot materials additionally read back from live PhysX",
+      "ground_colliders": [
+        {
+          "collider": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "dynamic_friction": 0.15000000596046448,
+          "material": "/World/ground/terrain/physicsMaterial",
+          "static_friction": 0.15000000596046448
+        }
+      ],
+      "ground_load_reserve": {
+        "active_event_identity_audit": [
+          {
+            "function": "isaaclab.envs.mdp.events.randomize_rigid_body_material",
+            "initialized_exact_class_instance": true,
+            "mode": "startup",
+            "name": "physics_material"
+          },
+          {
+            "function": "training.tron1_tracking.clear_legacy_joint_friction",
+            "initialized_exact_class_instance": false,
+            "mode": "startup",
+            "name": "legacy_joint_friction"
+          }
+        ],
+        "cached_mg_dtype": "float32",
+        "configured_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "continuous_contact_certified": false,
+        "cost_bounds": [
+          0.0,
+          2.0
+        ],
+        "cuda_device": "cuda:5",
+        "decimation": 4,
+        "first_environment_link_mass_kg": [
+          9.585000038146973,
+          1.4689998626708984,
+          1.4689998626708984,
+          0.009999999776482582,
+          2.299999952316284,
+          2.299999952316284,
+          1.4900000095367432,
+          1.4900000095367432,
+          1.0800000429153442,
+          1.0800000429153442
+        ],
+        "force_evidence": "filtered ContactSensor.data.force_matrix_w; normal forces only",
+        "formula": "sum(exp(-clamp(ground_normal_force_world_z_N,min=0)/(scale_fraction*mg_N)))",
+        "ground_collider": {
+          "collision_api_verified": true,
+          "native_cooked_geometry_readback_performed": false,
+          "path": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "usd_type": "Plane"
+        },
+        "host_synchronization_free": false,
+        "loaded_normal_vector_and_raw_aggregate_runtime_smoke_required": true,
+        "mass_kg_range": [
+          22.272999772801995,
+          22.272999772801995
+        ],
+        "mass_reduction_dtype": "float64",
+        "mg_N_range": [
+          218.49813711731022,
+          218.49813711731022
+        ],
+        "module_sha256": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+        "native_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.8100004196167
+        ],
+        "native_mass_source": "ArticulationView.get_masses() CPU (N,bodies)",
+        "num_envs": 1,
+        "physics_dt_s": 0.005,
+        "policy_dt_s": 0.02,
+        "raw_normal_forces_thresholded": false,
+        "reset_or_history_state_added": false,
+        "sampling": "last_physics_substep",
+        "scale_is_minimum_force": false,
+        "schema_version": 1,
+        "sensor_matrix_shape": [
+          1,
+          1,
+          1,
+          3
+        ],
+        "sensor_names": [
+          "wheel_L_ground",
+          "wheel_R_ground"
+        ],
+        "sensor_track_contact_points": [
+          true,
+          true
+        ],
+        "settings": {
+          "scale_fraction": 0.2,
+          "weight": -1.0
+        },
+        "soft_balanced_load_preference": true,
+        "startup_force_finite_and_nonnegative_z": true,
+        "startup_loaded_contact_required": false,
+        "tracking_tradeoff_and_no_hardware_safety_claim": true,
+        "training_contact_point_tracking_required": false,
+        "wheel_body_names": [
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ]
+      },
+      "leg_pd_gain_readback": {
+        "kd_range": [
+          10.0,
+          10.0
+        ],
+        "kp_range": [
+          500.0,
+          500.0
+        ]
+      },
+      "robot_runtime_friction_range": [
+        0.15000000596046448,
+        0.15000000596046448
+      ]
+    },
+    "mujoco": {
+      "colliding_geom_count": 10,
+      "combination_note": "Both contacting materials have the same value; max/average combination agree.",
+      "compiled_friction_range": [
+        0.15,
+        0.15
+      ],
+      "compiled_solref_ranges": [
+        [
+          0.04,
+          0.04
+        ],
+        [
+          2.0,
+          2.0
+        ]
+      ],
+      "contact_margin_and_gap_changed": false,
+      "expected_friction": 0.15,
+      "explicit_contact_solref": [
+        0.04,
+        2.0
+      ],
+      "refsafe_minimum_timeconst_s": 0.01
+    },
+    "training": {
+      "expected_friction": 0.15,
+      "ground_audit": "USD-bound material; robot materials additionally read back from live PhysX",
+      "ground_colliders": [
+        {
+          "collider": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "dynamic_friction": 0.15000000596046448,
+          "material": "/World/ground/terrain/physicsMaterial",
+          "static_friction": 0.15000000596046448
+        }
+      ],
+      "ground_load_reserve": {
+        "active_event_identity_audit": [
+          {
+            "function": "training.tron1_domain_randomization.reset_domain_randomization",
+            "initialized_exact_class_instance": false,
+            "mode": "reset",
+            "name": "domain_randomization"
+          },
+          {
+            "function": "isaaclab.envs.mdp.events.randomize_rigid_body_material",
+            "initialized_exact_class_instance": true,
+            "mode": "startup",
+            "name": "physics_material"
+          },
+          {
+            "function": "training.tron1_tracking.clear_legacy_joint_friction",
+            "initialized_exact_class_instance": false,
+            "mode": "startup",
+            "name": "legacy_joint_friction"
+          }
+        ],
+        "cached_mg_dtype": "float32",
+        "configured_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "continuous_contact_certified": false,
+        "cost_bounds": [
+          0.0,
+          2.0
+        ],
+        "cuda_device": "cuda:5",
+        "decimation": 4,
+        "first_environment_link_mass_kg": [
+          9.585000038146973,
+          1.4689998626708984,
+          1.4689998626708984,
+          0.009999999776482582,
+          2.299999952316284,
+          2.299999952316284,
+          1.4900000095367432,
+          1.4900000095367432,
+          1.0800000429153442,
+          1.0800000429153442
+        ],
+        "force_evidence": "filtered ContactSensor.data.force_matrix_w; normal forces only",
+        "formula": "sum(exp(-clamp(ground_normal_force_world_z_N,min=0)/(scale_fraction*mg_N)))",
+        "ground_collider": {
+          "collision_api_verified": true,
+          "native_cooked_geometry_readback_performed": false,
+          "path": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "usd_type": "Plane"
+        },
+        "host_synchronization_free": false,
+        "loaded_normal_vector_and_raw_aggregate_runtime_smoke_required": true,
+        "mass_kg_range": [
+          22.272999772801995,
+          22.272999772801995
+        ],
+        "mass_reduction_dtype": "float64",
+        "mg_N_range": [
+          218.49813711731022,
+          218.49813711731022
+        ],
+        "module_sha256": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+        "native_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.8100004196167
+        ],
+        "native_mass_source": "ArticulationView.get_masses() CPU (N,bodies)",
+        "num_envs": 2048,
+        "physics_dt_s": 0.005,
+        "policy_dt_s": 0.02,
+        "raw_normal_forces_thresholded": false,
+        "reset_or_history_state_added": false,
+        "sampling": "last_physics_substep",
+        "scale_is_minimum_force": false,
+        "schema_version": 1,
+        "sensor_matrix_shape": [
+          2048,
+          1,
+          1,
+          3
+        ],
+        "sensor_names": [
+          "wheel_L_ground",
+          "wheel_R_ground"
+        ],
+        "sensor_track_contact_points": [
+          false,
+          false
+        ],
+        "settings": {
+          "scale_fraction": 0.2,
+          "weight": -1.0
+        },
+        "soft_balanced_load_preference": true,
+        "startup_force_finite_and_nonnegative_z": true,
+        "startup_loaded_contact_required": false,
+        "tracking_tradeoff_and_no_hardware_safety_claim": true,
+        "training_contact_point_tracking_required": false,
+        "wheel_body_names": [
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ]
+      },
+      "leg_pd_gain_readback": {
+        "kd_range": [
+          10.0,
+          10.0
+        ],
+        "kp_range": [
+          500.0,
+          500.0
+        ]
+      },
+      "robot_runtime_friction_range": [
+        0.15000000596046448,
+        0.15000000596046448
+      ]
+    }
+  },
+  "engines": {
+    "isaac": {
+      "checks": {
+        "captured_reference_translation_progress": {
+          "passed": true
+        },
+        "captured_reference_yaw_progress": {
+          "passed": false
+        },
+        "completed_full_reference": {
+          "passed": true
+        },
+        "contact_patch_lateral_slip_evidence_available": {
+          "passed": true
+        },
+        "final_heading": {
+          "passed": true
+        },
+        "final_root_height": {
+          "passed": true
+        },
+        "final_root_position": {
+          "passed": false
+        },
+        "frame_zero_start": {
+          "passed": true
+        },
+        "full_episode_two_wheel_support": {
+          "passed": true
+        },
+        "initial_actual_sideslip_not_injected": {
+          "passed": true
+        },
+        "initial_com_velocity_matches_reference": {
+          "passed": true
+        },
+        "initial_reference_sideslip_not_injected": {
+          "passed": true
+        },
+        "monotonic_reference_without_reset": {
+          "passed": true
+        },
+        "no_early_termination": {
+          "passed": true
+        },
+        "no_nonwheel_ground_impact": {
+          "passed": true
+        },
+        "no_sustained_both_wheel_flight": {
+          "passed": true
+        },
+        "nontrivial_captured_reference_drift": {
+          "passed": true
+        },
+        "nontrivial_reference_translation": {
+          "passed": true
+        },
+        "nontrivial_reference_turn": {
+          "passed": true
+        },
+        "physics_only_no_hidden_reset_or_root_teleport": {
+          "passed": true
+        },
+        "root_motion_rmse": {
+          "passed": false
+        },
+        "stable_exit_planar_speed": {
+          "passed": true
+        },
+        "stable_exit_sideslip": {
+          "passed": true
+        },
+        "stable_exit_tilt": {
+          "passed": true
+        },
+        "stable_exit_two_wheel_support": {
+          "passed": true
+        },
+        "sustained_grounded_contact_patch_drift": {
+          "passed": false
+        },
+        "wheel_ground_contact_evidence_available": {
+          "passed": true
+        }
+      },
+      "complete_contact_evidence": true,
+      "contact_patch_slip_evidence_available": true,
+      "failed_checks": [
+        "sustained_grounded_contact_patch_drift",
+        "root_motion_rmse",
+        "final_root_position",
+        "captured_reference_yaw_progress"
+      ],
+      "metrics": {
+        "accepted_drift_intervals": [],
+        "actual_yaw_change_deg": -5.22711418667937,
+        "both_wheel_flight_intervals_after_settle": [],
+        "drift_intervals": [],
+        "drift_mean_abs_contact_slip_m_s": null,
+        "drift_total_observed_duration_s": 0.0,
+        "final_heading_error_deg": 3.3975582739787566,
+        "final_root_error_m": 0.40576636399116645,
+        "full_mean_abs_contact_slip_m_s": 0.02686121587553096,
+        "full_two_wheel_support_fraction": 0.998263888888889,
+        "initial_abs_sideslip_deg": 0.6074405242898888,
+        "initial_com_velocity_error_m_s": 0.0,
+        "initial_planar_com_speed_m_s": 1.3214507070503663,
+        "max_both_wheel_flight_s": 0.0,
+        "max_moving_abs_sideslip_deg": 6.711290144752752,
+        "max_planar_com_speed_m_s": 1.3543007394181765,
+        "maximum_contiguous_drift_s": 0.0,
+        "peak_abs_contact_slip_m_s_by_wheel": [
+          0.2275455732830954,
+          0.3727649186172626
+        ],
+        "reference_drift_intervals": [
+          {
+            "duration_s": 0.6599999999999999,
+            "end_s": 1.44,
+            "start_s": 0.78
+          },
+          {
+            "duration_s": 0.4999999999999998,
+            "end_s": 2.32,
+            "start_s": 1.82
+          }
+        ],
+        "reference_tracking": {
+          "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+          "base_axis_rmse_m": [
+            0.23011256112956344,
+            0.15930584757086513,
+            0.03639415423960471
+          ],
+          "base_position_rmse_m": 0.2822316040465613,
+          "base_z_rmse_m": 0.03639415423960471,
+          "duration_s": 5.76,
+          "end_s": 5.76,
+          "initial_common_base_position_difference_m": 0.0,
+          "initial_common_leg_joint_rmse_rad": 0.0,
+          "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+          "interpolation_knots": 1188,
+          "isaac_environment_index": 0,
+          "leg_joint_order": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint"
+          ],
+          "leg_joint_rmse_rad": 0.15988913934925128,
+          "leg_joint_rmse_rad_by_name": {
+            "abad_L_Joint": 0.19169564339182957,
+            "abad_R_Joint": 0.07517204843515198,
+            "hip_L_Joint": 0.23513301309341608,
+            "hip_R_Joint": 0.15384844462034272,
+            "knee_L_Joint": 0.09024162160623614,
+            "knee_R_Joint": 0.15455981593257365
+          },
+          "start_s": 0.0,
+          "wheel_angles_compared": false
+        },
+        "reference_yaw_change_deg": -8.624672460658127,
+        "tail_max_abs_sideslip_deg": 0.0,
+        "tail_max_planar_com_speed_m_s": 0.044249346004022125,
+        "tail_max_tilt_deg": 5.635342597961426,
+        "tail_sideslip_moving_samples": 0,
+        "tail_two_wheel_support_fraction": 1.0,
+        "translation_progress_fraction": 0.9279722653469403,
+        "yaw_progress_fraction": 0.6060652402190474
+      },
+      "nonwheel_contact_evidence_available": true,
+      "verdict": "fail",
+      "wheel_ground_contact_evidence_available": true
+    },
+    "mujoco": {
+      "checks": {
+        "captured_reference_translation_progress": {
+          "passed": true
+        },
+        "captured_reference_yaw_progress": {
+          "passed": false
+        },
+        "completed_full_reference": {
+          "passed": true
+        },
+        "contact_patch_lateral_slip_evidence_available": {
+          "passed": true
+        },
+        "final_heading": {
+          "passed": true
+        },
+        "final_root_height": {
+          "passed": false
+        },
+        "final_root_position": {
+          "passed": false
+        },
+        "frame_zero_start": {
+          "passed": true
+        },
+        "full_episode_two_wheel_support": {
+          "passed": true
+        },
+        "initial_actual_sideslip_not_injected": {
+          "passed": true
+        },
+        "initial_com_velocity_matches_reference": {
+          "passed": true
+        },
+        "initial_reference_sideslip_not_injected": {
+          "passed": true
+        },
+        "monotonic_reference_without_reset": {
+          "passed": true
+        },
+        "no_early_termination": {
+          "passed": true
+        },
+        "no_nonwheel_ground_impact": {
+          "passed": true
+        },
+        "no_sustained_both_wheel_flight": {
+          "passed": true
+        },
+        "nontrivial_captured_reference_drift": {
+          "passed": true
+        },
+        "nontrivial_reference_translation": {
+          "passed": true
+        },
+        "nontrivial_reference_turn": {
+          "passed": true
+        },
+        "physics_only_no_hidden_reset_or_root_teleport": {
+          "passed": true
+        },
+        "root_motion_rmse": {
+          "passed": false
+        },
+        "stable_exit_planar_speed": {
+          "passed": true
+        },
+        "stable_exit_sideslip": {
+          "passed": true
+        },
+        "stable_exit_tilt": {
+          "passed": true
+        },
+        "stable_exit_two_wheel_support": {
+          "passed": true
+        },
+        "sustained_grounded_contact_patch_drift": {
+          "passed": false
+        },
+        "wheel_ground_contact_evidence_available": {
+          "passed": true
+        }
+      },
+      "complete_contact_evidence": true,
+      "contact_patch_slip_evidence_available": true,
+      "failed_checks": [
+        "sustained_grounded_contact_patch_drift",
+        "root_motion_rmse",
+        "final_root_position",
+        "final_root_height",
+        "captured_reference_yaw_progress"
+      ],
+      "metrics": {
+        "accepted_drift_intervals": [],
+        "actual_yaw_change_deg": -5.667388549621452,
+        "both_wheel_flight_intervals_after_settle": [],
+        "drift_intervals": [],
+        "drift_mean_abs_contact_slip_m_s": null,
+        "drift_total_observed_duration_s": 0.0,
+        "final_heading_error_deg": 2.9572839110366735,
+        "final_root_error_m": 0.34610669326803395,
+        "full_mean_abs_contact_slip_m_s": 0.031714320215052515,
+        "full_two_wheel_support_fraction": 0.9835069444444443,
+        "initial_abs_sideslip_deg": 0.6074405242898888,
+        "initial_com_velocity_error_m_s": 0.0,
+        "initial_planar_com_speed_m_s": 1.3214507070503663,
+        "max_both_wheel_flight_s": 0.0,
+        "max_moving_abs_sideslip_deg": 7.322907253252804,
+        "max_planar_com_speed_m_s": 1.3555399480920014,
+        "maximum_contiguous_drift_s": 0.0,
+        "peak_abs_contact_slip_m_s_by_wheel": [
+          0.3256198014540994,
+          0.3816231928944892
+        ],
+        "reference_drift_intervals": [
+          {
+            "duration_s": 0.6599999999999999,
+            "end_s": 1.44,
+            "start_s": 0.78
+          },
+          {
+            "duration_s": 0.4999999999999998,
+            "end_s": 2.32,
+            "start_s": 1.82
+          }
+        ],
+        "reference_tracking": {
+          "alignment": "shared simulation clock; no phase shifting, DTW, spatial alignment, or extrapolation",
+          "base_axis_rmse_m": [
+            0.20440133940649377,
+            0.15287937256164089,
+            0.03727402319244373
+          ],
+          "base_position_rmse_m": 0.2579561259419138,
+          "base_z_rmse_m": 0.03727402319244373,
+          "duration_s": 5.759999999999899,
+          "end_s": 5.759999999999899,
+          "initial_common_base_position_difference_m": 0.0,
+          "initial_common_leg_joint_rmse_rad": 0.0,
+          "integration": "exact duration-weighted squared difference of linearly interpolated trajectories",
+          "interpolation_knots": 1437,
+          "isaac_environment_index": 0,
+          "leg_joint_order": [
+            "abad_L_Joint",
+            "abad_R_Joint",
+            "hip_L_Joint",
+            "hip_R_Joint",
+            "knee_L_Joint",
+            "knee_R_Joint"
+          ],
+          "leg_joint_rmse_rad": 0.1614794573671418,
+          "leg_joint_rmse_rad_by_name": {
+            "abad_L_Joint": 0.19333842111900554,
+            "abad_R_Joint": 0.0731211282227379,
+            "hip_L_Joint": 0.23621818193671973,
+            "hip_R_Joint": 0.15505667075385868,
+            "knee_L_Joint": 0.09874293159292484,
+            "knee_R_Joint": 0.15535597598366996
+          },
+          "start_s": 0.0,
+          "wheel_angles_compared": false
+        },
+        "reference_yaw_change_deg": -8.624672460658127,
+        "tail_max_abs_sideslip_deg": 0.0,
+        "tail_max_planar_com_speed_m_s": 0.030577791203286908,
+        "tail_max_tilt_deg": 5.956507676348676,
+        "tail_sideslip_moving_samples": 0,
+        "tail_two_wheel_support_fraction": 1.0,
+        "translation_progress_fraction": 0.9396519902571444,
+        "yaw_progress_fraction": 0.6571134817552235
+      },
+      "nonwheel_contact_evidence_available": true,
+      "verdict": "fail",
+      "wheel_ground_contact_evidence_available": true
+    }
+  },
+  "evaluation": {
+    "isaac": {
+      "contact_slip_helper_sha256": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+      "contact_slip_measurement": {
+        "active_point_normal_force_threshold_n": 5.0,
+        "aggregation": "normal-force-weighted RMS over active actual ground contact points",
+        "ground_is_stationary": true,
+        "nonwheel_active_point_threshold_n": 1.0,
+        "sample_dt_s": 0.02
+      },
+      "drift_module_sha256": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+      "evaluator_source_sha256": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+      "physics_dt_s": 0.005,
+      "physics_recording": {
+        "first_episode_only_valid_mask": true,
+        "hook": "after original scene.update at each incremented simulator counter during wrapped.step",
+        "initial_state_samples": 1,
+        "observations": "actual policy pre-action observations held across four physics substeps; validate actor only with trajectory.npz",
+        "policy_sample_dt_s": 0.02,
+        "primary_policy_trajectory_file": "trajectory.npz",
+        "same_counter_reset_and_forward_updates_excluded": true,
+        "sample_dt_s": 0.005,
+        "samples": 1153,
+        "terminal_states_before_reset": true,
+        "time_source": "relative simulator physics-step counter"
+      },
+      "physics_trajectory_file": "physics_trajectory.npz",
+      "physics_trajectory_sha256": "6e55ec2f7098cece0984a06f99bc31133d32b96534c26ff77e84d7da099891ec",
+      "reference_state_initialization_during_evaluation": false,
+      "terminal_states_captured_before_auto_reset": true,
+      "wheel_contact_slip_evidence": "force-weighted RMS from actual ground-filtered contact points and wheel COM twist",
+      "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points"
+    },
+    "mujoco": {
+      "contact_slip_helper_sha256": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+      "contact_slip_measurement": {
+        "active_point_comparison": ">",
+        "active_point_normal_force_threshold_n": 5.0,
+        "aggregation": "normal-force-weighted RMS over active contact points per wheel",
+        "ground_force_kind": "sum of normal contact forces, matching the filtered PhysX contact API",
+        "ground_is_stationary": true,
+        "lateral_axis": "body local +Y wheel axle projected into each actual contact tangent plane",
+        "no_contact": "count=0 and slip=0; slip requires positive contact count for interpretation",
+        "point_source": "MuJoCo data.contact.pos for wheel/world collision pairs only",
+        "sample_dt_s": 0.005,
+        "velocity_source": "mj_jacBodyCom at data.xipos; COM linear and angular velocity transported to each contact point"
+      },
+      "evaluator_source_sha256": "da6d1da378b5065589a49f2befaebfb0576665dbd2ad5d34a157d11b8984a3aa",
+      "hidden_resets": 0,
+      "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+      "nonwheel_ground_contact_recorded": true,
+      "physics_stepped": true,
+      "root_state_writes": 1,
+      "task_source_sha256": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817",
+      "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points"
+    }
+  },
+  "failed_checks": [
+    "isaac.sustained_grounded_contact_patch_drift",
+    "isaac.root_motion_rmse",
+    "isaac.final_root_position",
+    "isaac.captured_reference_yaw_progress",
+    "mujoco.sustained_grounded_contact_patch_drift",
+    "mujoco.root_motion_rmse",
+    "mujoco.final_root_position",
+    "mujoco.final_root_height",
+    "mujoco.captured_reference_yaw_progress"
+  ],
+  "ground_load_reserve_context": {
+    "all_cached_gpu_weight_values_independently_recorded": false,
+    "baseline_profile_sha256": "325cf279c699769694fb4934852ce85753b459e09670376b8c2d62d94f7d4e3c",
+    "behavior_gates_changed": false,
+    "continuous_contact_certified": false,
+    "evaluation_sensor_telemetry": "same filtered matrices plus original wheel-point/nonwheel-contact recording; telemetry-only difference",
+    "full_training_force_validity_independently_proved": false,
+    "hardware_ready": false,
+    "limitations": [
+      "Source-backed validated startup context, not independently recorded live RewardManager configuration, all cached GPU weight values or full-run force proof.",
+      "Approved helper guards establish the declared native layout, 5 ms impulse conversion and inspected event identities; omitted runtime readbacks are not invented.",
+      "Any separate 8-env/16-window/64-sample GPU smoke establishes configuration/equation validity only in that fixture, not 2048-env training, policy force continuity or simulator force-envelope equivalence.",
+      "Initial zero ground forces are legitimate; last-substep sampling cannot supervise all intervening physics steps. The e-fold scale is not a minimum-force gate or hard 50:50 load target."
+    ],
+    "live_reward_manager_configuration_independently_recorded": false,
+    "native_cooked_geometry_equivalence_claimed": false,
+    "normal_force_envelope_equivalence_claimed": false,
+    "sampling": "last_physics_substep_at_50Hz_reward_clock",
+    "schema_version": 1,
+    "settings": {
+      "scale_fraction": 0.2,
+      "weight": -1.0
+    },
+    "source_sha256": {
+      "scripts/eval_tracking.py": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+      "scripts/train_tracking.py": "ea9e4cd14f25ff3ba5202b9ba43ac0f08320418e2311cbae205c8449f3a1da9c",
+      "training/tron1_contact_slip.py": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+      "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+      "training/tron1_drift.py": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+      "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+      "training/tron1_tracking.py": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817"
+    },
+    "startup_audits": {
+      "isaac_evaluation": {
+        "active_event_identity_audit": [
+          {
+            "function": "isaaclab.envs.mdp.events.randomize_rigid_body_material",
+            "initialized_exact_class_instance": true,
+            "mode": "startup",
+            "name": "physics_material"
+          },
+          {
+            "function": "training.tron1_tracking.clear_legacy_joint_friction",
+            "initialized_exact_class_instance": false,
+            "mode": "startup",
+            "name": "legacy_joint_friction"
+          }
+        ],
+        "cached_mg_dtype": "float32",
+        "configured_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "continuous_contact_certified": false,
+        "cost_bounds": [
+          0.0,
+          2.0
+        ],
+        "cuda_device": "cuda:5",
+        "decimation": 4,
+        "first_environment_link_mass_kg": [
+          9.585000038146973,
+          1.4689998626708984,
+          1.4689998626708984,
+          0.009999999776482582,
+          2.299999952316284,
+          2.299999952316284,
+          1.4900000095367432,
+          1.4900000095367432,
+          1.0800000429153442,
+          1.0800000429153442
+        ],
+        "force_evidence": "filtered ContactSensor.data.force_matrix_w; normal forces only",
+        "formula": "sum(exp(-clamp(ground_normal_force_world_z_N,min=0)/(scale_fraction*mg_N)))",
+        "ground_collider": {
+          "collision_api_verified": true,
+          "native_cooked_geometry_readback_performed": false,
+          "path": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "usd_type": "Plane"
+        },
+        "host_synchronization_free": false,
+        "loaded_normal_vector_and_raw_aggregate_runtime_smoke_required": true,
+        "mass_kg_range": [
+          22.272999772801995,
+          22.272999772801995
+        ],
+        "mass_reduction_dtype": "float64",
+        "mg_N_range": [
+          218.49813711731022,
+          218.49813711731022
+        ],
+        "module_sha256": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+        "native_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.8100004196167
+        ],
+        "native_mass_source": "ArticulationView.get_masses() CPU (N,bodies)",
+        "num_envs": 1,
+        "physics_dt_s": 0.005,
+        "policy_dt_s": 0.02,
+        "raw_normal_forces_thresholded": false,
+        "reset_or_history_state_added": false,
+        "sampling": "last_physics_substep",
+        "scale_is_minimum_force": false,
+        "schema_version": 1,
+        "sensor_matrix_shape": [
+          1,
+          1,
+          1,
+          3
+        ],
+        "sensor_names": [
+          "wheel_L_ground",
+          "wheel_R_ground"
+        ],
+        "sensor_track_contact_points": [
+          true,
+          true
+        ],
+        "settings": {
+          "scale_fraction": 0.2,
+          "weight": -1.0
+        },
+        "soft_balanced_load_preference": true,
+        "startup_force_finite_and_nonnegative_z": true,
+        "startup_loaded_contact_required": false,
+        "tracking_tradeoff_and_no_hardware_safety_claim": true,
+        "training_contact_point_tracking_required": false,
+        "wheel_body_names": [
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ]
+      },
+      "training": {
+        "active_event_identity_audit": [
+          {
+            "function": "training.tron1_domain_randomization.reset_domain_randomization",
+            "initialized_exact_class_instance": false,
+            "mode": "reset",
+            "name": "domain_randomization"
+          },
+          {
+            "function": "isaaclab.envs.mdp.events.randomize_rigid_body_material",
+            "initialized_exact_class_instance": true,
+            "mode": "startup",
+            "name": "physics_material"
+          },
+          {
+            "function": "training.tron1_tracking.clear_legacy_joint_friction",
+            "initialized_exact_class_instance": false,
+            "mode": "startup",
+            "name": "legacy_joint_friction"
+          }
+        ],
+        "cached_mg_dtype": "float32",
+        "configured_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "continuous_contact_certified": false,
+        "cost_bounds": [
+          0.0,
+          2.0
+        ],
+        "cuda_device": "cuda:5",
+        "decimation": 4,
+        "first_environment_link_mass_kg": [
+          9.585000038146973,
+          1.4689998626708984,
+          1.4689998626708984,
+          0.009999999776482582,
+          2.299999952316284,
+          2.299999952316284,
+          1.4900000095367432,
+          1.4900000095367432,
+          1.0800000429153442,
+          1.0800000429153442
+        ],
+        "force_evidence": "filtered ContactSensor.data.force_matrix_w; normal forces only",
+        "formula": "sum(exp(-clamp(ground_normal_force_world_z_N,min=0)/(scale_fraction*mg_N)))",
+        "ground_collider": {
+          "collision_api_verified": true,
+          "native_cooked_geometry_readback_performed": false,
+          "path": "/World/ground/terrain/GroundPlane/CollisionPlane",
+          "usd_type": "Plane"
+        },
+        "host_synchronization_free": false,
+        "loaded_normal_vector_and_raw_aggregate_runtime_smoke_required": true,
+        "mass_kg_range": [
+          22.272999772801995,
+          22.272999772801995
+        ],
+        "mass_reduction_dtype": "float64",
+        "mg_N_range": [
+          218.49813711731022,
+          218.49813711731022
+        ],
+        "module_sha256": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+        "native_gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.8100004196167
+        ],
+        "native_mass_source": "ArticulationView.get_masses() CPU (N,bodies)",
+        "num_envs": 2048,
+        "physics_dt_s": 0.005,
+        "policy_dt_s": 0.02,
+        "raw_normal_forces_thresholded": false,
+        "reset_or_history_state_added": false,
+        "sampling": "last_physics_substep",
+        "scale_is_minimum_force": false,
+        "schema_version": 1,
+        "sensor_matrix_shape": [
+          2048,
+          1,
+          1,
+          3
+        ],
+        "sensor_names": [
+          "wheel_L_ground",
+          "wheel_R_ground"
+        ],
+        "sensor_track_contact_points": [
+          false,
+          false
+        ],
+        "settings": {
+          "scale_fraction": 0.2,
+          "weight": -1.0
+        },
+        "soft_balanced_load_preference": true,
+        "startup_force_finite_and_nonnegative_z": true,
+        "startup_loaded_contact_required": false,
+        "tracking_tradeoff_and_no_hardware_safety_claim": true,
+        "training_contact_point_tracking_required": false,
+        "wheel_body_names": [
+          "wheel_L_Link",
+          "wheel_R_Link"
+        ]
+      }
+    },
+    "supported_helper_sha256": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+    "training_sensor_telemetry": "two force-only single-wheel ground-filtered matrices; contact-point tracking disabled",
+    "validation_kind": "source_backed_validated_startup_context"
+  },
+  "hardware_ready": false,
+  "input_sha256": {
+    "actor": "b55d078eda00b144791eda53da6fbfed78ebd1ce79765c4d86b9f04de5a45500",
+    "adaptation": "55b9e779139e17a383c0e275eaf9d321c00332844ec76f7e53dd4cd7ca604065",
+    "assessment": "9b57223036e52baad4a01db6d7b025a3f5db8491a6b39905003dbe14f58d2ef4",
+    "contract": "28446332173950ee8ea62b5504af25234d7277c98f893d3d2ea4323d9e7bf7b0",
+    "export_report": "6520b3f7e71d88dae2e2f204fc5e8e0a8fcee24722a5da12bf4d16426d3d15c9",
+    "ground_load_reserve_baseline_profile": "325cf279c699769694fb4934852ce85753b459e09670376b8c2d62d94f7d4e3c",
+    "ground_load_reserve_source_eval_tracking": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+    "ground_load_reserve_source_train_tracking": "ea9e4cd14f25ff3ba5202b9ba43ac0f08320418e2311cbae205c8449f3a1da9c",
+    "ground_load_reserve_source_tron1_contact_slip": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+    "ground_load_reserve_source_tron1_domain_randomization": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+    "ground_load_reserve_source_tron1_drift": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+    "ground_load_reserve_source_tron1_ground_load_reserve": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+    "ground_load_reserve_source_tron1_tracking": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817",
+    "isaac_physics_trajectory": "6e55ec2f7098cece0984a06f99bc31133d32b96534c26ff77e84d7da099891ec",
+    "isaac_report": "ccc4e11701463569046f321c70c1275feade7da7f7b799338ad52600870589fa",
+    "isaac_trajectory": "e524ccacb2086d2e83e9de0e11c44314b29c289aa648357477a462de8c478a2b",
+    "manifest": "c72ebeec47f7a2917b23307f81f796907a86f1225021c35fecb762da7fc7bd6e",
+    "motion": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+    "mujoco_report": "3b16cd9f7aabd5256ef6f1e166bb2238a0f9731591eaf0d622c48049d10d25fb",
+    "mujoco_trajectory": "2e7ff585ed32be4e80c39fdc3a8db9d73ded84e4359aa35fcb8af5565d18a4f6",
+    "render_report": "1dfb59ab23d4b37efc5977bc1c934c4970adcbc543dd93aa87bbeaf22b405317",
+    "robot_reference": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+    "run_status": "4c98959b292540e92f40c4a55c0c5eb79e9a0797f8915125b72a37e7f548d218",
+    "runner": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738"
+  },
+  "limitations": [
+    "One first episode per engine; this is not a measured robustness probability.",
+    "Contact support and contiguous drift duration use held samples on the actual logged clock.",
+    "Near-rest sideslip is undefined and excluded below the fixed speed threshold.",
+    "Contact-patch slip must be recorded by each engine; it is never inferred from base velocity.",
+    "Canonical 50 Hz Isaac trajectory verifies actor observations; separately hash-verified physical-rate telemetry determines behavior and contact gates.",
+    "Legacy Isaac policy-rate records remain inspectable but unequal physical contact sampling is a failed paired gate.",
+    "Missing nonwheel contact telemetry leaves complete contact evidence false.",
+    "Common-window RMSE is diagnostic and uses no phase shift, spatial alignment or extrapolation."
+  ],
+  "provenance_checks": {
+    "isaac_engine": {
+      "passed": true
+    },
+    "matching_actuator_and_clock_contract": {
+      "detail": [],
+      "passed": true
+    },
+    "matching_wheel_action_order": {
+      "passed": true
+    },
+    "mujoco_engine": {
+      "passed": true
+    },
+    "same_actor_reference_and_observation_contract": {
+      "passed": true
+    },
+    "same_physics_contact_sampling_clock": {
+      "detail": [],
+      "passed": true
+    },
+    "supplied_reference_hash": {
+      "passed": true
+    }
+  },
+  "published_artifact_sha256": {
+    "assessment.json": "8c1c926d3c990dd9346b7f801c7a189cd39e59e73699a389dc4c04f9b753c4a7",
+    "contact_overview.png": "9e383e1361191529cbe48fc0abe0e0b11ccd4fcfcb1eb15699b342c7634bb484",
+    "final.png": "ff819d288d0d76337d521f492f8a89d30a750151126d07e852e0f979d3ff72cd",
+    "motion_pipeline.mp4": "5975cc2309416025de63b04bb8b703a9800c28935251065e98d5e560aa98d452",
+    "overview.png": "b5457e2e35d78cfbe4225ff195ac0dc89f339c44b63dfbc459b160950377829b",
+    "reference_audit.json": "4553696a8b1350c6199a9d512a138f2392659270fd21c754729209e4eba22f89",
+    "render_report.json": "3bb998a1e2777c6f11af7d20258ae4ff5f1f941687484077e28db7511902c380"
+  },
+  "reference": {
+    "adaptation": {
+      "heading_alignment_matrix_xy": [
+        [
+          0.028087461965567776,
+          -0.9996054694129743
+        ],
+        [
+          0.9996054694129743,
+          0.028087461965567776
+        ]
+      ],
+      "height_and_roll_pitch": "Explicit constant lowered root height; zero roll/pitch; source z/pitch discarded",
+      "initial_heading_alignment_rad": 1.5427051704586863,
+      "nominal_root_height_m": 0.75,
+      "omitted_source_subframe_tail_estimated_s": 0.00022374590837803687,
+      "output_fps": 50.0,
+      "phase_codes": {
+        "0": "captured_scaled_car_motion",
+        "1": "synthetic_stop_recovery",
+        "2": "stationary_tail"
+      },
+      "physics_validated": false,
+      "recovery_adaptation": "Synthetic quintic taper of speed/yaw rate and sideslip to zero; trapezoidal velocity integration",
+      "recovery_duration_s": 1.5,
+      "recovery_initial_sideslip_rad": 0.008753851954671266,
+      "recovery_initial_speed_m_s": 1.1017994803582987,
+      "recovery_initial_yaw_rate_rad_s": -0.25488282041665755,
+      "sampled_source_last_time_estimated_s": 1.87,
+      "scaled_logged_velocity_vs_pose_difference_max_m_s": 0.034780305637643956,
+      "smoothing_source_s": 0.0,
+      "source_clock_status": "reconstructed_estimate_not_original_timestamps",
+      "source_frames": 188,
+      "source_initial_time_estimated_s": 0.0,
+      "source_last_time_estimated_s": 1.8702237459083781,
+      "source_motion": "Starts already moving; retain initial root/wheel velocities on reset",
+      "source_position_mapping": "uniform scale * initial-heading rotation * (captured XY - initial XY)",
+      "source_task_end_s": 3.74,
+      "source_yaw_mapping": "interpolate captured unwrapped yaw on estimated clock; subtract initial yaw; no amplitude scaling",
+      "spatial_scale": 0.08,
+      "stationary_tail_s": 0.5,
+      "time_scale": 2.0
+    },
+    "diagnostics": {
+      "all_frames_checked": 288,
+      "contact_validation": "Geometry and contact Jacobian only; static COM support does not establish dynamic or tire-force feasibility",
+      "final_root_angular_speed_rad_s": 0.0,
+      "final_root_speed_m_s": 0.0,
+      "final_wheel_speed_rad_s": 0.0,
+      "lateral_slip_constraint_imposed": false,
+      "max_contact_rolling_velocity_residual_m_s": 0.0028786761622305868,
+      "max_ground_penetration_m": 5.828670879282072e-16,
+      "max_ik_residual_m": 3.885780586188048e-16,
+      "max_joint_limit_violation_rad": 0.0,
+      "max_nonwheel_ground_penetration_m": 0.0,
+      "max_reference_contact_lateral_slip_m_s": 0.2963596089746352,
+      "max_root_acceleration_m_s2": 1.3774362237028783,
+      "max_root_speed_m_s": 1.3214505695729089,
+      "max_self_penetration_m": 0.0,
+      "max_static_com_foreaft_support_error_m": 6.954800067452276e-06,
+      "max_wheel_speed_rad_s": 10.675888131913172,
+      "simulation_steps": 0,
+      "static_leg_joint_positions_rad": {
+        "abad_L_Joint": 0.0,
+        "abad_R_Joint": 0.0,
+        "hip_L_Joint": 0.34477716472098374,
+        "hip_R_Joint": -0.34477716472098374,
+        "knee_L_Joint": 0.7936588295957885,
+        "knee_R_Joint": -0.7936588295957885
+      }
+    },
+    "fps": 50.0,
+    "frames": 288,
+    "linear_velocity": "world-frame link COM velocity; MuJoCo Jacobian at original URDF COM",
+    "positions": "world Z-up meters; rigid-body link/actor frame, not COM",
+    "sample_span_s": 5.74,
+    "source_time_mapping": "source_time_s uses robot reference clock; demonstration_time_s_estimated maps separately to captured car clock; synthetic phases are marked"
+  },
+  "rendered_comparison_included": true,
+  "safety_verified": false,
+  "same_actor_provenance": {
+    "action_dim": 8,
+    "actor_dim": 51,
+    "actor_sha256": "b55d078eda00b144791eda53da6fbfed78ebd1ce79765c4d86b9f04de5a45500",
+    "isaac_actor_file": "<private-path>",
+    "isaac_report_sha256": "ccc4e11701463569046f321c70c1275feade7da7f7b799338ad52600870589fa",
+    "isaac_trajectory_sha256": "e524ccacb2086d2e83e9de0e11c44314b29c289aa648357477a462de8c478a2b",
+    "leg_joint_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ],
+    "mujoco_report_sha256": "3b16cd9f7aabd5256ef6f1e166bb2238a0f9731591eaf0d622c48049d10d25fb",
+    "mujoco_trajectory_sha256": "2e7ff585ed32be4e80c39fdc3a8db9d73ded84e4359aa35fcb8af5565d18a4f6",
+    "observation_verification": {
+      "atol": 2e-05,
+      "max_abs_error": 5.364418029785156e-07,
+      "max_abs_error_by_term": {
+        "base_ang_vel_b": 5.960464477539063e-08,
+        "base_lin_vel_b": 1.564621925354004e-07,
+        "joint_velocities": 0.0,
+        "leg_joint_pos_rel": 0.0,
+        "motion_anchor_ori_b_6d_first_two_columns_row_major": 2.8312206268310547e-07,
+        "motion_anchor_pos_b": 1.1920928955078125e-07,
+        "previous_clipped_actions": 0.0,
+        "ref_leg_q_ref_leg_dq_phase_sin_cos": 5.364418029785156e-07
+      },
+      "observations_checked": 289,
+      "rtol": 2e-05,
+      "status": "passed",
+      "trajectory_sha256": "e524ccacb2086d2e83e9de0e11c44314b29c289aa648357477a462de8c478a2b"
+    },
+    "reference_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04"
+  },
+  "same_actor_reference_verified": true,
+  "schema_version": 1,
+  "statistical_robustness_benchmark": false,
+  "status": "assessed_fail",
+  "task": "captured_car_drift",
+  "task_profile": {
+    "action_rate_weight": -0.5,
+    "contact_friction": 0.15,
+    "description": "Trial010 adds only a smooth ground-normal wheel-load reserve penalty to original trial004, resuming its fixed final checkpoint. Sum exp(-max(F_ground_world_z,0)/(0.20*live_robot_weight)) over two separately ground-filtered wheels, reward weight -1. The force scale is not a minimum-load threshold. Sample the last actual5ms substep at the unchanged50Hz reward clock; no all-substep objective or observation change. Retain original500/10PD, old rewards, last-substep wheel-vz sampling, motor randomization, reference, friction, explicit MuJoCo contact response, clocks and every acceptance gate. Verify live mass/gravity and filtered normal-force GPU telemetry before learning. No forced50:50load, contact equivalence, hardware or statistical robustness claim.",
+    "env_spacing_m": 8.0,
+    "leg_kd": 10.0,
+    "leg_target_rate_weight": -1.0,
+    "mujoco_contact_solref": [
+      0.04,
+      2.0
+    ],
+    "reward_weights": {
+      "grounded": 0.4,
+      "sideslip": 2.0,
+      "speed": 3.0,
+      "tilt": -0.2,
+      "yaw_rate": 1.0
+    },
+    "schema_version": 1,
+    "speed_std_m_s": 0.1,
+    "task": "car_drift",
+    "wheel_ground_load_reserve": {
+      "scale_fraction": 0.2,
+      "weight": -1.0
+    },
+    "wheel_vertical_velocity_std_m_s": 0.02,
+    "wheel_vertical_velocity_weight": -5.0
+  },
+  "training": {
+    "asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "completed_requested_iterations": 600,
+    "completion_status": "training_completed",
+    "domain_randomization_profile": {
+      "friction_smoothing_rad_s": 0.5,
+      "mode": "random",
+      "nominal_probability": 0.2,
+      "schema_version": 1,
+      "seed": 42,
+      "torque_scale_range": [
+        0.85,
+        1.0
+      ],
+      "velocity_scale_range": [
+        0.85,
+        1.0
+      ],
+      "wheel_friction_nm_range": [
+        0.0,
+        0.3
+      ]
+    },
+    "gpu": "NVIDIA GeForce RTX 4090 D",
+    "iterations_requested": 600,
+    "method": "official BeyondMimic tracking MDP + TRON1 wheel-aware adaptation + RSL-RL PPO",
+    "num_envs": 2048,
+    "num_steps_per_env": 24,
+    "reported_run_status": {
+      "elapsed_seconds": 990.8184140510857,
+      "iterations_requested": 600,
+      "last_iteration": 4595,
+      "num_envs": 2048,
+      "status": "training_completed",
+      "training_environment_steps": 29491200
+    },
+    "requested_budget_completion_verified": true,
+    "resume_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "seed": 42,
+    "smoke_steps_passed": 8,
+    "source_sha256": {
+      "scripts/train_tracking.py": "ea9e4cd14f25ff3ba5202b9ba43ac0f08320418e2311cbae205c8449f3a1da9c",
+      "training/tron1_contact_slip.py": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+      "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+      "training/tron1_drift.py": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+      "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+      "training/tron1_runtime_device.py": "2a1460d1b48e884fc5608e0365edc43b815d1fc74c8439945d4e2cc18027f775",
+      "training/tron1_terrain.py": "dec819a3c3c526fce706fb6a5a6491388298884b32bfe73a5c331b166f976ebf",
+      "training/tron1_tracking.py": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817"
+    },
+    "task_profile_sha256": "174a0543dfbf3c65bdd54867ab8e9b591047c8a572b0212eaaddbcd0573f2064",
+    "upstream_revision": "cd65172032893724b445448818c34165846d847d",
+    "versions": {
+      "isaaclab": "0.47.2",
+      "isaacsim": "5.1.0.0",
+      "rsl-rl-lib": "3.0.1",
+      "torch": "2.7.0+cu128"
+    }
+  },
+  "trial_snapshot_identity_sha256": "2395c97f2b86a68f008f1eea179ad0a13e0103f00eaaccf7547076b1eac66ec3",
+  "verdict": "fail"
+}

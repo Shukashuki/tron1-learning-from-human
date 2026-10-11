@@ -83,12 +83,15 @@ Car drift uses actual ground-contact measurements at **200 Hz in both engines**.
 | Frozen-actor diagnostic, common deployment PD 400/10 | Isaac passes (0.52 s); MuJoCo reaches only 0.13 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial007/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial007/assessment.json) |
 | Frozen-actor damping diagnostic, common deployment PD 500/12 | Isaac passes (0.43 s); MuJoCo reaches only 0.15 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial008/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial008/assessment.json) |
 | Opposite damping diagnostic, common deployment PD 500/8 | Isaac passes (0.46 s); MuJoCo reaches only 0.145 s; zero additional training | [Watch](results/2026-10-11-car-drift/trial009/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial009/assessment.json) |
+| Ground-load reserve retry, original PD 500/10 | Fail in both; zero qualifying drift and worse reference tracking | [Watch](results/2026-10-11-car-drift/trial010/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial010/assessment.json) |
 
 The explicit MuJoCo contact-compliance calibration is softer than the baseline, not hardware-identified or claimed equivalent to PhysX. Contact-stability shaping reduces leg-command changes and improves cross-engine root RMSE to 1.18 cm, but six genuine 5 ms right-wheel contact gaps still split the drift. Fixed-policy 400/800 Hz MuJoCo diagnostics do not resolve the contact loss and are not paired successes. See the [experiment log](EXPERIMENT_LOG.md) for profiles and limitations.
 
 Trial005 tests verified all-substep reward sampling but loses the target behavior: sideslip at speeds ≥0.4 m/s peaks at only 5.59°/5.30°, and stopping also fails. Both engines agree closely but are wrong relative to the reference. Its actor is not adopted; trial004 remains the better, still-failing candidate.
 
 Trial006 resumes trial004 and halves common leg stiffness, retaining its rewards and sampling. It also fails: path RMSE grows to 0.68 / 0.80 m, with more MuJoCo wheel unloading and delayed drift. Its actor is not adopted; neither lower stiffness nor the sampling retry establishes successful transfer.
+
+Trial010 adds a verified ground-normal load-reserve reward, but the final actor loses the target drift: moving sideslip peaks at 6.71° / 7.32°, below the unchanged 8° gate, and path RMSE grows to 0.28 / 0.26 m. Both finish and stop with full tail support, but that is not motion imitation. This actor is not adopted; trial004 remains the better, still-failing baseline. Continued PPO and the new reward are not causally separated by this single run.
 
 Trial007 freezes trial004's actor byte-for-byte and changes only deployment Kp to 400. Tracking and stopping pass in both engines, but MuJoCo's 0.13 s continuous drift still fails. This is a zero-shot controller diagnostic—not a policy trained at Kp 400—and the gain setting is not adopted.
 
