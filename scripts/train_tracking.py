@@ -61,6 +61,7 @@ def main():
     parser.add_argument("--smoke-steps", type=int, default=8)
     parser.add_argument("--resume", type=Path)
     parser.add_argument("--terrain-file", type=Path, help="Explicit matched static terrain JSON; default is the existing flat plane")
+    parser.add_argument("--task-profile", type=Path, help="Optional explicit drift reference/reward/material contract")
     domains = parser.add_mutually_exclusive_group()
     domains.add_argument("--domain-randomization", choices=("none", "motor-v1"), default="none")
     domains.add_argument("--domain-profile", type=Path, help="Explicit bounded domain-randomization JSON profile")
@@ -86,6 +87,8 @@ def main():
         sys.path.insert(0, str(ROOT))
         from training.tron1_tracking import make_env_cfg, observation_action_contract
         from training.tron1_domain_randomization import default_profile, validate_profile, domain_randomization_audit
+        from training.tron1_drift import load_task_profile
+        task_profile = load_task_profile(args.task_profile) if args.task_profile else None
 
         profile = (validate_profile(json.loads(args.domain_profile.read_text())) if args.domain_profile else
                    default_profile(args.seed) if args.domain_randomization == "motor-v1" else None)
@@ -94,15 +97,22 @@ def main():
             from training.tron1_terrain import load_terrain
             terrain_spec = load_terrain(args.terrain_file)
         cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device,
-                           dr_profile=profile, terrain_spec=terrain_spec)
+                           dr_profile=profile, terrain_spec=terrain_spec, task_profile=task_profile)
         cfg.seed = args.seed
         env = ManagerBasedRLEnv(cfg=cfg)
+        contact_material_audit = None
+        if task_profile is not None:
+            from training.tron1_drift import audit_isaac_materials
+            contact_material_audit = audit_isaac_materials(env, task_profile)
         terrain_audit = None
         if terrain_spec is not None:
             from training.tron1_terrain import terrain_runtime_audit
             terrain_audit = terrain_runtime_audit(env, terrain_spec)
         wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
         contract = observation_action_contract()
+        if task_profile is not None:
+            from training.tron1_drift import apply_task_profile_to_contract
+            contract = apply_task_profile_to_contract(contract, task_profile)
         contract["domain_randomization"] = profile if profile else "disabled; nominal actuator parameters"
         if terrain_spec is not None:
             contract["terrain"] = terrain_spec
@@ -136,6 +146,7 @@ def main():
             "source_sha256": {str(path.relative_to(ROOT)): sha256(path) for path in
                               (ROOT / "training/tron1_tracking.py", ROOT / "training/tron1_domain_randomization.py",
                                ROOT / "training/tron1_terrain.py",
+                               ROOT / "training/tron1_drift.py", ROOT / "training/tron1_contact_slip.py",
                                Path(__file__).resolve())},
             "num_envs": args.num_envs, "iterations_requested": args.iterations,
             "seed": args.seed, "smoke_steps_passed": args.smoke_steps,
@@ -145,6 +156,9 @@ def main():
             "contract": contract, "resume": str(args.resume) if args.resume else None,
             "resume_sha256": sha256(args.resume) if args.resume else None,
             "terrain": terrain_spec,
+            "task_profile": task_profile,
+            "task_profile_sha256": sha256(args.task_profile) if args.task_profile else None,
+            "contact_material_audit": contact_material_audit,
             "terrain_runtime_audit": terrain_audit,
             "terrain_file_sha256": sha256(args.terrain_file) if args.terrain_file else None,
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,

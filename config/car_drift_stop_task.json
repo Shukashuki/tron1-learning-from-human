@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 30.0,
+  "mujoco_contact_solref": [0.02, 1.0],
+  "description": "Sequential retry: precise speed/stop tracking, smoother policy commands and common leg damping 30 in both engines. MuJoCo uses its documented default 20 ms critically damped contact instead of the baseline 4 ms value silently clamped to 10 ms. No contact margin/gap or validation threshold changes."
+}

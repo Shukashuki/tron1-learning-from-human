@@ -30,6 +30,123 @@ def sha256(path):
     return digest.hexdigest()
 
 
+class PhysicsTrajectoryRecorder:
+    """First-episode physical states; independent of policy-rate recording.
+
+    Scene-update callbacks may also occur during forward/reset operations.
+    Only consecutive simulator-counter increments during a policy step are
+    accepted. Observations/actions are the actual policy context held through
+    its decimation interval; the recorder never computes new observations.
+    """
+
+    def __init__(self, num_envs, physics_dt, start_counter, initial_snapshot, initial_observation):
+        self.num_envs = int(num_envs)
+        self.physics_dt = float(physics_dt)
+        if self.num_envs < 1 or not np.isfinite(self.physics_dt) or self.physics_dt <= 0:
+            raise ValueError("Physics recorder needs positive environment count and timestep")
+        self.start_counter = self.last_counter = int(start_counter)
+        self.in_step = False
+        self.valid = np.ones(self.num_envs, dtype=bool)
+        self.records = {key: [] for key in initial_snapshot}
+        self.records.update({key: [] for key in ("valid_mask", "terminal_sample", "action_observation",
+                                                "actions_raw", "actions_clipped", "reference_frame_for_action",
+                                                "action_was_applied")})
+        self.counters = []
+        self.observation = self._context(initial_observation, (self.num_envs, 51), "observation")
+        self.raw_actions = np.zeros((self.num_envs, 8), dtype=np.float32)
+        self.clipped_actions = np.zeros_like(self.raw_actions)
+        self.action_frames = np.asarray(initial_snapshot["reference_frame"]).copy()
+        self._append(initial_snapshot, applied=False)
+
+    @staticmethod
+    def _context(value, shape, label):
+        result = np.asarray(value).copy()
+        if result.shape != shape or not np.isfinite(result).all():
+            raise ValueError(f"Physics recording {label} must have finite shape {shape}")
+        return result
+
+    def _masked(self, value):
+        result = np.asarray(value).copy()
+        if result.shape[0] != self.num_envs:
+            raise ValueError("Physical sample has an inconsistent environment count")
+        if result.dtype.kind == "b":
+            result[~self.valid] = False
+        elif np.issubdtype(result.dtype, np.integer):
+            result[~self.valid] = -1
+        else:
+            result[~self.valid] = np.nan
+        return result
+
+    def _append(self, snapshot, applied):
+        for key, value in snapshot.items():
+            if key not in self.records:
+                raise ValueError("Physical snapshot schema changed while recording")
+            self.records[key].append(self._masked(value))
+        self.records["valid_mask"].append(self.valid.copy())
+        self.records["terminal_sample"].append(np.zeros(self.num_envs, dtype=bool))
+        self.records["action_observation"].append(self._masked(self.observation))
+        self.records["actions_raw"].append(self._masked(self.raw_actions))
+        self.records["actions_clipped"].append(self._masked(self.clipped_actions))
+        self.records["reference_frame_for_action"].append(self._masked(self.action_frames))
+        self.records["action_was_applied"].append(self.valid.copy() if applied else np.zeros(self.num_envs, dtype=bool))
+        self.counters.append(self.last_counter)
+
+    def begin_step(self, valid, observation, raw_actions, clipped_actions, action_frames):
+        if self.in_step:
+            raise RuntimeError("Physics capture policy steps must not overlap")
+        valid = np.asarray(valid)
+        if valid.shape != (self.num_envs,) or valid.dtype.kind != "b":
+            raise ValueError("Physics capture valid mask must be one boolean per environment")
+        if np.any(valid & ~self.valid):
+            raise ValueError("A completed first episode cannot become valid again")
+        self.valid = valid.copy()
+        self.observation = self._context(observation, (self.num_envs, 51), "observation")
+        self.raw_actions = self._context(raw_actions, (self.num_envs, 8), "raw actions")
+        self.clipped_actions = self._context(clipped_actions, (self.num_envs, 8), "clipped actions")
+        self.action_frames = self._context(action_frames, (self.num_envs,), "action frames")
+        self.step_start_counter = self.last_counter
+        self.in_step = True
+
+    def should_capture(self, counter):
+        counter = int(counter)
+        if not self.in_step or counter == self.last_counter:
+            return False
+        if counter != self.last_counter + 1:
+            raise RuntimeError("Physical simulation counter skipped or moved backwards during capture")
+        return True
+
+    def capture(self, counter, snapshot):
+        if not self.should_capture(counter):
+            return False
+        self.last_counter = int(counter)
+        self._append(snapshot, applied=True)
+        return True
+
+    def finish_step(self, newly_done, expected_substeps):
+        self.in_step = False
+        if self.last_counter - self.step_start_counter != int(expected_substeps):
+            raise RuntimeError("Physics recording missed a decimation substep")
+        done = np.asarray(newly_done)
+        if done.shape != (self.num_envs,) or done.dtype.kind != "b" or np.any(done & ~self.valid):
+            raise ValueError("Physical terminal flags must belong to active first episodes")
+        self.records["terminal_sample"][-1] |= done
+        self.valid[done] = False
+
+    def arrays(self, joint_names, body_names, wheel_body_names, policy_dt):
+        arrays = {key: np.stack(value) for key, value in self.records.items()}
+        arrays.update({
+            "time_s": (np.asarray(self.counters, dtype=np.int64) - self.start_counter) * self.physics_dt,
+            "simulation_step_counter": np.asarray(self.counters, dtype=np.int64),
+            "policy_dt_s": np.array(policy_dt), "physics_dt_s": np.array(self.physics_dt),
+            "joint_names": np.asarray(joint_names), "qpos_joint_names": np.asarray(joint_names),
+            "body_names": np.asarray(body_names), "wheel_body_names": np.asarray(wheel_body_names),
+            "action_observation_kind": np.asarray("actual policy pre-action observation held across decimation substeps"),
+        })
+        arrays["qpos"] = np.concatenate((arrays["root_position_m"], arrays["root_quaternion_wxyz"],
+                                        arrays["joint_position_rad"]), axis=-1)
+        return arrays
+
+
 def true_runs(mask):
     """Half-open intervals of contiguous True samples."""
     padded = np.r_[False, np.asarray(mask, dtype=bool), False].astype(np.int8)
@@ -156,7 +273,10 @@ def main():
     parser.add_argument("--num-envs", default=16, type=int)
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--terrain-file", type=Path, help="Must match the terrain used for training")
+    parser.add_argument("--task-profile", type=Path, help="Must match the checkpoint drift task/material contract")
     parser.add_argument("--contact-threshold-n", default=5.0, type=float)
+    parser.add_argument("--record-physics", action="store_true",
+                        help="Also save every physics substep in a separate first-episode physics_trajectory.npz")
     parser.add_argument("--domain-parameters", type=Path,
                         help="One explicit fixed actuator-domain draw JSON; never resample during evaluation")
     AppLauncher.add_app_launcher_args(parser)
@@ -189,15 +309,20 @@ def main():
         )
         domain_parameters = (validate_draw(json.loads(args.domain_parameters.read_text()))
                              if args.domain_parameters else None)
+        from training.tron1_drift import load_task_profile
+        task_profile = load_task_profile(args.task_profile) if args.task_profile else None
         terrain_spec = None
         if args.terrain_file:
             from training.tron1_terrain import load_terrain
             terrain_spec = load_terrain(args.terrain_file)
         training_manifest_path = args.checkpoint.parent / "manifest.json"
         if training_manifest_path.is_file():
-            trained_terrain = json.loads(training_manifest_path.read_text()).get("terrain")
+            trained_manifest = json.loads(training_manifest_path.read_text())
+            trained_terrain = trained_manifest.get("terrain")
             if trained_terrain != terrain_spec:
                 raise ValueError("Evaluation terrain differs from the checkpoint training manifest")
+            if trained_manifest.get("task_profile") != task_profile:
+                raise ValueError("Evaluation drift task/material profile differs from training")
 
         def to_numpy(tensor):
             return tensor.detach().cpu().numpy().copy()
@@ -210,7 +335,7 @@ def main():
                 forces = to_numpy(sensor.data.net_forces_w[:, env.eval_wheel_sensor_ids])
             else:
                 forces = np.full((env.num_envs, 2, 3), np.nan, dtype=np.float32)
-            return {
+            snapshot = {
                 "root_position_m": to_numpy(robot.data.root_pos_w - env.scene.env_origins),
                 "root_quaternion_wxyz": to_numpy(robot.data.root_quat_w),
                 "root_linear_velocity_w_m_s": to_numpy(robot.data.root_lin_vel_w),
@@ -223,6 +348,12 @@ def main():
                 "wheel_contact_force_w_n": forces,
                 "reference_frame": to_numpy(command.time_steps),
             }
+            if task_profile is not None:
+                from training.tron1_contact_slip import sample_raw_isaac_ground_contacts, sample_nonwheel_ground_force_norm
+                snapshot.update(sample_raw_isaac_ground_contacts(env, force_threshold_n=args.contact_threshold_n))
+                names = tuple(name for name in env.scene.sensors if name.startswith("nonwheel_ground_"))
+                snapshot.update(sample_nonwheel_ground_force_norm(env, names, force_threshold_n=1.))
+            return snapshot
 
         class TerminalCaptureEnv(ManagerBasedRLEnv):
             def __init__(self, *positional, **keyword):
@@ -251,9 +382,13 @@ def main():
 
         cfg = make_env_cfg(args.motion_file, args.asset_path, args.num_envs, args.device, eval_mode=True,
                            dr_profile={"mode": "fixed", "fixed_draw": domain_parameters} if domain_parameters else None,
-                           terrain_spec=terrain_spec)
+                           terrain_spec=terrain_spec, task_profile=task_profile)
         cfg.seed = args.seed
         env = TerminalCaptureEnv(cfg=cfg)
+        contact_material_audit = None
+        if task_profile is not None:
+            from training.tron1_drift import audit_isaac_materials
+            contact_material_audit = audit_isaac_materials(env, task_profile)
         terrain_audit = None
         if terrain_spec is not None:
             from training.tron1_terrain import terrain_runtime_audit
@@ -312,6 +447,24 @@ def main():
             "action_was_applied": [np.zeros(args.num_envs, dtype=bool)],
         })
         env.capture_resets = True
+        physics_recorder = None
+        original_scene_update = None
+        if args.record_physics:
+            physics_recorder = PhysicsTrajectoryRecorder(
+                args.num_envs, env.physics_dt, env._sim_step_counter, initial, to_numpy(obs["policy"]),
+            )
+            original_scene_update = env.scene.update
+
+            def physics_scene_update(*positional, **keyword):
+                result = original_scene_update(*positional, **keyword)
+                counter = env._sim_step_counter
+                # Check before reading state: a same-counter reset/forward
+                # update must not even fetch a post-reset terminal snapshot.
+                if physics_recorder.should_capture(counter):
+                    physics_recorder.capture(counter, state_snapshot(env))
+                return result
+
+            env.scene.update = physics_scene_update
         export_validation_max_error = export_error
         max_steps = frames + int(math.ceil(0.2 / env.step_dt))
         with torch.inference_mode():
@@ -335,11 +488,16 @@ def main():
                 # vectorized, but cannot contribute a second episode's states.
                 clipped_actions[torch.as_tensor(~active, device=env.device)] = 0.0
                 env.terminal_snapshots.clear()
+                if physics_recorder is not None:
+                    physics_recorder.begin_step(valid, policy_obs, to_numpy(raw_actions),
+                                                to_numpy(clipped_actions), reference_for_action)
                 obs, rewards, dones, extras = wrapped.step(clipped_actions)
                 del rewards, extras
                 done = to_numpy(dones).astype(bool)
-                state = state_snapshot(env)
                 newly_done = done & active
+                if physics_recorder is not None:
+                    physics_recorder.finish_step(newly_done, expected_substeps=cfg.decimation)
+                state = state_snapshot(env)
                 for env_index in np.flatnonzero(newly_done):
                     if int(env_index) not in env.terminal_snapshots:
                         raise RuntimeError("Missing pre-reset terminal snapshot; refusing contaminated evaluation")
@@ -367,6 +525,9 @@ def main():
                 records["action_was_applied"].append(valid)
                 active[newly_done] = False
 
+        if original_scene_update is not None:
+            env.scene.update = original_scene_update
+
         for env_index in np.flatnonzero(active):
             outcomes[env_index]["end_reason"] = "application_interrupted" if not app.is_running() else "evaluation_step_limit"
         arrays = {key: np.stack(value) for key, value in records.items()}
@@ -380,6 +541,9 @@ def main():
                                         arrays["joint_position_rad"]), axis=-1)
         summary = summarize_episodes(arrays, outcomes, reference, args.contact_threshold_n)
         contract = observation_action_contract()
+        if task_profile is not None:
+            from training.tron1_drift import apply_task_profile_to_contract
+            contract = apply_task_profile_to_contract(contract, task_profile)
         contract["domain_randomization"] = "disabled during evaluation; fixed actuator parameters"
         if terrain_spec is not None:
             contract["terrain"] = terrain_spec
@@ -407,6 +571,18 @@ def main():
             "terrain_module_sha256": sha256(ROOT / "training/tron1_terrain.py") if terrain_spec is not None else None,
             "legacy_joint_friction_audit": env.legacy_joint_friction_audit,
             "domain_parameters": domain_parameters,
+            "task_profile": task_profile,
+            "contact_material_audit": contact_material_audit,
+            "wheel_contact_slip_evidence": "force-weighted RMS from actual ground-filtered contact points and wheel COM twist" if task_profile else None,
+            "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points" if task_profile else None,
+            "contact_slip_helper_sha256": sha256(ROOT / "training/tron1_contact_slip.py") if task_profile else None,
+            "evaluator_source_sha256": sha256(__file__),
+            "drift_module_sha256": sha256(ROOT / "training/tron1_drift.py") if task_profile else None,
+            "contact_slip_measurement": {"aggregation": "normal-force-weighted RMS over active actual ground contact points",
+                                         "active_point_normal_force_threshold_n": args.contact_threshold_n,
+                                         "nonwheel_active_point_threshold_n": 1.,
+                                         "ground_is_stationary": True,
+                                         "sample_dt_s": env.step_dt} if task_profile else None,
             "domain_parameters_file_sha256": sha256(args.domain_parameters) if args.domain_parameters else None,
             "domain_randomization_audit": domain_randomization_audit(env),
             "simulator": "IsaacLab/PhysX", "checkpoint": str(args.checkpoint),
@@ -434,6 +610,29 @@ def main():
             ],
         }
         np.savez_compressed(args.output_dir / "trajectory.npz", **arrays)
+        if physics_recorder is not None:
+            physical_arrays = physics_recorder.arrays(robot.joint_names, robot.body_names,
+                                                       WHEEL_BODY_NAMES, env.step_dt)
+            physical_path = args.output_dir / "physics_trajectory.npz"
+            np.savez_compressed(physical_path, **physical_arrays)
+            report.update({
+                "physics_trajectory_file": "physics_trajectory.npz",
+                "physics_trajectory_sha256": sha256(physical_path),
+                "physics_dt_s": env.physics_dt,
+                "physics_recording": {
+                    "sample_dt_s": env.physics_dt,
+                    "samples": len(physical_arrays["time_s"]),
+                    "time_source": "relative simulator physics-step counter",
+                    "hook": "after original scene.update at each incremented simulator counter during wrapped.step",
+                    "initial_state_samples": 1,
+                    "terminal_states_before_reset": True,
+                    "same_counter_reset_and_forward_updates_excluded": True,
+                    "first_episode_only_valid_mask": True,
+                    "observations": "actual policy pre-action observations held across four physics substeps; validate actor only with trajectory.npz",
+                    "primary_policy_trajectory_file": "trajectory.npz",
+                    "policy_sample_dt_s": env.step_dt,
+                },
+            })
         (args.output_dir / "policy_contract.json").write_text(json.dumps(contract, indent=2) + "\n")
         (args.output_dir / "report.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
         print(json.dumps({"output_dir": str(args.output_dir), "status": report["status"],

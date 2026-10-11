@@ -22,6 +22,8 @@ A TRON1-specific adapter uses GMR's two-stage inverse kinematics to generate the
 
 Forward jump, turning jump, sideways jump, and step-up use this GMR pipeline. Rolling stop and crouch instead use explicit wheel-task adaptations: duration is doubled, and displacement or crouch depth is adjusted. They are not unmodified human imitation or direct GMR outputs. See the [reference recipes](config/suite/motion_suite.json).
 
+The car-drift extension uses a captured DOA/CARLA vehicle demonstration, not human mocap or physical-car capture. Vehicle XY is scaled by 0.08 and time by 2, while the heading and sideslip profile are retained. Bounded leg IK supplies an upright, grounded robot reference; wheel spin cancels rolling velocity but allows lateral slip. A disclosed 1.5 s synthetic stop and 0.5 s stationary tail complete the reference. This is a separate task adapter, not GMR applied to a car.
+
 ### Reference to learned control
 
 We use BeyondMimic-style motion tracking with PPO, reusing its motion commands, tracking rewards, and adaptive reference-state initialization through a custom TRON1 configuration. The policy learns feedback control in physics; the base trajectory is not prescribed during rollout.
@@ -53,7 +55,7 @@ There is no reference wheel torque: PPO learns wheel actions from tracking rewar
 
 Each motion has a separate policy fine-tuned from the same previous jump checkpoint, not trained from scratch. We evaluate the predesignated final checkpoint. Training randomizes wheel shaft resistance (0–0.3 N·m), motor no-load speed (0.85–1.00× nominal), and torque capacity (0.85–1.00× nominal). Parameters stay fixed within each episode; 20% of resets use nominal parameters.
 
-Every demonstration uses **human keypoints → kinematic reference → Isaac policy → MuJoCo policy**, with synchronized task time and height curves. The policy panels replay recorded physics, not reference animation. Adaptations and terminal holds are labeled; all videos use 0.5× playback.
+Human-motion demonstrations use **human keypoints → kinematic reference → Isaac policy → MuJoCo policy**, with synchronized task time and height curves. The car task substitutes captured vehicle motion in the first panel and plots sideslip, speed and wheel-ground slip. Policy panels replay recorded physics, not reference animation. Adaptations and terminal holds are labeled; all videos use 0.5× playback.
 
 | Motion / CMU clip | Result in Isaac / MuJoCo | Four-panel video |
 |---|---|---|
@@ -68,6 +70,8 @@ Four of six tasks pass the predefined gates in both engines, with the turning-ju
 
 [Video gallery](results/2026-10-03-motion-pipeline-suite/index.html) · [Metrics and assessments](results/2026-10-03-motion-suite/summary.json) · [Detailed experiment log and reproduction instructions](EXPERIMENT_LOG.md)
 
-Next motion source: [captured car drift preview](results/2026-10-11-car-drift-source/source_preview.mp4). Three public DOA/CARLA expert demonstrations were captured and screened for active steering and sideslip. The selected clip peaks at 13.91° sideslip. Its clock is reconstructed because the source CSV has no timestamps; TRON1 retargeting and drift-policy training are pending. [Source audit](results/2026-10-11-car-drift-source/source_audit.json) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
+Car drift, trial001: **sim2sim FAIL** after 600 PPO updates. Isaac's 50 Hz samples show a 0.28 s qualifying drift interval; MuJoCo's 200 Hz measurements fragment into at most 0.03 s intervals because of real contact micro-gaps. Both track the route but fail stable-exit sideslip. This first trial has unequal contact sampling rates; a physics-rate retry is in progress. [Four-panel video](results/2026-10-11-car-drift/trial001/motion_pipeline.mp4) · [Assessment](results/2026-10-11-car-drift/trial001/assessment.json) · [Reference audit](results/2026-10-11-car-drift/trial001/reference_audit.json).
+
+Drift validation requires forward motion at least 0.4 m/s, sideslip at least 8°, both wheels bearing ground contact and measured contact-patch lateral slip at least 0.04 m/s, concurrently for 0.20 s, followed by stable stopping. Spins, flight and reference playback do not pass. The source starts already rolling; its approximate clock is reconstructed from a CSV without timestamps. [Captured car preview](results/2026-10-11-car-drift-source/source_preview.mp4) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
 
 Credits: [CMU data sources and acknowledgment](config/mocap_sources.json), [pinned GMR adapter](config/gmr_retarget_wf.json), [BeyondMimic license](notices/BeyondMimic-LICENCE.txt), and [LimX TRON1 model license](notices/LimX-TRON1-LICENSE.txt). Third-party code, models, and data retain their original terms; raw mocap, robot assets, and checkpoints are not redistributed here.

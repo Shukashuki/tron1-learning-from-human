@@ -40,3 +40,12 @@ def test_flat_floor_omits_terrain_and_does_not_create_output(tmp_path):
     for _, command in commands(args):
         assert "--terrain-file" not in command
     assert not args.output_dir.exists()
+
+
+def test_drift_profile_shared_by_training_and_evaluation(tmp_path):
+    args = arguments(tmp_path)
+    args.task_profile = tmp_path / "car_drift_task.json"
+    for _, command in commands(args):
+        assert value(command, "--task-profile") == str(args.task_profile)
+    assert "--record-physics" in commands(args)[1][1]
+    assert "--record-physics" not in commands(args)[0][1]

@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from training.tron1_domain_randomization import validate_draw, apply_draw_to_contract, nominal_draws, single_draw
+from training.tron1_contact_slip import aggregate_ground_contacts
 DEFAULT_MODEL = ROOT / "outputs/sim2sim-cmu-16_03/mujoco_model.xml"
 TASK_SOURCE = ROOT / "training/tron1_tracking.py"
 ROOT_COM_LINK = np.array([0.04576, 0.00014, -0.16398])
@@ -123,6 +124,9 @@ def validate_contract(contract):
         if draw["joint_names"] != contract.get("observed_joint_velocity_order"):
             raise ValueError("Domain joint order differs from the policy contract")
         contract = {**contract, "domain_parameters": draw}
+    if contract.get("task_profile") is not None:
+        from training.tron1_drift import validate_task_profile
+        contract = {**contract, "task_profile": validate_task_profile(contract["task_profile"])}
     return contract
 
 
@@ -482,6 +486,52 @@ class MujocoState:
                     contacts[wheel] += int(np.linalg.norm(force) > 1e-6)
         return net, ground, contacts
 
+    def ground_contact_slip(self, force_threshold_n=5.0):
+        """Actual ground-contact lateral slip, excluding every robot self-contact.
+
+        The world body is the stationary plane/terrain in this evaluator.
+        Velocities are evaluated from each wheel's COM Jacobians and measured
+        contact points, rather than a guessed lowest point or wheel center.
+        Forces returned here are normal-only, matching the filtered PhysX API.
+        """
+        points = [[], []]
+        normals = [[], []]
+        normal_forces = [[], []]
+        wrench = np.zeros(6)
+        for index, contact in enumerate(self.data.contact):
+            b1, b2 = self.model.geom_bodyid[[contact.geom1, contact.geom2]]
+            if 0 not in (b1, b2):
+                continue
+            for wheel, body in enumerate(self.wheels):
+                if body not in (b1, b2):
+                    continue
+                self.mj.mj_contactForce(self.model, self.data, index, wrench)
+                # Contact-frame +normal points from geom1 to geom2; its force
+                # acts on geom2. Orient it as the force acting on this wheel.
+                normal = contact.frame[:3].copy()
+                if b1 == body:
+                    normal = -normal
+                points[wheel].append(contact.pos.copy())
+                normals[wheel].append(normal)
+                normal_forces[wheel].append(float(wrench[0]))
+        counts = np.zeros(2, dtype=np.int32)
+        forces = np.zeros((2, 3), dtype=float)
+        slip = np.zeros(2, dtype=float)
+        for wheel, body in enumerate(self.wheels):
+            jacp = np.empty((3, self.model.nv))
+            jacr = np.empty((3, self.model.nv))
+            self.mj.mj_jacBodyCom(self.model, self.data, jacp, jacr, int(body))
+            counts[wheel], forces[wheel], slip[wheel] = aggregate_ground_contacts(
+                np.asarray(points[wheel], dtype=float).reshape(-1, 3),
+                np.asarray(normals[wheel], dtype=float).reshape(-1, 3),
+                np.asarray(normal_forces[wheel], dtype=float),
+                self.data.xipos[body], jacp @ self.data.qvel, jacr @ self.data.qvel,
+                self.data.xquat[body], force_threshold_n=force_threshold_n,
+            )
+        return {"wheel_ground_contact_count": counts,
+                "wheel_ground_contact_force_w_n": forces,
+                "wheel_lateral_contact_slip_m_s": slip}
+
     def nonwheel_ground_contacts(self):
         """Ground-only evidence, excluding robot self-contact and both wheels."""
         count, total_force = 0, 0.0
@@ -494,9 +544,10 @@ class MujocoState:
             if robot_body == 0 or robot_body in self.wheels:
                 continue
             self.mj.mj_contactForce(self.model, self.data, index, wrench)
-            magnitude = float(np.linalg.norm(wrench[:3]))
+            # Normal-only scalar matches the filtered PhysX raw-contact API.
+            magnitude = float(wrench[0])
             total_force += magnitude
-            count += int(magnitude >= 1.0)
+            count += int(magnitude > 1.0)
         return count, total_force
 
 
@@ -536,6 +587,10 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
     reference = MotionReference(motion_file, contract)
     model, removed_visual_geoms = load_model(model_path, no_visual_mesh, terrain=contract.get("terrain"))
     collision_geoms = configure_model(model, contract)
+    contact_material_audit = None
+    if contract.get("task_profile") is not None:
+        from training.tron1_drift import configure_mujoco_materials
+        contact_material_audit = configure_mujoco_materials(model, contract["task_profile"])
     terrain_audit = None
     if contract.get("terrain") is not None:
         from training.tron1_terrain import mujoco_terrain_runtime_audit
@@ -553,12 +608,13 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
 
     def record(frame, torque):
         state = measured.measure()
-        force, ground_force, contacts = measured.contact_forces()
+        force, ground_force, _ = measured.contact_forces()
+        contact_slip = measured.ground_contact_slip(force_threshold_n=contact_threshold_n)
         nonwheel_count, nonwheel_force = measured.nonwheel_ground_contacts()
         physical.append({"time_s": float(data.time), "reference_frame": frame, **state,
                          "qpos": data.qpos.copy(),
                          "joint_torque_nm": torque.copy(), "wheel_contact_force_w_n": force,
-                         "wheel_ground_contact_force_w_n": ground_force, "wheel_ground_contact_count": contacts,
+                         "wheel_ground_total_contact_force_w_n": ground_force, **contact_slip,
                          "nonwheel_ground_contact_count": nonwheel_count,
                          "nonwheel_ground_contact_force_norm_n": nonwheel_force})
         return state
@@ -600,7 +656,7 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
     tilt = np.degrees(np.arccos(np.clip(1 - 2 * np.sum(arrays["root_quat_wxyz"][:, 1:3] ** 2, axis=1), -1, 1)))
     root_gain = float(root[:, 2].max() - root[0, 2])
     events = contact_events(arrays["time_s"], arrays["wheel_ground_contact_force_w_n"], contact_threshold_n)
-    events["force_source"] = "summed wheel-ground contact forces, excluding robot self-contact"
+    events["force_source"] = "summed wheel-ground normal contact forces, excluding robot self-contact"
     landed = bool(events["first_landing_s"] is not None and root_gain >= .05)
     motor_model = contract.get("actuator_model", "ideal_pd")
     velocity_bounds = np.array([contract.get("leg_motor_velocity_limit_rad_s", 15.)] * 6
@@ -627,6 +683,7 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
         "contract": contract, "reference_frames": reference.frames,
         "contract_source": str(Path(contract_source).resolve()), "contract_source_sha256": sha256(contract_source),
         "actuator_model": motor_model, "actual_joint_velocity_hard_clipped": False,
+        "contact_material_audit": contact_material_audit,
         "domain_parameters": actual_domain,
         "domain_parameters_resampled_during_episode": False,
         "domain_parameter_implementation": "scaled DC motor envelope, then smooth wheel axle drag, then nominal net-effort guard",
@@ -646,7 +703,22 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
         "joint_speed_exceedance_fraction_by_joint": speed_exceeded.mean(axis=0).tolist(),
         "max_abs_joint_torque_nm": np.max(np.abs(arrays["joint_torque_nm"]), axis=0).tolist(),
         "contact": events, "jump_and_landing_detected": landed,
+        "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points",
+        "contact_slip_helper_sha256": sha256(ROOT / "training/tron1_contact_slip.py"),
+        "contact_slip_measurement": {
+            "point_source": "MuJoCo data.contact.pos for wheel/world collision pairs only",
+            "velocity_source": "mj_jacBodyCom at data.xipos; COM linear and angular velocity transported to each contact point",
+            "lateral_axis": "body local +Y wheel axle projected into each actual contact tangent plane",
+            "aggregation": "normal-force-weighted RMS over active contact points per wheel",
+            "active_point_normal_force_threshold_n": float(contact_threshold_n),
+            "active_point_comparison": ">",
+            "no_contact": "count=0 and slip=0; slip requires positive contact count for interpretation",
+            "ground_force_kind": "sum of normal contact forces, matching the filtered PhysX contact API",
+            "ground_is_stationary": True,
+            "sample_dt_s": float(contract["physics_dt"]),
+        },
         "nonwheel_ground_contact_recorded": True,
+        "nonwheel_ground_contact_force_kind": "sum of actual wheel-excluded ground contact normal forces; point count uses normal force >1N",
         "max_nonwheel_ground_contact_force_norm_n": float(arrays["nonwheel_ground_contact_force_norm_n"].max()),
         "nonwheel_ground_contact_sample_count": int(np.count_nonzero(arrays["nonwheel_ground_contact_count"])),
         "full_clip_with_detected_jump_and_landing": bool(termination == "motion_end" and landed),
@@ -662,6 +734,7 @@ def run_evaluation(policy, motion_file, model_path, output, *, policy_path=None,
              "Legacy IdealPD has no matching PhysX solver velocity brake in MuJoCo; qvel is never clamped."),
             "DC motor parameters are simulation assumptions, not validated manufacturer ratings. The DC model changes training physics.",
             "MuJoCo contact forces are instantaneous constraint forces; Isaac contact sensors may aggregate differently.",
+            "Lateral contact slip uses real contact points and is sampled at 200 Hz; contact patch resolution remains engine-specific.",
             "Reference is held for each 20 ms action; training termination predicates are checked before phase advances.",
         ],
     }

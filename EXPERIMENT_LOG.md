@@ -2,6 +2,30 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
+## Car drift: trained baseline and sequential retry (2026-10-11)
+
+The selected DOA/CARLA `sa_traj34` capture now drives a real TRON1 WF tracking experiment. The adapter keeps the captured XY/heading profile with spatial scale 0.08 and time scale 2, solves bounded support-leg IK at 0.75 m root height, and derives wheel rolling rates without suppressing lateral slip. The 50 Hz reference has 288 frames: 3.74 s captured motion, 1.5 s explicitly synthetic stopping, and a 0.5 s stationary tail. The source starts moving; no extra lateral reset velocity is injected.
+
+Trial001 fine-tuned the common jump checkpoint for 600 updates with 2,048 environments, seed 42 and the existing three-motor domain randomization, using [the baseline drift profile](config/car_drift_task.json). Both wheel and ground friction are 0.15, verified from live PhysX robot materials, bound ground materials and compiled MuJoCo geometry. Both engines complete 5.76 s using the same exported normalized actor; reconstructed Isaac observations match before deployment. Robot root motion is never prescribed during rollout.
+
+**Overall result: FAIL.** Isaac's sampled grounded drift lasts 0.28 s; MuJoCo's longest continuous interval is 0.03 s. Both fail stable-exit sideslip; MuJoCo also fails full/tail two-wheel support. Cross-engine root-position RMSE is 1.85 cm. All observed qualifying drift overlaps the source's drift windows and matches its signed sideslip. No chassis/leg ground impacts occur.
+
+The published first snapshot uses 50 Hz Isaac and 200 Hz MuJoCo contact measurements. A separate 200 Hz Isaac probe preserves every original policy-rate state/action/observation bit-exactly and confirms the 0.28 s drift with uninterrupted wheel support. MuJoCo's micro-gaps are genuine zero-force, absent geometric contacts: each lasts 5 ms, with median clearance 25.7 micrometers. The original baseline files are not replaced by the probe.
+
+[Baseline four-panel video](results/2026-10-11-car-drift/trial001/motion_pipeline.mp4) · [Fixed-gate assessment](results/2026-10-11-car-drift/trial001/assessment.json) · [Hash-linked summary](results/2026-10-11-car-drift/trial001/summary.json).
+
+A declared contact-only ablation uses MuJoCo's documented `solref=[0.02,1]` default instead of the baseline `0.004,1`, which `refsafe` clamps to at least two 5 ms timesteps. It improves support but still fails continuous drift and recovery; friction, margins, gaps and acceptance thresholds are unchanged. This is a diagnostic, not a successful matched-profile sim2sim trial. See [MuJoCo contact solver parameters](https://mujoco.readthedocs.io/en/stable/modeling.html#solver-parameters).
+
+The sequential retry resumes trial001 for another predesignated 600 updates. Its [explicit stop profile](config/car_drift_stop_task.json) tightens speed tracking, increases action smoothing and uses leg PD 500/30 in both engines; it retains three-motor randomization and the same reference. MuJoCo's 20 ms contact compliance is disclosed rather than claimed equivalent to PhysX. Both engines are measured at 200 Hz. Training completion alone will not count as success, and the failed baseline remains visible.
+
+Prepare the robot reference after capturing the pinned source:
+
+```bash
+python scripts/prepare_car_drift_reference.py --output-dir outputs/my-drift-reference
+```
+
+Use `scripts/run_motion_trial.py --task-profile ...` for bounded training/evaluation, then deploy the exported actor with `scripts/eval_tracking_mujoco.py --verify-isaac-trajectory ...`. Assess with `scripts/assess_drift.py`; render recorded evidence with `scripts/render_car_drift_pipeline.py`. Raw source states, robot references, checkpoints and full rollouts remain private outputs.
+
 ## Car drift demonstration capture (2026-10-11)
 
 We captured three flat-ground expert demonstrations from [DOA](https://github.com/ustcly/DOA/tree/05ea8d643ea60b4649a59e2988cd1ae21719f9f4/expert_traj), a CARLA 0.9.14 simulated-car source. The source commit, CSV hashes, recorder and scenario settings are pinned in [config/drift_sources.json](config/drift_sources.json). Raw samples, including duplicated observations, are kept in private `outputs/`; the public snapshot contains derived previews and an audit.

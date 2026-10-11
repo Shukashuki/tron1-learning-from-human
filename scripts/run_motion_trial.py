@@ -32,6 +32,10 @@ def commands(args):
     if args.terrain_file:
         for command in (train, evaluate):
             command += ["--terrain-file", str(args.terrain_file)]
+    if getattr(args, "task_profile", None):
+        for command in (train, evaluate):
+            command += ["--task-profile", str(args.task_profile)]
+        evaluate += ["--record-physics"]
     return [("training", train), ("isaac_evaluation", evaluate)]
 
 
@@ -40,6 +44,7 @@ def main():
     for name in ("motion-file", "asset-path", "resume", "output-dir"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--terrain-file", type=Path)
+    parser.add_argument("--task-profile", type=Path)
     parser.add_argument("--num-envs", type=int, default=2048)
     parser.add_argument("--iterations", type=int, default=600)
     parser.add_argument("--seed", type=int, default=42)
@@ -48,7 +53,7 @@ def main():
     args = parser.parse_args()
     if min(args.num_envs, args.iterations, args.stage_timeout_s) <= 0:
         parser.error("Environment count, updates and timeout must be positive")
-    for name in ("motion_file", "asset_path", "resume", "output_dir", "terrain_file"):
+    for name in ("motion_file", "asset_path", "resume", "output_dir", "terrain_file", "task_profile"):
         value = getattr(args, name)
         if value is not None:
             setattr(args, name, value.resolve())

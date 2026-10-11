@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 1.0, "grounded": 0.4, "tilt": -0.2},
+  "description": "Captured car steering-induced drift; fixed low-grip nominal surface, identical wheel/ground friction in both engines."
+}
