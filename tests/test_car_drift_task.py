@@ -580,3 +580,151 @@ def test_overridden_damping_contract_roundtrips_and_controls_mujoco_pd(tmp_path)
     assert deployed == contract
     torque = action_torques(np.zeros(8), np.zeros(8), np.r_[np.full(6, .5), np.zeros(2)], np.zeros(8), deployed)
     np.testing.assert_allclose(torque, np.r_[np.full(6, -15.), np.zeros(2)])
+
+
+@pytest.mark.parametrize("invalid", [
+    99.999, 500.001, 0., -1., True, False, None, "250", [250.],
+    np.nan, np.inf, -np.inf, 10 ** 500,
+])
+def test_optional_leg_stiffness_rejects_invalid_nonfinite_and_out_of_bounds_values(invalid):
+    with pytest.raises(ValueError, match="leg_kp"):
+        drift.validate_task_profile({**task_profile(), "leg_kp": invalid})
+
+
+@pytest.mark.parametrize("value", [100, 250, 500, 100., 250., 500.])
+def test_optional_leg_stiffness_accepts_exact_declared_range_without_mutation(value):
+    profile = {**task_profile(), "leg_kp": value}
+    before = copy.deepcopy(profile)
+    validated = drift.validate_task_profile(profile)
+    assert profile == before and validated == before and validated is not profile
+
+
+def test_explicit_stiffness_changes_only_leg_stiffness_relative_to_same_factory_profile(configuration_inputs):
+    profile = drift.load_task_profile(ROOT / "config/car_drift_contact_task.json")
+    assert "leg_kp" not in profile and "wheel_vertical_velocity_sampling" not in profile
+    factory = extract_configuration_factory()
+    baseline = factory(*configuration_inputs, num_envs=4, task_profile=profile)
+    declared = {**profile, "leg_kp": 250.}
+    actual = factory(*configuration_inputs, num_envs=4, task_profile=declared)
+    assert baseline.scene.robot.actuators["legs"].stiffness == 500.
+    assert actual.scene.robot.actuators["legs"].stiffness == 250.
+    # Replace only this declared difference, then compare full offline config.
+    actual.scene.robot.actuators["legs"].stiffness = 500.
+    assert actual == baseline
+    assert baseline.scene.robot.actuators["legs"].damping == 10.
+    assert baseline.scene.robot.actuators["wheels"].stiffness == 0.
+    assert baseline.scene.robot.actuators["wheels"].damping == 0.
+    assert baseline.sim.dt == .005 and baseline.decimation == 4
+
+
+def test_unspecified_stiffness_does_not_assign_existing_actuator_stiffness(configuration_inputs):
+    cfg = extract_configuration_factory()(*configuration_inputs, num_envs=4)
+    existing = {"abad_L_Joint": 321., "abad_R_Joint": 432.}
+    cfg.scene.robot.actuators["legs"].stiffness = existing
+    drift.configure_drift(cfg, task_profile())
+    assert cfg.scene.robot.actuators["legs"].stiffness is existing
+    assert existing == {"abad_L_Joint": 321., "abad_R_Joint": 432.}
+
+
+def test_shared_stiffness_contract_override_changes_only_leg_kp_and_profile():
+    original = read_contract()
+    profile = {**task_profile(), "leg_kp": 250.}
+    original_before, profile_before = copy.deepcopy(original), copy.deepcopy(profile)
+    result = drift.apply_task_profile_to_contract(original, profile)
+    assert result["leg_kp"] == 250. and result["leg_kd"] == 10.
+    assert result["task_profile"] == profile
+    assert {key: value for key, value in result.items() if key not in ("leg_kp", "task_profile")} == {
+        key: value for key, value in original.items() if key != "leg_kp"}
+    assert original == original_before and profile == profile_before
+    result["task_profile"]["reward_weights"]["speed"] = 8.
+    assert original == original_before and profile == profile_before
+
+
+def test_unspecified_stiffness_keeps_existing_contract_value_without_adding_profile_default():
+    original = {**read_contract(), "leg_kp": 321.}
+    profile = task_profile()
+    result = drift.apply_task_profile_to_contract(original, profile)
+    assert result["leg_kp"] == 321. and "leg_kp" not in result["task_profile"]
+    assert {key: value for key, value in result.items() if key != "task_profile"} == original
+
+
+def test_stiffness_contract_roundtrips_and_mujoco_pd_uses_declared_kp_without_clock_or_wheel_changes(tmp_path):
+    from eval_tracking_mujoco import action_torques
+    profile = {**task_profile(), "leg_kp": 250.}
+    contract = drift.apply_task_profile_to_contract(read_contract(), profile)
+    path = tmp_path / "policy_contract.json"
+    path.write_text(json.dumps(contract))
+    deployed = read_contract(path)
+    assert deployed == contract
+    actions = np.r_[np.full(6, .02), [.1, -.1]]
+    torque = action_torques(actions, np.zeros(8), np.zeros(8), np.zeros(8), deployed)
+    np.testing.assert_allclose(torque, np.r_[np.full(6, 5.), [1.2, -1.2]])
+    assert deployed["physics_dt"] == .005 and deployed["decimation"] == 4
+    assert deployed["leg_torque_limit_nm"] == 80. and deployed["wheel_torque_limit_nm"] == 12.
+    assert deployed["actor_dim"] == 51 and deployed["action_dim"] == 8
+
+
+@pytest.fixture
+def material_audit_environment(monkeypatch):
+    """Existing native material/actuator readback API stubs; no Isaac app."""
+    class Tensor:
+        def __init__(self, values):
+            self.values = np.asarray(values, float)
+        def detach(self):
+            return self
+        def cpu(self):
+            return self
+        def numpy(self):
+            return self.values
+
+    ground = NS(GetPath=lambda: "/World/ground/terrain/GroundPlane/CollisionPlane",
+                HasAPI=lambda api: True)
+    material = NS(GetPath=lambda: "/World/ground/physicsMaterial", GetPrim=lambda: object())
+    material_api = NS(GetStaticFrictionAttr=lambda: NS(Get=lambda: .15),
+                      GetDynamicFrictionAttr=lambda: NS(Get=lambda: .15))
+    pxr = types.ModuleType("pxr")
+    pxr.UsdPhysics = NS(CollisionAPI=object(), MaterialAPI=lambda prim: material_api)
+    pxr.UsdShade = NS(MaterialBindingAPI=lambda prim: NS(ComputeBoundMaterial=lambda purpose: (material, None)))
+    monkeypatch.setitem(sys.modules, "pxr", pxr)
+    omni = types.ModuleType("omni")
+    usd = types.ModuleType("omni.usd")
+    usd.get_context = lambda: NS(get_stage=lambda: NS(Traverse=lambda: [ground]))
+    omni.usd = usd
+    monkeypatch.setitem(sys.modules, "omni", omni)
+    monkeypatch.setitem(sys.modules, "omni.usd", usd)
+    class Scene(dict):
+        sensors = {}
+
+    def create(kp, kd=10.):
+        materials = Tensor(np.array([[[.15, .15, 0.]]]))
+        legs = NS(stiffness=Tensor(np.full((1, 6), kp)), damping=Tensor(np.full((1, 6), kd)))
+        robot = NS(root_physx_view=NS(get_material_properties=lambda: materials), actuators={"legs": legs})
+        return NS(scene=Scene(robot=robot))
+
+    return create
+
+
+@pytest.mark.parametrize("profile_kp,actual_kp", [(None, 500.), (250., 250.), (100., 100.), (500., 500.)])
+def test_gain_readback_audit_accepts_only_declared_stiffness_or_historical_default(material_audit_environment, profile_kp, actual_kp):
+    profile = task_profile()
+    if profile_kp is not None:
+        profile["leg_kp"] = profile_kp
+    before = copy.deepcopy(profile)
+    audit = drift.audit_isaac_materials(material_audit_environment(actual_kp), profile)
+    assert audit["leg_pd_gain_readback"] == {"kp_range": [actual_kp, actual_kp], "kd_range": [10., 10.]}
+    assert profile == before
+    assert audit["robot_runtime_friction_range"] == [.15, .15]
+
+
+@pytest.mark.parametrize("profile_kp,actual_kp", [(250., 500.), (None, 250.), (500., 250.)])
+def test_gain_readback_rejects_stale_kp_before_learning(material_audit_environment, profile_kp, actual_kp):
+    profile = task_profile()
+    if profile_kp is not None:
+        profile["leg_kp"] = profile_kp
+    with pytest.raises(RuntimeError, match="Runtime leg PD gains"):
+        drift.audit_isaac_materials(material_audit_environment(actual_kp), profile)
+
+
+def test_stiffness_readback_change_does_not_weaken_existing_damping_audit(material_audit_environment):
+    with pytest.raises(RuntimeError, match="Runtime leg PD gains"):
+        drift.audit_isaac_materials(material_audit_environment(250., kd=30.), {**task_profile(), "leg_kp": 250.})

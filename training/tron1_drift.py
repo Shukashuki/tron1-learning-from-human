@@ -21,12 +21,13 @@ def validate_task_profile(profile):
             raise ValueError(f"Invalid drift reward {key}")
         if (key == "tilt" and value > 0) or (key != "tilt" and value < 0):
             raise ValueError(f"Invalid drift reward sign: {key}")
-    for key, low, high in (("speed_std_m_s", .03, 1.), ("action_rate_weight", -2., 0.), ("leg_kd", 5., 50.),
+    for key, low, high in (("speed_std_m_s", .03, 1.), ("action_rate_weight", -2., 0.),
+                           ("leg_kp", 100., 500.), ("leg_kd", 5., 50.),
                            ("leg_target_rate_weight", -5., 0.), ("wheel_vertical_velocity_weight", -5., 0.),
                            ("wheel_vertical_velocity_std_m_s", .005, .1)):
         if key in out:
             value = out[key]
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not low <= value <= high:
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not low <= value <= high or not math.isfinite(value):
                 raise ValueError(f"Invalid drift task {key}")
     if "wheel_vertical_velocity_weight" in out and "wheel_vertical_velocity_std_m_s" not in out:
         raise ValueError("Wheel vertical-velocity weight requires an explicit wheel_vertical_velocity_std_m_s")
@@ -53,6 +54,8 @@ def load_task_profile(path):
 def apply_task_profile_to_contract(contract, profile):
     out = copy.deepcopy(contract)
     out["task_profile"] = validate_task_profile(profile)
+    if "leg_kp" in out["task_profile"]:
+        out["leg_kp"] = out["task_profile"]["leg_kp"]
     if "leg_kd" in out["task_profile"]:
         out["leg_kd"] = out["task_profile"]["leg_kd"]
     return out
@@ -152,6 +155,8 @@ def configure_drift(cfg, profile, eval_mode=False):
     from isaaclab.managers import RewardTermCfg
     mu = profile["contact_friction"]
     cfg.scene.env_spacing = profile["env_spacing_m"]
+    if "leg_kp" in profile:
+        cfg.scene.robot.actuators["legs"].stiffness = profile["leg_kp"]
     if "leg_kd" in profile:
         cfg.scene.robot.actuators["legs"].damping = profile["leg_kd"]
     cfg.scene.terrain.physics_material.static_friction = mu
@@ -203,7 +208,7 @@ def audit_isaac_materials(env, profile):
         raise RuntimeError("Runtime robot friction differs from the declared drift contract")
     legs = env.scene["robot"].actuators["legs"]
     kp, kd = legs.stiffness.detach().cpu().numpy(), legs.damping.detach().cpu().numpy()
-    if not np.allclose(kp, 500.) or not np.allclose(kd, profile.get("leg_kd", 10.)):
+    if not np.allclose(kp, profile.get("leg_kp", 500.)) or not np.allclose(kd, profile.get("leg_kd", 10.)):
         raise RuntimeError("Runtime leg PD gains differ from the declared drift contract")
     stage = omni.usd.get_context().get_stage()
     ground = []

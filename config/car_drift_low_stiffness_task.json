@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kp": 250.0,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "description": "Trial006 stiffness-only experiment relative to trial004, resuming trial004's fixed final checkpoint rather than the failed trial005 actor. Change common leg Kp from 500 to 250 in both engines, retaining Kd10 and trial004's default last-substep reward sampling. The archived free controlled mode near 6 Hz overlaps observed wheel bounce; this association motivates a test, not a proven cause. Reference, all rewards, motor randomization, torque limits, friction, contact parameters, clocks and behavior gates remain unchanged. Runtime gain readback must verify 250/10 before learning. Predesignate the final checkpoint after 600 updates; retain failure and tracking-height tradeoffs. No contact-parameter equivalence, hardware readiness or statistical robustness claim."
+}
