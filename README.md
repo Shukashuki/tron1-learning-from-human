@@ -68,4 +68,6 @@ Four of six tasks pass the predefined gates in both engines, with the turning-ju
 
 [Video gallery](results/2026-10-03-motion-pipeline-suite/index.html) · [Metrics and assessments](results/2026-10-03-motion-suite/summary.json) · [Detailed experiment log and reproduction instructions](EXPERIMENT_LOG.md)
 
+Next motion source: [captured car drift preview](results/2026-10-11-car-drift-source/source_preview.mp4). Three public DOA/CARLA expert demonstrations were captured and screened for active steering and sideslip. The selected clip peaks at 13.91° sideslip. Its clock is reconstructed because the source CSV has no timestamps; TRON1 retargeting and drift-policy training are pending. [Source audit](results/2026-10-11-car-drift-source/source_audit.json) · [Pinned source configuration](config/drift_sources.json) · [DOA license](notices/DOA-LICENSE.txt).
+
 Credits: [CMU data sources and acknowledgment](config/mocap_sources.json), [pinned GMR adapter](config/gmr_retarget_wf.json), [BeyondMimic license](notices/BeyondMimic-LICENCE.txt), and [LimX TRON1 model license](notices/LimX-TRON1-LICENSE.txt). Third-party code, models, and data retain their original terms; raw mocap, robot assets, and checkpoints are not redistributed here.

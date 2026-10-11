@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/ustcly/DOA",
+  "commit": "05ea8d643ea60b4649a59e2988cd1ae21719f9f4",
+  "origin": "CARLA 0.9.14 expert driving demonstrations, not physical-car mocap",
+  "selected_for_first_reference": "sa_traj34",
+  "selection_reason": "Moderate measured sideslip; flat scenario; source onset and exit retained. Selection is source screening, not policy/checkpoint selection.",
+  "files": [
+    {"id": "sa_traj18", "path": "expert_traj/Sa_param5/0928213233param5_traj18_success.csv", "sha256": "0208fc4a6a52aa3ddc10dbc07bbd47ce774f12b20e2fda6a20e3240d503f581d"},
+    {"id": "sa_traj29", "path": "expert_traj/Sa_param5/0928213415param5_traj29_success.csv", "sha256": "3bb52933d7073b20b722b3b449a2e1a04671d95337a64d471ccf9be70371ce1f"},
+    {"id": "sa_traj34", "path": "expert_traj/Sa_param5/0928213455param5_traj34_success.csv", "sha256": "ab68330e71fb044af6334fbac79a72c0157c88226e79d21cb1ef46d84c948920"},
+    {"id": "recorder", "path": "code/carla_record/manual_control_steeringwheel.py", "sha256": "3a7c3af35a7d0bbf3ef0455483de6b0cb2b62b2df43b17f9d8bd480df0534fba"},
+    {"id": "parameters", "path": "expert_traj/experiments_parameters.py", "sha256": "fa7a4cc53bf8fb9c808f60c1565d4db87e1124999050fec8aaeb44ae4a81b2e2"},
+    {"id": "license", "path": "LICENSE", "sha256": "8839ece5ab8d114f9fdf9c69c63c6c609be328053d69df60fc73acb9b275a167"}
+  ],
+  "coordinate_conversion": "CARLA left-handed Z-up -> right-handed Z-up: y and vy negated; yaw, yaw-rate and sideslip signs negated; degrees converted to radians.",
+  "clock": "CSV has no timestamps/frame IDs. Recorder is asynchronous with fixed physics step 0.005s and client loop capped at 120Hz. Reconstruct approximate time from position increments and average velocity; preserve duplicate rows, never assume exact uniform sampling.",
+  "validation_extension": "Keep same-actor sim2sim, tracking and stable-exit checks. Add moving-grounded sideslip duration and actual wheel-ground lateral contact-slip evidence. Do not reuse jump-flight gates.",
+  "limitations": [
+    "Scenario a starts already moving near 120km/h; no expert acceleration from standstill.",
+    "Captured samples show active steering with no throttle/hand-brake input; inertia drift, not power drift.",
+    "The source filename success flag does not establish absolute sideslip/yaw-rate recovery.",
+    "Vehicle controls are source evidence, not TRON1 wheel-torque targets.",
+    "Car pose and reconstructed clock require explicit spatial/time adaptation before robot retargeting.",
+    "This source capture does not create a robot policy or prove physical feasibility."
+  ]
+}

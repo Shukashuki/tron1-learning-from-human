@@ -2,6 +2,32 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
+## Car drift demonstration capture (2026-10-11)
+
+We captured three flat-ground expert demonstrations from [DOA](https://github.com/ustcly/DOA/tree/05ea8d643ea60b4649a59e2988cd1ae21719f9f4/expert_traj), a CARLA 0.9.14 simulated-car source. The source commit, CSV hashes, recorder and scenario settings are pinned in [config/drift_sources.json](config/drift_sources.json). Raw samples, including duplicated observations, are kept in private `outputs/`; the public snapshot contains derived previews and an audit.
+
+[![Captured steering-induced drift](results/2026-10-11-car-drift-source/overview.png)](results/2026-10-11-car-drift-source/source_preview.mp4)
+
+| Source clip | Peak absolute sideslip | Duplicate pose intervals | Estimated duration |
+|---|---:|---:|---:|
+| Scenario a, trajectory 18 | 20.63° | 57 / 320 | 1.596 s |
+| Scenario a, trajectory 29 | 28.53° | 58 / 316 | 1.576 s |
+| Scenario a, trajectory 34 (first candidate) | 13.91° | 64 / 375 | 1.870 s |
+
+These samples show active steering at nonzero speed, no throttle or hand-brake input, and negligible service-brake input: steering-induced inertia drift. They start already moving near 120 km/h. The recorder uses asynchronous simulation and omits timestamps/frame IDs; the 0.005 s physics step does not establish a uniform CSV sampling rate. We reconstruct an approximate clock using `dt = dot(delta_xy, average_velocity_xy) / ||average_velocity_xy||²`, with duplicate poses assigned zero increment. It is not measured time. CARLA's left-handed coordinates are reflected into right-handed coordinates and degree-valued angles converted to radians; sideslip is recomputed from velocity and heading. Logged yaw rate and the source filename's success label do not certify a stable exit.
+
+The selected clip's last estimated 0.25 s has median absolute sideslip 0.33° and pose-derived yaw rate 7.30°/s. The final logged yaw rate is still 30.57°/s, highlighting the asynchronous telemetry limitation. This capture produces no robot reference or policy. Retargeting must explicitly disclose spatial/time adaptation and preserve the source sideslip profile; source steering/brake commands are not robot torque targets.
+
+The existing same-actor sim2sim provenance, path/yaw tracking and stable-exit checks can be reused. Drift evaluation must additionally record speed, sideslip duration while grounded, and actual lateral wheel-ground contact slip. Jump flight gates must be replaced. Four-panel demonstrations will compare captured car motion, TRON1 kinematics, Isaac policy and MuJoCo policy. Until robot rollouts exist, this snapshot displays only the captured car source.
+
+Reproduce the source capture without installing CARLA:
+
+```bash
+python scripts/capture_car_drift.py --output-dir outputs/my-car-drift-capture
+```
+
+[Capture audit](results/2026-10-11-car-drift-source/source_audit.json) · [Upstream license](notices/DOA-LICENSE.txt). The preview is a schematic replay of captured states with an estimated clock, with zero new physics steps.
+
 ## 最新結果：六動作實測（2026-10-03）
 
 六項都完成 **600 次 PPO 更新、2,048 個環境，以及同一 actor 的 Isaac／MuJoCo 評估**。
