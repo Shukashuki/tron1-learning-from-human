@@ -43,6 +43,9 @@ def validate_task_profile(profile):
                 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value)
                 or not .01 <= value[0] <= .05 or not 1. <= value[1] <= 2.):
             raise ValueError("Invalid explicit MuJoCo contact time constant/damping ratio")
+    if "wheel_ground_load_reserve" in out:
+        from training.tron1_ground_load_reserve import validate_load_reserve_settings
+        out["wheel_ground_load_reserve"] = validate_load_reserve_settings(out["wheel_ground_load_reserve"])
     json.dumps(out, allow_nan=False)
     return out
 
@@ -189,6 +192,16 @@ def configure_drift(cfg, profile, eval_mode=False):
             params = {"std_m_s": profile["wheel_vertical_velocity_std_m_s"]}
         cfg.rewards.drift_wheel_vertical_velocity = RewardTermCfg(
             func=func, weight=profile["wheel_vertical_velocity_weight"], params=params)
+    if "wheel_ground_load_reserve" in profile:
+        from training.tron1_ground_load_reserve import (
+            configure_training_ground_force_sensors, wheel_ground_load_reserve_penalty,
+        )
+        settings = profile["wheel_ground_load_reserve"]
+        cfg.rewards.drift_wheel_ground_load_reserve = RewardTermCfg(
+            func=wheel_ground_load_reserve_penalty, weight=settings["weight"],
+            params={"scale_fraction": settings["scale_fraction"]})
+        if not eval_mode:
+            configure_training_ground_force_sensors(cfg.scene)
     if eval_mode:
         from training.tron1_contact_slip import configure_wheel_ground_sensors, configure_nonwheel_ground_sensors
         from training.tron1_tracking import NON_WHEEL_BODY_NAMES
@@ -229,9 +242,13 @@ def audit_isaac_materials(env, profile):
     for name, sensor in env.scene.sensors.items():
         if (name in ("wheel_L_ground", "wheel_R_ground") or name.startswith("nonwheel_ground_")) and not set(sensor.cfg.filter_prim_paths_expr) <= ground_paths:
             raise RuntimeError(f"Contact filter does not resolve to an audited ground collider: {name}")
-    return {"expected_friction": mu, "robot_runtime_friction_range": [float(materials[..., :2].min()), float(materials[..., :2].max())],
-            "leg_pd_gain_readback": {"kp_range": [float(kp.min()), float(kp.max())], "kd_range": [float(kd.min()), float(kd.max())]},
-            "ground_colliders": ground, "ground_audit": "USD-bound material; robot materials additionally read back from live PhysX"}
+    audit = {"expected_friction": mu, "robot_runtime_friction_range": [float(materials[..., :2].min()), float(materials[..., :2].max())],
+             "leg_pd_gain_readback": {"kp_range": [float(kp.min()), float(kp.max())], "kd_range": [float(kd.min()), float(kd.max())]},
+             "ground_colliders": ground, "ground_audit": "USD-bound material; robot materials additionally read back from live PhysX"}
+    if "wheel_ground_load_reserve" in profile:
+        from training.tron1_ground_load_reserve import initialize_ground_load_reserve
+        audit["ground_load_reserve"] = initialize_ground_load_reserve(env, profile["wheel_ground_load_reserve"])
+    return audit
 
 
 def configure_mujoco_materials(model, profile):

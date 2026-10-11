@@ -180,6 +180,9 @@ def main():
         if reward_accumulator is not None:
             manifest["source_sha256"]["training/tron1_substep_rewards.py"] = sha256(ROOT / "training/tron1_substep_rewards.py")
             manifest["reward_sampling_audit"] = reward_accumulator.audit()
+        if task_profile is not None and "wheel_ground_load_reserve" in task_profile:
+            manifest["source_sha256"]["training/tron1_ground_load_reserve.py"] = sha256(
+                ROOT / "training/tron1_ground_load_reserve.py")
         if runtime_device_audit is not None:
             manifest["runtime_device_audit"] = runtime_device_audit
             manifest["source_sha256"]["training/tron1_runtime_device.py"] = sha256(ROOT / "training/tron1_runtime_device.py")

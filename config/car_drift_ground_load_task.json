@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "description": "Trial010 adds only a smooth ground-normal wheel-load reserve penalty to original trial004, resuming its fixed final checkpoint. Sum exp(-max(F_ground_world_z,0)/(0.20*live_robot_weight)) over two separately ground-filtered wheels, reward weight -1. The force scale is not a minimum-load threshold. Sample the last actual5ms substep at the unchanged50Hz reward clock; no all-substep objective or observation change. Retain original500/10PD, old rewards, last-substep wheel-vz sampling, motor randomization, reference, friction, explicit MuJoCo contact response, clocks and every acceptance gate. Verify live mass/gravity and filtered normal-force GPU telemetry before learning. No forced50:50load, contact equivalence, hardware or statistical robustness claim."
+}

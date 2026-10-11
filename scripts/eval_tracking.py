@@ -735,6 +735,8 @@ def main():
         if reward_accumulator is not None:
             report.update({"reward_sampling_audit": reward_accumulator.audit(),
                            "substep_reward_module_sha256": sha256(ROOT / "training/tron1_substep_rewards.py")})
+        if task_profile is not None and "wheel_ground_load_reserve" in task_profile:
+            report["ground_load_reserve_module_sha256"] = sha256(ROOT / "training/tron1_ground_load_reserve.py")
         if args.physics_dt_s is not None:
             report.update({"physics_clock_refinement": contract["physics_clock_refinement"],
                            "physics_clock_readback": clock_readback})
