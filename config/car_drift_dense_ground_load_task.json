@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_mean_cost",
+  "description": "Trial016 changes only ground-load-reserve quadrature relative to completed LR-synchronized trial013: mean of the four instantaneous exp(-max(F_ground_world_z,0)/(0.20*live_robot_weight)) costs, summed over two filtered wheels; not exp of mean force. Hold weight -1, last-substep wheel-vz, sideslip weight2, original500/10PD, original004 parent,600updates/2048envs/seed42, motor randomization, reference, friction, clocks and all behavior gates. The new opt-in handler reuses frozen native-window checks and also collects the inherited wheel-vz statistic without consuming it as a reward. No new teacher, physical step, actor call, observation, reset hook, contact-law fit or required50:50load split. Fresh GPU sampling, reset and performance checks precede learning. This soft reward does not certify uninterrupted bearing contact, force-model equivalence, hardware safety or statistical robustness."
+}

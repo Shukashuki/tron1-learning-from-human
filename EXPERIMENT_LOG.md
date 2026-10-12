@@ -182,6 +182,14 @@ Relative to primary trial014, first-pulse sideslip qualification begins 70 ms ea
 
 All 15 deployment-provenance checks pass: all 12 exported actor/normalizer tensors match the final checkpoint, and all 288 applied actions per engine replay on CPU with maximum errors of 2.943e-7 within the existing 1e-5 bound. Both engines use actor `7b9ecd3860e66a821680e4ceb3ad1808dc3b90297cc490d9ba0d8d02599f2d65`. Independent root live observations catch training and evaluation; the short fixture's independent observer arrives after exit, so its live observation is missing. Owned processes exit and their GPU contexts are released; physical GPU isolation, native app-close return and hardware readiness are not claimed. Recorded-only rendering fully decodes all 145 frames and preserves the failed outcome, historical results and initial jump. [Four-panel video](results/2026-10-12-car-drift/trial015/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial015/assessment.json) · [LR, sampling and sideslip context](results/2026-10-12-car-drift/trial015/summary.json).
 
+### Trial016 prospective test: physics-rate ground-load cost quadrature
+
+The [trial016 protocol](config/car_drift_dense_ground_load_trial.json) compares against completed trial013, not trial015. It holds reserve weight −1 and scale 0.20, implicit last-substep wheel-link vertical-velocity sampling, sideslip weight 2 and initial LR synchronization fixed, again resuming original trial004 for 600 updates with 2,048 environments and seed42. Only reserve quadrature changes: average the four instantaneous exponential costs at the actual 5 ms physics clock, rather than evaluating only the final sample. Averaging forces before applying the exponential would be a different objective and is not used.
+
+Separate opt-in trainer/evaluator/helper files preserve every historical source. The handler reuses the frozen single-owner native-window lifecycle; its inherited velocity statistic is collected but never consumed as a reward. The original mass/gravity cache, force filters, sensor capacity, controller, reference, motors, observations and all behavior gates remain held. Fresh 8-environment raw-contact/cost/reset/cleanup evidence and a bounded 2,048-environment runtime check are required before learning. Extra sensor reads can synchronize the host and have nonzero overhead; a soft load cost is not a continuous-bearing constraint. This prospective entry has no trial016 training or behavior outcome. The initial jump and all previous results remain preserved.
+
+Trial016 requires the explicit [dense-load trainer](scripts/train_tracking_dense_ground_load.py) and [dense-load Isaac evaluator](scripts/eval_tracking_dense_ground_load.py); its profile must not be passed to a historical generic trainer as if that enabled dense sampling.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
