@@ -214,6 +214,8 @@ The [next single-factor protocol](config/car_drift_wheel_axle_trial.json) adds o
 
 Actual Torch CPU invariance tests and strict profile/contract/entrypoint tests pass. Actual Isaac/GPU reward-ledger, reset and performance fixtures are still required before learning; no trial017 application, training or behavior outcome exists at this snapshot. The reward may suppress useful camber or sideslip and does not guarantee continuous support. Trial016's failure remains unchanged.
 
+The separately pinned [runtime fixture](scripts/smoke_wheel_axle_tracking.py) records the actual last-substep axle target and state before the command advances or resets, and compares the untouched axle term with independent quaternion arithmetic. The installed manager stores a weighted per-second reward; integration applies the 0.02 s policy period exactly once. It also records the resolved original reward ledger, native window baselines and both sides of the explicit reset. Its 49 synthetic tests and the extended CPU regression (554 tests, 107 subtests, plus 14 actual Torch CPU tests) pass. These are source/arithmetic checks, not a GPU fixture or trained behavior result; independently sealed actual 8/2,048-environment applications remain required.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash

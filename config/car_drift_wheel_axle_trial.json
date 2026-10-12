@@ -17,6 +17,7 @@
   "baseline_task_profile_sha256": "989215d55b548e245d6add928411d9e6fa16852a21f6863a777179014e3230b5",
   "training_entrypoint": "scripts/train_tracking_wheel_axle.py",
   "evaluation_entrypoint": "scripts/eval_tracking_wheel_axle.py",
+  "runtime_fixture_entrypoint": "scripts/smoke_wheel_axle_tracking.py",
   "scientific_change": "Relative to completed016, add only one explicit both-wheel local+Y axle-direction reward at LAST/50Hz. Retain the SAME robot reference, original seven-link full orientation objective and all other016 terms. Original004 remains the resume parent; do not select an intermediate actor or resume learned016.",
   "motivation": "Saved states show persistent ~12-degree left camber against the approximately horizontal reference, with left-biased loading in both engines. This is descriptive, not causal. Knee orientation already carries the same axle information. The additional term isolates/increases that posture cue's priority; it is not a new car-wheel teacher, wheel-spin target, contact constraint or new degree of freedom.",
   "hypothesis": "Additional directed axle tracking may reduce sustained asymmetric posture while preserving captured signed sideslip, tracking and stopping, and thereby improve uninterrupted actual-bearing drift. Outcome unknown. Right-wheel gaps can occur already near reference camber; reduced axle error without improved support would count against this hypothesis.",
@@ -126,7 +127,9 @@
     "tests/test_tron1_wheel_axle_tracking.py": "f1e8ee6bc6c8a1914565b0ac50aa647146c104fd79af9d693ff17e5fd3357fac",
     "tests/test_wheel_axle_trial.py": "f00fd99ef17a7b1a3ada824a852c3efbe747c43282a651b9153e6c190123268e",
     "tests/test_wheel_axle_entrypoints.py": "8498abcb9406983b35b98b101357ed766454c660ce3bb1783d1b0a34a4bc5cbc",
-    "config/car_drift_wheel_axle_task.json": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78"
+    "config/car_drift_wheel_axle_task.json": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78",
+    "scripts/smoke_wheel_axle_tracking.py": "8ba91d74a5af5eded0c3cdc81e7dc9318459b0b2a5111f55edf6ff9a0457b561",
+    "tests/test_smoke_wheel_axle_tracking.py": "daa01174c0e00a14bae67570534c663f5aa0105b27bd5c6d04940aa9233a80ca"
   },
   "unchanged": {
     "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
@@ -205,11 +208,14 @@
     "new_pytest_subtests_passed": 32,
     "combined_cpu_regression_tests_passed": 341,
     "combined_cpu_regression_subtests_passed": 107,
+    "new_runtime_fixture_synthetic_tests_passed": 49,
+    "extended_cpu_regression_tests_passed": 554,
+    "extended_cpu_regression_subtests_passed": 107,
     "runtime_gpu_verified": false,
     "fixture_launched": false,
     "training_launched": false,
     "paired_policy_evaluation_available": false,
     "goal_achieved": false,
-    "note": "These are arithmetic/schema/CLI-source checks, not a trained-policy or contact-success result. Runtime fixture/launcher/verifier/publication sources are not yet implemented/sealed in this snapshot."
+    "note": "These are arithmetic/schema/CLI-source checks, not a trained-policy or contact-success result. The current-source fixture is byte-pinned here; actual fixture/launcher/verifier/archive identity must additionally be externally sealed before every application. No trial017 runtime application exists at this snapshot; publication of a completed policy still requires a new reviewed producer."
   }
 }
