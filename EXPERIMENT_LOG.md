@@ -140,6 +140,16 @@ The [trial013 protocol](config/car_drift_lr_sync_ground_load_trial.json) resumes
 
 The soft penalty is `sum(exp(-max(Fz,0)/(0.20 mg)))`, with weight −1 and last-substep reward sampling. It may reduce wheel unloading, but can also suppress drift or favor larger contact forces; the scale is not a minimum-load constraint. Trial012 is the primary fixed-budget comparison, while trial004/010 are descriptive only. Only the completed final checkpoint receives one nominal episode per engine and the same four-panel evidence/provenance checks. No trial013 training or outcome is available at this prospective snapshot; all previous results and the initial jump remain preserved.
 
+### Trial013 outcome: LR-synchronized load reserve (2026-10-12)
+
+The predeclared run completes 600 updates with 2,048 environments and seed42 in 879.15 s, adding 29,491,200 environment steps. CPU verification confirms all 25 model and 51 optimizer tensors are finite and the Adam/normalizer counters match the budget. Initial LR synchronization remains fixed relative to trial012; adaptive scheduling continues. The final checkpoint is `b445e44d00ed9de28facc6b079942a0b1d648322d3fc42446d5d15f25462f3ba`.
+
+**Sim2sim FAILS: MuJoCo's continuous-grounded-drift check is the only failed behavior gate.** Both engines complete 5.76 s with 1,153 actual 200 Hz states. Isaac sustains 0.490 s; MuJoCo reaches 0.170 s against the unchanged 0.200 s requirement. Root-reference RMSE is 0.04013 / 0.04460 m, final root error is 0.01534 / 0.03697 m, and tail maximum speed is 0.04942 / 0.03405 m/s. Tracking, stopping, support, completion and nonwheel-impact gates otherwise pass; near-rest sideslip remains undefined, not measured as zero.
+
+The fixed-window comparison with trial012 shows only a 5 ms increase in MuJoCo's longest drift, while total qualifying drift falls from 0.675 / 0.795 s to 0.495 / 0.645 s. Recorded wheel-support gaps remain; no gap bridging, phase alignment, force-law fitting or threshold relaxation is used. Archived normal-force vectors are not an independent reconstruction of the training sensor's last-substep force matrix or cached gravity load. This single-seed result does not establish a causal reward effect or statistical robustness, and the final actor is not adopted as a successful transfer.
+
+All 15 deployment-provenance checks pass: all 12 actor/normalizer tensors match the actual final checkpoint, and all 288 applied actions per engine replay on CPU with maximum errors of 2.980e-7 / 3.166e-7. Both engines use actor `b13eca03352624365bd6d3379441ec4cc18c341f40bc2faa48e6c1af9ae30c9d`. Training and evaluation processes exit and their owned GPU contexts are released; physical GPU isolation and hardware readiness are not claimed. The four-panel presentation replays recorded evidence without new physics, preserving failures, all historical trials and the initial jump. [Four-panel video](results/2026-10-12-car-drift/trial013/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial013/assessment.json) · [LR and reserve context](results/2026-10-12-car-drift/trial013/summary.json).
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
