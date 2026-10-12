@@ -164,6 +164,14 @@ The current-source fixture passes all 16 windows and 64 native substeps, includi
 
 All 15 deployment-provenance checks pass: all 12 exported actor/normalizer tensors match the final checkpoint, and all 288 applied actions per engine replay on CPU within the existing 1e-5 bound (maximum errors 2.235e-7 / 3.465e-7). Both engines use actor `a770cff5fc0dbbfcde45112baa5ed4406c3e9d2344c1944e2cb73fecb2a1a699`. Owned processes exit and their GPU contexts are released. Independent root live observation is missing for the short fixture and late evaluation observer; the fixture retains its source-backed pre-close audit and evaluation retains 25 continuously flushed placement snapshots. Physical GPU isolation, native app-close return and hardware readiness are not claimed. Recorded-only four-panel rendering fully decodes all 145 frames and preserves failure labels, all historical results and the initial jump. [Four-panel video](results/2026-10-12-car-drift/trial014/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial014/assessment.json) · [LR and sampling context](results/2026-10-12-car-drift/trial014/summary.json).
 
+### Trial015 prospective test: stronger signed sideslip tracking
+
+The [trial015 protocol](config/car_drift_lr_sync_sideslip_trial.json) uses completed trial014 as the primary comparison and again resumes original trial004 for 600 updates, 2,048 environments and seed42. Its only scientific change is sideslip reward weight 2 to 4. The new description is metadata-only; initial LR synchronization, all-four squared wheel-link vertical-velocity sampling, controller, reference, motor randomization, physics and every original behavior gate remain unchanged. No wheel teacher or load-reserve objective is added.
+
+Trial014's first MuJoCo pulse has both bearing contacts and sufficient patch slip from 0.905 to 1.125 s, but sideslip crosses 8 degrees only at 0.965 s. Stronger signed-reference tracking may improve timing, but may also increase unloading or hurt tracking and stopping. The original wrapped error, 0.12 rad scale and strict speed masks remain unchanged; the fully stationary tail receives no sideslip reward. The existing full-quaternion reward frame and horizontal-yaw assessor convention are not changed.
+
+Activation requires strict profile/configuration tests and a new small current-profile GPU fixture, including read-only actual sideslip weight/function/parameter checks and the unchanged native sampling/reset tests. Its active-term ledger is fixture configuration evidence, not independent full-training live telemetry. Only the completed final checkpoint receives one nominal 200 Hz episode per engine, full actor provenance and the original four-panel presentation. No trial015 training or outcome is available at this prospective snapshot; all historical results and the initial jump remain preserved.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
