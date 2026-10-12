@@ -190,6 +190,8 @@ Separate opt-in trainer/evaluator/helper files preserve every historical source.
 
 Trial016 requires the explicit [dense-load trainer](scripts/train_tracking_dense_ground_load.py) and [dense-load Isaac evaluator](scripts/eval_tracking_dense_ground_load.py); its profile must not be passed to a historical generic trainer as if that enabled dense sampling.
 
+Prerequisite status (2026-10-12): the sealed 8-environment fixture completed all 16 control windows and 64 native physical samples on an explicitly selected idle GPU. Independent CPU replay verified the mean of instantaneous costs (maximum absolute error 1.19e-7) and raw normal-point force sums against the sensor matrices (maximum difference 2.08e-5 N), including reset and owned-process exit checks. These are implementation checks, not drift success. The 2,048-environment fixture, training and paired policy evaluation remain pending; no reference or acceptance gate has changed.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
