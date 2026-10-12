@@ -1,0 +1,98 @@
+{
+  "calibration_and_adaptation": {
+    "heading_alignment_matrix_xy": [
+      [
+        0.028087461965567776,
+        -0.9996054694129743
+      ],
+      [
+        0.9996054694129743,
+        0.028087461965567776
+      ]
+    ],
+    "height_and_roll_pitch": "Explicit constant lowered root height; zero roll/pitch; source z/pitch discarded",
+    "initial_heading_alignment_rad": 1.5427051704586863,
+    "nominal_root_height_m": 0.75,
+    "omitted_source_subframe_tail_estimated_s": 0.00022374590837803687,
+    "output_fps": 50.0,
+    "phase_codes": {
+      "0": "captured_scaled_car_motion",
+      "1": "synthetic_stop_recovery",
+      "2": "stationary_tail"
+    },
+    "physics_validated": false,
+    "recovery_adaptation": "Synthetic quintic taper of speed/yaw rate and sideslip to zero; trapezoidal velocity integration",
+    "recovery_duration_s": 1.5,
+    "recovery_initial_sideslip_rad": 0.008753851954671266,
+    "recovery_initial_speed_m_s": 1.1017994803582987,
+    "recovery_initial_yaw_rate_rad_s": -0.25488282041665755,
+    "sampled_source_last_time_estimated_s": 1.87,
+    "scaled_logged_velocity_vs_pose_difference_max_m_s": 0.034780305637643956,
+    "smoothing_source_s": 0.0,
+    "source_clock_status": "reconstructed_estimate_not_original_timestamps",
+    "source_frames": 188,
+    "source_initial_time_estimated_s": 0.0,
+    "source_last_time_estimated_s": 1.8702237459083781,
+    "source_motion": "Starts already moving; retain initial root/wheel velocities on reset",
+    "source_position_mapping": "uniform scale * initial-heading rotation * (captured XY - initial XY)",
+    "source_task_end_s": 3.74,
+    "source_yaw_mapping": "interpolate captured unwrapped yaw on estimated clock; subtract initial yaw; no amplitude scaling",
+    "spatial_scale": 0.08,
+    "stationary_tail_s": 0.5,
+    "time_scale": 2.0
+  },
+  "diagnostics": {
+    "all_frames_checked": 288,
+    "contact_validation": "Geometry and contact Jacobian only; static COM support does not establish dynamic or tire-force feasibility",
+    "final_root_angular_speed_rad_s": 0.0,
+    "final_root_speed_m_s": 0.0,
+    "final_wheel_speed_rad_s": 0.0,
+    "lateral_slip_constraint_imposed": false,
+    "max_contact_rolling_velocity_residual_m_s": 0.0028786761622305868,
+    "max_ground_penetration_m": 5.828670879282072e-16,
+    "max_ik_residual_m": 3.885780586188048e-16,
+    "max_joint_limit_violation_rad": 0.0,
+    "max_nonwheel_ground_penetration_m": 0.0,
+    "max_reference_contact_lateral_slip_m_s": 0.2963596089746352,
+    "max_root_acceleration_m_s2": 1.3774362237028783,
+    "max_root_speed_m_s": 1.3214505695729089,
+    "max_self_penetration_m": 0.0,
+    "max_static_com_foreaft_support_error_m": 6.954800067452276e-06,
+    "max_wheel_speed_rad_s": 10.675888131913172,
+    "simulation_steps": 0,
+    "static_leg_joint_positions_rad": {
+      "abad_L_Joint": 0.0,
+      "abad_R_Joint": 0.0,
+      "hip_L_Joint": 0.34477716472098374,
+      "hip_R_Joint": -0.34477716472098374,
+      "knee_L_Joint": 0.7936588295957885,
+      "knee_R_Joint": -0.7936588295957885
+    }
+  },
+  "frames": 288,
+  "generator_sha256": "04fab9f4178b66e302702563ba4cf30001dfb8dbbea9f2a58f9e1a6f0a155f0e",
+  "hardware_ready": false,
+  "kind": "car_demonstration_task_adaptation",
+  "model_sha256": "30c8bb94b32b1804aa2f7de2425f7a8dd02be7792881255388097e2e68092e52",
+  "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+  "physics_validated": false,
+  "policy_trained": false,
+  "provenance": {
+    "source_audit_sha256": "ab3061fa87a66058083d9ca9b29f4d1239cbe8bb5afb707dd190cb215b855394",
+    "source_clock_status": "reconstructed_estimate_not_original_timestamps",
+    "source_commit": "05ea8d643ea60b4649a59e2988cd1ae21719f9f4",
+    "source_configuration_sha256": "d2fbbb27b96e57b7208c1a6f588d0dee64b290fc480f845a82bfc87d5a13e0fb",
+    "source_csv_path": "expert_traj/Sa_param5/0928213455param5_traj34_success.csv",
+    "source_csv_sha256": "ab68330e71fb044af6334fbac79a72c0157c88226e79d21cb1ef46d84c948920",
+    "source_id": "sa_traj34",
+    "source_is_physical_car_capture": false,
+    "source_npz_sha256": "41e65c8d8da35312a8855080e03591f0acb3a07da8e7da1f990dd80e1605acf7",
+    "source_repository": "https://github.com/ustcly/DOA"
+  },
+  "robot_reference_sha256": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+  "sample_span_s": 5.74,
+  "schema_version": 1,
+  "skill": "car_drift",
+  "source_modified": false,
+  "status": "kinematic_reference_ready_for_physics_training"
+}
