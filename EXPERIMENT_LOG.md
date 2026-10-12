@@ -150,6 +150,12 @@ The fixed-window comparison with trial012 shows only a 5 ms increase in MuJoCo's
 
 All 15 deployment-provenance checks pass: all 12 actor/normalizer tensors match the actual final checkpoint, and all 288 applied actions per engine replay on CPU with maximum errors of 2.980e-7 / 3.166e-7. Both engines use actor `b13eca03352624365bd6d3379441ec4cc18c341f40bc2faa48e6c1af9ae30c9d`. Training and evaluation processes exit and their owned GPU contexts are released; physical GPU isolation and hardware readiness are not claimed. The four-panel presentation replays recorded evidence without new physics, preserving failures, all historical trials and the initial jump. [Four-panel video](results/2026-10-12-car-drift/trial013/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial013/assessment.json) · [LR and reserve context](results/2026-10-12-car-drift/trial013/summary.json).
 
+### Trial014 prospective test: all-substep velocity cost with LR synchronization held fixed
+
+The [trial014 protocol](config/car_drift_lr_sync_substeps_trial.json) resumes original trial004 for the same 600 updates, 2,048 environments and seed42. Relative to trial012, only the wheel-link vertical-velocity cost changes from the last physical sample to the mean of the four squared samples. Weight −5, scale 0.02 m/s, initial LR synchronization, adaptive scheduling, reference, controller, motor randomization and all original behavior gates remain unchanged. No load-reserve objective or new wheel teacher is added.
+
+A new current-source GPU fixture must first verify 16 zero-action windows, 64 native substeps, independent cost equality, reset isolation and owned-process cleanup; the historical trial005 smoke is not current-stack evidence. Trial012 is the primary comparison, with trial004 and old trial005 descriptive only. Only the completed final actor will receive paired nominal evaluation and the original four-panel presentation. This prospective snapshot has no trial014 training or outcome; all previous results and the initial jump are preserved. Correct sampling alone does not establish continuous wheel support or successful transfer.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
