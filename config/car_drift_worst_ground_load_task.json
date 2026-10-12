@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_max_cost",
+  "wheel_axle_orientation_tracking": {"weight": 1.0, "std": 0.4},
+  "description": "Prospective trial018 replaces only mean-over-four instantaneous ground-load costs by their maximum, relative to completed017. Each instantaneous cost remains the same two-wheel sum of exp(-clamp(Fn,0)/(.20*mg)), weight -1.0. This is max of simultaneous two-wheel sums, not sum of independent wheel maxima, and not a force/contact threshold. Hold original004 parent,600updates/2048envs/24steps/seed42, initial LR synchronization, last-substep LINK-vz and axle reward, all other rewards, motor randomization, reference, controller500/10, physics/contact laws and all original gates. Four actual force reads and one reward read per control window; no additional physics, actor, command, reset or RNG calls. Runtime fixtures and paired final actor verification are still required. Worst-cost aggregation may suppress useful drift or tracking and does not certify continuous contact. No018 learned behavior exists at preparation."
+}

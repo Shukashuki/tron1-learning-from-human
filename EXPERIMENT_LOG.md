@@ -238,6 +238,14 @@ The [assessment](results/2026-10-12-car-drift/trial017/assessment.json) remains 
 
 [Four-panel video](results/2026-10-12-car-drift/trial017/motion_pipeline.mp4) · [Overview](results/2026-10-12-car-drift/trial017/overview.png) · [Summary](results/2026-10-12-car-drift/trial017/summary.json). The same eight-file format and all historical results, including the initial jump demonstration, are retained. Publication is run in the same Python/NumPy environment as assessment: a different-environment exact-summary refusal is preserved, without weakening equality or modifying raw evidence.
 
+### Trial018 preparation: worst-substep load cost (2026-10-12)
+
+The [recorded trial017 gate decomposition](results/2026-10-12-car-drift/trial017_contact_breaks.json) separates 6 unsupported samples from 11 supported-but-low-contact-slip samples among 152 moving-sideslip samples. In the first drift, isolated support failures at 0.960, 1.135 and 1.305 s split otherwise qualifying motion; speed and COM sideslip are already above the original gates. This is saved evidence, not a causal test, reconstructed manifold or permission to bridge gaps. Continuous support alone would not guarantee the contact-slip gate.
+
+The [next single-factor preparation](config/car_drift_worst_ground_load_trial.json) replaces trial017's mean of four instantaneous load costs with their maximum, retaining each instantaneous two-wheel sum, weight -1 and scale .20. This targets short unloading without averaging it away. It is not a sum of independent per-wheel maxima or a new force threshold. The original004 parent, 600-update budget, last-substep LINK-vz and axle terms, controller, motor randomization, contact laws, observations and all acceptance gates stay fixed.
+
+CPU synthetic lifecycle/profile/contract and diagnostic tests pass. Torch2.5.1 CPU arithmetic on the actual archived017 fixture's64 force samples /8 environments agrees with independent float64 arithmetic within1.22e-7; it adds no physics, actor inference or CUDA initialization. These checks do not verify the new GPU sampler or establish improved behavior. New source-pinned8/2048 runtime fixtures, entrypoints and final same-actor paired evaluation remain required. No trial018 application, learning or policy result has started; trial017 remains FAIL and its eight-file result is untouched.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash

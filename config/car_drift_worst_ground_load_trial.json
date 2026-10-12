@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial018",
+  "task": "captured_car_drift",
+  "baseline_trial": "trial017",
+  "resume_parent_trial": "trial004",
+  "status_at_predeclaration": "CPU_preparation_only_no_trial018_application_training_or_behavior",
+  "task_profile": "config/car_drift_worst_ground_load_task.json",
+  "task_profile_sha256": "ad76a604264c142761175cad3c887100874394fed041e3b0a25b6b32df41d026",
+  "baseline_profile_sha256": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78",
+  "scientific_change": "Only mean-over-four instantaneous two-wheel load costs becomes their maximum. Keep the same instantaneous sum, scale_fraction .20 and weight -1.0. Never sum per-wheel independent maxima or apply a new force threshold.",
+  "hypothesis": "Worst-substep aggregation penalizes transient unloading more strongly than a mean, possibly reducing real contact interruptions. It may also suppress useful sideslip; no outcome or causal claim is made.",
+  "reward_formula": "max_k(sum_i(exp(-clamp(Fn[k,i],min=0)/(.20*mg)))) for exactly four refreshed native5ms samples",
+  "reward_weight": -1.0,
+  "reward_integration": "Original RewardManager applies .02s once; no new dt multiplier.",
+  "source_sha256": {
+    "training/tron1_worst_ground_load_substeps.py": "9e3cf953d1b5210e53530480610c1e338e7eeb65f1b009ad41271dc942f91363",
+    "training/tron1_worst_ground_load_trial.py": "6fae1d687c1e4c4520831d0d8496c9779e48c4d0e48de83d79b3cb4ed2a5b7cf",
+    "training/tron1_ground_load_substeps.py": "4df069ea80e37cf7575346201687be934927434db45ea143f5ce797d4979ecd2",
+    "training/tron1_wheel_axle_trial.py": "92301d90d844c3b3db0aa82e336abf7823855cde2ec21b01b639924be36e8421"
+  },
+  "training": {
+    "resume_checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "iterations": 600,
+    "num_envs": 2048,
+    "rollout_steps_per_update": 24,
+    "seed": 42,
+    "smoke_steps": 8,
+    "save_interval": 600,
+    "expected_final_saved_iteration": 4595,
+    "maximum_training_wall_time_s": 4500,
+    "additional_environment_steps": 29491200,
+    "initial_LR_scalar_synchronized_to_restored_optimizer": true,
+    "only_predesignated_fully_completed_final_checkpoint_eligible": true
+  },
+  "held": {
+    "leg_kp": 500.0,
+    "leg_kd": 10.0,
+    "policy_hz": 50,
+    "physics_hz": 200,
+    "contact_threshold_n": 5.0,
+    "minimum_uninterrupted_grounded_drift_s": 0.20,
+    "same_reference_motor_randomization_contact_laws_and_observations": true,
+    "last_substep_LINK_vertical_velocity_and_axle_reward": true,
+    "all_original_behavior_gates": true,
+    "contact_gaps_bridged": false
+  },
+  "activation_prerequisites": [
+    "Complete and source-pin new runtime fixture, training and evaluation entrypoints before any application; this preparation protocol is not a launch authorization seal.",
+    "Actual current-source8-env GPU fixture: native4-substep ordering, independent recorded max-of-sums arithmetic, one reward read per window, unchanged ledger and reset/cache isolation.",
+    "Actual2048-env bounded fixture with finite tensors, measured overhead and the same lifecycle and reward identities before learning.",
+    "Preserve all trial017 results and raw evidence. Explicitly record any authorized GPU sharing; never claim hardware isolation or stop foreign tasks.",
+    "One actual final actor in both nominal engines, full200Hz first-episode evidence and CPU tensor/action provenance, unchanged gates and full four-panel eight-artifact publication. Preserve FAIL or incomplete stages; no silent restart or intermediate actor selection."
+  ]
+}

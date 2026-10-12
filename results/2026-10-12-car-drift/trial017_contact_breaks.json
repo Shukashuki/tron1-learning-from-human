@@ -1,0 +1,335 @@
+{
+  "moving_drift_samples": 152,
+  "support_failure_samples_while_moving_drift": 6,
+  "slip_only_failure_samples_while_supported_moving_drift": 11,
+  "events": [
+    {
+      "sample_index": 192,
+      "time_s": 0.9600000000000007,
+      "planar_speed_m_s": 1.175551026215662,
+      "sideslip_deg": 9.144599246028662,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        124.38681021695352,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.005113315856900633,
+      "support_failed": true,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 227,
+      "time_s": 1.1349999999999978,
+      "planar_speed_m_s": 1.153582023895027,
+      "sideslip_deg": 10.48969903070605,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        126.09532091460025,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0019925661323672112,
+      "support_failed": true,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 261,
+      "time_s": 1.3049999999999942,
+      "planar_speed_m_s": 1.1464737918321124,
+      "sideslip_deg": 9.0572406424454,
+      "bearing_contact_count": [
+        0,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        0.0,
+        76.83673279695758
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.04215913987956312,
+      "support_failed": true,
+      "slip_failed": false
+    },
+    {
+      "sample_index": 266,
+      "time_s": 1.3299999999999936,
+      "planar_speed_m_s": 1.1460151029512067,
+      "sideslip_deg": 9.114223863643502,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        135.30465590088338,
+        84.54311234377015
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03458093175124931,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 267,
+      "time_s": 1.3349999999999935,
+      "planar_speed_m_s": 1.1465724220563516,
+      "sideslip_deg": 9.071180107267896,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        134.83972613379404,
+        81.4356829799221
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.027449166047586057,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 268,
+      "time_s": 1.3399999999999934,
+      "planar_speed_m_s": 1.1472539094298513,
+      "sideslip_deg": 9.027474180034229,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        137.57362812488356,
+        81.54729199029072
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.022127739113185357,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 269,
+      "time_s": 1.3449999999999933,
+      "planar_speed_m_s": 1.1460940207056742,
+      "sideslip_deg": 8.934970027269117,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        145.89575801821638,
+        76.57259129243218
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.02053602733530325,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 270,
+      "time_s": 1.3499999999999932,
+      "planar_speed_m_s": 1.147817032200041,
+      "sideslip_deg": 8.851411852458671,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        151.48190022777123,
+        83.14474381874194
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.018568485054782556,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 271,
+      "time_s": 1.354999999999993,
+      "planar_speed_m_s": 1.148780640159907,
+      "sideslip_deg": 8.788273516894197,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        151.23297659080774,
+        82.13406756235874
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.01806293640581075,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 272,
+      "time_s": 1.359999999999993,
+      "planar_speed_m_s": 1.1498570152488488,
+      "sideslip_deg": 8.725634350468994,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        152.9666636201571,
+        82.1702062601752
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.018316593600885882,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 273,
+      "time_s": 1.3649999999999929,
+      "planar_speed_m_s": 1.149332346807797,
+      "sideslip_deg": 8.609099285830704,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        155.01882863153415,
+        79.59837777535702
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.02645704890176623,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 274,
+      "time_s": 1.3699999999999928,
+      "planar_speed_m_s": 1.1506063013582075,
+      "sideslip_deg": 8.511033745100184,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        156.80898529953697,
+        84.64854997777917
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.029559117604274657,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 275,
+      "time_s": 1.3749999999999927,
+      "planar_speed_m_s": 1.1514330539936095,
+      "sideslip_deg": 8.429590109905869,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        155.99403587147492,
+        84.54038517315307
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03381640127430624,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 276,
+      "time_s": 1.3799999999999926,
+      "planar_speed_m_s": 1.1523698252043828,
+      "sideslip_deg": 8.348960526663893,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        156.5040199693384,
+        84.63344678289376
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.038143720084446234,
+      "support_failed": false,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 277,
+      "time_s": 1.3849999999999925,
+      "planar_speed_m_s": 1.151967347313495,
+      "sideslip_deg": 8.23765699679903,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        154.84868861541025,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.020573506690004236,
+      "support_failed": true,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 389,
+      "time_s": 1.9449999999999805,
+      "planar_speed_m_s": 1.1922901323960915,
+      "sideslip_deg": -8.86792931352112,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        127.67375623906875,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.003736718688455162,
+      "support_failed": true,
+      "slip_failed": true
+    },
+    {
+      "sample_index": 412,
+      "time_s": 2.0599999999999783,
+      "planar_speed_m_s": 1.192701931079576,
+      "sideslip_deg": -8.750837991755832,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        115.41852774884518,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0006029157359405884,
+      "support_failed": true,
+      "slip_failed": true
+    }
+  ],
+  "schema_version": 1,
+  "kind": "recorded_MuJoCo_contact_break_decomposition",
+  "rollout_sha256": "1a25a46bbc92d965959307247f3a2d9482f6b1908253390607dc456eebfcbacc",
+  "assessor_source_sha256": "a2214c47d0f8b262fb8f5b70a709908ef1d7487fd2b1393becb8ad8dfc672fa5",
+  "diagnostic_source_sha256": "ab70ccae7929b884b2face0ce8347f723d32b0cd76a377527bc7371152127817",
+  "thresholds": {
+    "drift_min_planar_speed_m_s": 0.4,
+    "drift_min_abs_sideslip_deg": 8.0,
+    "drift_min_mean_abs_contact_slip_m_s": 0.04,
+    "drift_min_contiguous_duration_s": 0.2,
+    "sideslip_defined_min_speed_m_s": 0.1,
+    "initial_max_abs_sideslip_deg": 5.0,
+    "initial_com_velocity_error_m_s": 0.0001,
+    "tail_seconds": 0.5,
+    "tail_max_abs_sideslip_deg": 5.0,
+    "tail_max_planar_speed_m_s": 0.2,
+    "tail_max_tilt_deg": 15.0,
+    "tail_min_two_wheel_support_fraction": 0.9,
+    "full_min_two_wheel_support_fraction": 0.9,
+    "initial_contact_settle_seconds": 0.1,
+    "max_both_wheel_flight_s": 0.04,
+    "root_rmse_m": 0.15,
+    "final_root_error_m": 0.15,
+    "final_height_error_m": 0.06,
+    "final_heading_error_deg": 15.0,
+    "minimum_reference_progress_fraction": 0.7,
+    "minimum_reference_translation_m": 0.03,
+    "minimum_reference_yaw_deg": 5.0,
+    "nonwheel_impact_threshold_n": 1.0
+  },
+  "simulation_steps": 0,
+  "actor_inference_calls": 0,
+  "gates_changed": false,
+  "contact_gaps_bridged": false,
+  "limitations": [
+    "Raw saved contact evidence, not a causal test or new episode.",
+    "Loss of bearing contact does not by itself identify collision geometry or an empty raw manifold.",
+    "Supported low-slip intervals are separately retained; continuous support alone does not guarantee drift."
+  ]
+}
