@@ -1,5 +1,86 @@
 {
   "schema_version": 1,
+  "expected_historical_source_sha256": {
+    "training/tron1_tracking.py": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817",
+    "training/tron1_drift.py": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+    "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+    "training/tron1_contact_slip.py": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+    "training/tron1_runtime_device.py": "2a1460d1b48e884fc5608e0365edc43b815d1fc74c8439945d4e2cc18027f775",
+    "training/tron1_terrain.py": "dec819a3c3c526fce706fb6a5a6491388298884b32bfe73a5c331b166f976ebf",
+    "scripts/train_tracking.py": "ea9e4cd14f25ff3ba5202b9ba43ac0f08320418e2311cbae205c8449f3a1da9c",
+    "scripts/train_tracking_lr_sync.py": "9bd544b82e211633bb37c3fd8a658448d6d0e9b90f380f01a78dd9e8de02b8cb",
+    "training/tron1_resume_lr.py": "596f1e2a455a4bba5644965985791aec9d4a934b5079932e6c6c4a208a1a3064",
+    "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+    "training/tron1_substep_rewards.py": "aeec31437226984a326a263109aaadebca004a6ef333f25a1d3377688aa276a5",
+    "scripts/eval_tracking.py": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+    "training/tron1_ground_load_substeps.py": "4df069ea80e37cf7575346201687be934927434db45ea143f5ce797d4979ecd2",
+    "training/tron1_ground_load_substeps_trial.py": "1917e3147783cddc47d8f8aeae366a46f224dd1b4091cc695a7327eded0b5b3f",
+    "scripts/train_tracking_dense_ground_load.py": "361c76f4a2ef9bc3ce4d95a3fbd878ddc7728af2da80c44cf70cc0566fcc4fcd",
+    "scripts/eval_tracking_dense_ground_load.py": "ba44bc4215f2913e59d6fa8c616d2d057c2d9c7fc1bc98b7fc9df68470d14185",
+    "scripts/smoke_dense_ground_load.py": "620c8f2906114cf4cf7aa375413d43034b416acab091ca144a792801436c3d08",
+    "training/tron1_wheel_axle_tracking.py": "aa3dac2bdae03f029d2c4bb174e79007f9b7927b5eaa04d35e50eefcff7de256",
+    "training/tron1_wheel_axle_trial.py": "92301d90d844c3b3db0aa82e336abf7823855cde2ec21b01b639924be36e8421",
+    "scripts/train_tracking_wheel_axle.py": "654acc37ccd8ff41f7b10d0b71abe9c85051cafe58be7f3b5d893755906c7bc3",
+    "scripts/eval_tracking_wheel_axle.py": "c865d498c94ceafee1bf20f72ded62ac7ee417ec91e370c475ecbaa029fc1663",
+    "tests/test_tron1_wheel_axle_tracking.py": "f1e8ee6bc6c8a1914565b0ac50aa647146c104fd79af9d693ff17e5fd3357fac",
+    "tests/test_wheel_axle_trial.py": "f00fd99ef17a7b1a3ada824a852c3efbe747c43282a651b9153e6c190123268e",
+    "tests/test_wheel_axle_entrypoints.py": "8498abcb9406983b35b98b101357ed766454c660ce3bb1783d1b0a34a4bc5cbc",
+    "config/car_drift_wheel_axle_task.json": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78",
+    "scripts/smoke_wheel_axle_tracking.py": "8ba91d74a5af5eded0c3cdc81e7dc9318459b0b2a5111f55edf6ff9a0457b561",
+    "tests/test_smoke_wheel_axle_tracking.py": "daa01174c0e00a14bae67570534c663f5aa0105b27bd5c6d04940aa9233a80ca"
+  },
+  "installed_isaaclab_manager_sources": {
+    "verification": "Previously captured actual installed manager source pins; the new018 fixture rechecks these bytes before AppLauncher and before/after evidence output.",
+    "source_sha256": {
+      "managers/reward_manager.py": "5d41d6a376cfb456849d861c3232694ea5662cc38970e2e2c7e5152f156d88d7",
+      "managers/scene_entity_cfg.py": "1f187fb964c5ecb77865d2d24f2ff61468e667c4d4e170b2020145888a0eb689",
+      "envs/manager_based_rl_env.py": "8ec2759541c8320ed725411d49564f5617b3ab6b9d340c860bededee13d557d4"
+    },
+    "step_reward_units": "RewardManager first integrates func*weight*policy_dt, then stores value/policy_dt in _step_reward; this term store is weighted per-second density. Multiply the captured density by .02 exactly once when comparing integrated contribution.",
+    "clock": "Capture LAST target/state before RewardManager and command.compute/reset; the post-step command target may already belong to the next control window. No new physics or RNG calls.",
+    "limitations": "Installed-source inspection is not a new018 runtime reward-ledger, ordering, reset or performance fixture. No018 application has started at this predeclaration."
+  },
+  "unchanged": {
+    "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+    "robot_asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "robot_reference_sha256": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+    "mujoco_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+    "policy_hz": 50,
+    "physics_hz_both_engines": 200,
+    "actor_critic_action_dimensions": [
+      51,
+      120,
+      8
+    ],
+    "leg_kp_kd": [
+      500,
+      10
+    ],
+    "leg_and_wheel_torque_limits_nm": [
+      80,
+      12
+    ],
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [
+      0.04,
+      2
+    ],
+    "ground_load_cost": "Instantaneous two-wheel exponential sum, weight-1/scale.20 held. Only mean-to-max aggregation changes as explicitly declared, using the inherited native lifecycle and cache.",
+    "wheel_vertical_cost": "Original LAST wheel LINK-origin vz, weight-5/std.02, unchanged; inherited substep velocity statistic remains unused",
+    "other_rewards": "All original017 seven-link body orientation, axle-direction weight1/std.4 LAST, signed sideslip2, speed3, yaw1, grounded.4, tilt-.2, action-rate-.5 and leg-target-rate-1 terms remain.",
+    "motor_randomization": "Existing episode-fixed motor-v1 shaft friction/no-load speed/torque capacity with20% nominal resets; no contact/mass/gravity randomization.",
+    "environment": "Same factory, eight zero-action training smoke steps/reset, loader/RNG semantics and normalizer updates. New max buffer retains the inherited current-window lifecycle and reads the same four refreshed force samples.",
+    "contact_geometry_margin_or_gap_changed": false,
+    "new_teacher_or_reference": false,
+    "new_observation_or_action": false,
+    "hardware_ready": false
+  },
+  "runtime_fixture_entrypoint": "scripts/smoke_worst_ground_load_tracking.py",
+  "expected_new_source_sha256": {
+    "training/tron1_worst_ground_load_substeps.py": "9e3cf953d1b5210e53530480610c1e338e7eeb65f1b009ad41271dc942f91363",
+    "training/tron1_worst_ground_load_trial.py": "6fae1d687c1e4c4520831d0d8496c9779e48c4d0e48de83d79b3cb4ed2a5b7cf",
+    "scripts/smoke_worst_ground_load_tracking.py": "8fa4ba0f3746bc7b4d3354eeaf2485a17866923edc44e883314decdc30665d3f"
+  },
   "trial_id": "trial018",
   "task": "captured_car_drift",
   "baseline_trial": "trial017",
