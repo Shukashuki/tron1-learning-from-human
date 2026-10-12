@@ -42,8 +42,10 @@ SOURCE_COMMIT = "a50cd96989c70cb7cc1f3fb4863959e7eeb4326a"
 ARCHIVE_SHA256 = "5b1cbab5e680aff6ec8cc9174b5292e83790f9c14f00dff2f416c68e7a177fbd"
 CPU_PRODUCER_SHA256 = "fc348af116fd002639f923fd05cb4fbc21373297b5ae601321ce5155ab27c5e7"
 CPU_LAUNCHER_SHA256 = "78858401033ac69c9f7dec790b1133deab03d296ddaa0599f5ef432fc0f8b875"
-PAIRED_PRODUCER_SHA256 = "d12525989256337d95430c0e3769701cdacd35bc51c76232c913026bd8edfd1d"
+PAIRED_PRODUCER_SHA256 = "07e3d2b44c892691ce1e6fb9a008d86a01f9d96c34820cd708e362698b54d9fe"
 EVALUATION_LAUNCHER_SHA256 = "8e065bae62c7f5dc0b4a80831f830a6e5e54cce76311c93479507317d95976b9"
+SHARED_ENTRYPOINT_SHA256 = "78886a27d22a9305b08f4e37d771d9f128685ee754b4e6d047dce722d6f3ac25"
+SHARED_AUTHORIZATION_SHA256 = "3b17c49aaf09422247f4dd3a3ad7c1c815f4165de3cd6ec2b34f3e203ba671bf"
 DENSE_PUBLISHER_SHA256 = "cb3897f3185974f02cc29636aff0472784ffb952ff4055defd2c59a68e493f06"
 LEGACY_PUBLISHER_SHA256 = "598cd0cf6a78918da8a5e09ca0f20624c0a7379c7311813923366fd2c9b4293d"
 LR_PUBLISHER_SHA256 = "497ded75605813f916380d01eee387017e444c9e75bb496c5440da96015f71cd"
@@ -1034,6 +1036,33 @@ def validate_publication_producer_sources(repo_root):
     return producers
 
 
+def validate_shared_publication_evidence(proof, files, hashes):
+    """Do not relabel this explicitly authorized shared run as an idle-GPU run."""
+    for key, expected in (("shared_entrypoint", SHARED_ENTRYPOINT_SHA256),
+                          ("shared_authorization", SHARED_AUTHORIZATION_SHA256)):
+        require(hashes.get(key) == expected and sha256(files[key]) == expected,
+                "Changed actual shared-evaluation evidence: " + key)
+    receipt = read_json(files["evaluation_stage/eval_launch_receipt.json"])
+    fields(receipt, {"status": "sealed_and_authorized_shared_before_launch",
+        "resource_mode": "user_authorized_shared", "physical_gpu_index": 5,
+        "physical_gpu_uuid_pin": "GPU-f3fe90b7-ba72-b055-11a3-440d7726d34e",
+        "entrypoint_sha256": SHARED_ENTRYPOINT_SHA256,
+        "shared_authorization_sha256": SHARED_AUTHORIZATION_SHA256}, "Actual shared eval receipt")
+    fields(proof.get("evaluation_placement"), {"resource_mode": "user_authorized_shared",
+        "selected_gpu_index": 5, "entrypoint_sha256": SHARED_ENTRYPOINT_SHA256,
+        "shared_authorization_sha256": SHARED_AUTHORIZATION_SHA256,
+        "physical_isolation_claimed": False, "all8_owned_contexts_absent": True}, "Paired shared eval evidence")
+    for name, expected in (("launch_eval_trial017_shared.py", SHARED_ENTRYPOINT_SHA256),
+                           ("shared_evaluation_authorization.json", SHARED_AUTHORIZATION_SHA256)):
+        require(proof.get("input_sha256", {}).get(
+            "repository/outputs/drift-trial017-deployment-20261012/" + name) == expected,
+            "Paired proof must seal actual shared entrypoint/authority")
+    return {"mode": "user_authorized_shared", "selected_gpu_index": 5,
+        "physical_isolation_claimed": False, "harmlessness_claimed": False,
+        "entrypoint_sha256": SHARED_ENTRYPOINT_SHA256,
+        "authorization_sha256": SHARED_AUTHORIZATION_SHA256}
+
+
 def prepare_publication(trial_dir, reference_dir, render_dir, *, protocol_path,
                         expected_protocol_sha256, fixture_seal_path, fixture_seal_sha256,
                         training_seal_path, training_seal_sha256,
@@ -1070,6 +1099,8 @@ def prepare_publication(trial_dir, reference_dir, render_dir, *, protocol_path,
     for name in ("eval_launch_receipt.json", "eval_started.json", "eval_exit_report.json",
                  "eval_live_placement.jsonl", "eval.log"):
         extra["evaluation_stage/" + name] = Path(evaluation_seal_path).resolve().parent / name
+    extra["shared_entrypoint"] = Path(evaluation_seal_path).resolve().parent / "launch_eval_trial017_shared.py"
+    extra["shared_authorization"] = Path(evaluation_seal_path).resolve().parent / "shared_evaluation_authorization.json"
     for name, path in extra.items():
         require(path.is_file() and path.stat().st_size > 0, "Missing actual017 evidence " + name)
         files[name], hashes[name] = path, sha256(path)
@@ -1080,9 +1111,10 @@ def prepare_publication(trial_dir, reference_dir, render_dir, *, protocol_path,
         "fixture_seal", "training_seal", "evaluation_seal")}
     context = validate_context(records, files, hashes, protocol, read_json(files["training_completion"]),
         read_json(files["paired_proof"]), repo_root=repo_root)
+    resource = validate_shared_publication_evidence(read_json(files["paired_proof"]), files, hashes)
     identities = private_identities({**records, "context": context})
     summary.update({"experiment_kind": EXPERIMENT_KIND, "additional_training_updates": 600,
-        "wheel_axle_context": sanitize(context, identities), "input_sha256": hashes})
+        "wheel_axle_context": sanitize(context, identities), "evaluation_resource": resource, "input_sha256": hashes})
     require(len(payloads) == 3 and len(media) == 4, "Unchanged full four-panel8-file format")
     require(all(sha256(path) == hashes[key] for key, path in files.items()), "Inputs changed during preflight")
     return sanitize(summary, identities), payloads, media, files, hashes

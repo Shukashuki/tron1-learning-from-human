@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -73,6 +74,49 @@ def test_actual_posttraining_producer_sources_are_pinned():
     assert len(producers) == 2
     for name, digest in producers.items():
         assert p.sha256(ROOT / name) == digest
+
+
+def shared_publication_fixture(tmp_path):
+    evidence = ROOT / "outputs/drift-trial017-deployment-20261012"
+    files = {"shared_entrypoint": evidence / "launch_eval_trial017_shared.py",
+        "shared_authorization": evidence / "shared_evaluation_authorization.json"}
+    receipt = {"status": "sealed_and_authorized_shared_before_launch",
+        "resource_mode": "user_authorized_shared", "physical_gpu_index": 5,
+        "physical_gpu_uuid_pin": "GPU-f3fe90b7-ba72-b055-11a3-440d7726d34e",
+        "entrypoint_sha256": p.SHARED_ENTRYPOINT_SHA256,
+        "shared_authorization_sha256": p.SHARED_AUTHORIZATION_SHA256}
+    path = tmp_path / "synthetic_shared_receipt.json"
+    path.write_text(json.dumps(receipt))
+    files["evaluation_stage/eval_launch_receipt.json"] = path
+    hashes = {key: p.sha256(value) for key, value in files.items()}
+    proof = {"evaluation_placement": {"resource_mode": "user_authorized_shared",
+        "selected_gpu_index": 5, "entrypoint_sha256": p.SHARED_ENTRYPOINT_SHA256,
+        "shared_authorization_sha256": p.SHARED_AUTHORIZATION_SHA256,
+        "physical_isolation_claimed": False, "all8_owned_contexts_absent": True},
+        "input_sha256": {"repository/outputs/drift-trial017-deployment-20261012/launch_eval_trial017_shared.py": p.SHARED_ENTRYPOINT_SHA256,
+            "repository/outputs/drift-trial017-deployment-20261012/shared_evaluation_authorization.json": p.SHARED_AUTHORIZATION_SHA256}}
+    return receipt, proof, files, hashes
+
+
+def test_shared_publication_explicitly_retains_nonisolated_scope(tmp_path):
+    _, proof, files, hashes = shared_publication_fixture(tmp_path)
+    result = p.validate_shared_publication_evidence(proof, files, hashes)
+    assert result["mode"] == "user_authorized_shared"
+    assert result["physical_isolation_claimed"] is False
+    assert result["harmlessness_claimed"] is False
+
+
+@pytest.mark.parametrize("change", ["authorization", "entrypoint", "idle_label", "different_gpu", "isolation", "missing_paired_seals"])
+def test_shared_publication_rejects_forged_or_missing_authority(change, tmp_path):
+    receipt, proof, files, hashes = shared_publication_fixture(tmp_path)
+    if change == "authorization": hashes["shared_authorization"] = "0" * 64
+    if change == "entrypoint": hashes["shared_entrypoint"] = "0" * 64
+    if change == "idle_label": receipt["status"] = "sealed_and_idle_before_launch"
+    if change == "different_gpu": receipt["physical_gpu_index"] = 6
+    if change == "isolation": proof["evaluation_placement"]["physical_isolation_claimed"] = True
+    if change == "missing_paired_seals": proof["input_sha256"] = {}
+    files["evaluation_stage/eval_launch_receipt.json"].write_text(json.dumps(receipt))
+    with pytest.raises(ValueError): p.validate_shared_publication_evidence(proof, files, hashes)
 
 
 @pytest.mark.parametrize("field", ["PAIRED_PRODUCER_SHA256", "EVALUATION_LAUNCHER_SHA256"])
