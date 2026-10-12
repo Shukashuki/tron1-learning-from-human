@@ -134,6 +134,12 @@ The predeclared run completes all 600 updates with 2,048 environments and seed42
 
 The deployment audit passes all 15 checks: all 12 exported actor/normalizer tensors equal this final checkpoint, and all 288 applied observations/actions per engine replay with maximum errors of 2.645e-7 / 2.608e-7, below the existing 1e-5 bound. The canonical assessment uses the original assessor and pinned `motion.npz`; an initial offline call with the wrong reference file was rejected and retained privately, then corrected using the same recorded episodes without rerunning either simulator. Recorded-only rendering retains the captured-car, kinematic, Isaac and MuJoCo panels. The initial jump and all prior snapshots remain unchanged; this is one seed and one nominal episode per engine, not hardware or statistical-robustness validation. [Four-panel video](results/2026-10-12-car-drift/trial012/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial012/assessment.json) · [Source and LR context](results/2026-10-12-car-drift/trial012/summary.json).
 
+### Trial013 prospective test: load reserve with LR synchronization held fixed
+
+The [trial013 protocol](config/car_drift_lr_sync_ground_load_trial.json) resumes the same original trial004 checkpoint for 600 updates, 2,048 environments and seed42. Relative to trial012, only the original wheel-ground load-reserve objective and its required filtered force sensors/cache are added; the initial LR synchronization is retained. The exact historical [reserve profile](config/car_drift_ground_load_task.json), including its trial010 description, is reused without relabeling its bytes. Reference, 500/10 controller, motor randomization, 50/200Hz clocks and every original behavior gate remain unchanged.
+
+The soft penalty is `sum(exp(-max(Fz,0)/(0.20 mg)))`, with weight −1 and last-substep reward sampling. It may reduce wheel unloading, but can also suppress drift or favor larger contact forces; the scale is not a minimum-load constraint. Trial012 is the primary fixed-budget comparison, while trial004/010 are descriptive only. Only the completed final checkpoint receives one nominal episode per engine and the same four-panel evidence/provenance checks. No trial013 training or outcome is available at this prospective snapshot; all previous results and the initial jump remain preserved.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash
