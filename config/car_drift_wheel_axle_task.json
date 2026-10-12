@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_mean_cost",
+  "wheel_axle_orientation_tracking": {"weight": 1.0, "std": 0.4},
+  "description": "Prospective trial017 adds only an explicit spin-invariant two-wheel local+Y axle-direction tracking reward relative to completed016: exp(-mean_two(axis_angle_squared)/0.4^2), weight1.0, at the unchanged last physical substep/policy50Hz. Use the SAME robot kinematic reference and its existing yaw reanchoring, not measured car-wheel pose/spin/torque. Parent knee orientation already contains the axle information; this only isolates and increases its task priority. Hold original004 parent,600updates/2048envs/seed42, restored initial PPO scalarLR, mean4 instantaneous normal-load reserve, originalLAST LINK-vz, existing seven-link orientation reward, motor randomization, reference, controller500/10, contact laws and all original gates. Full wheel quaternion/spin tracking remains disabled. Geometry diagnostics are saved-state MuJoCo only; there is no PhysX contact-equivalence, causal or hardware claim. Tightening axle direction may suppress useful camber or drift, so runtime fixtures and unchanged paired behavior evaluation are required before adoption."
+}

@@ -202,6 +202,18 @@ Relative to primary trial013, MuJoCo's total qualifying drift increases from 0.6
 
 All 15 deployment-provenance checks pass: all 12 exported actor/normalizer tensors match the actual final checkpoint, and all 288 applied actions per engine replay on CPU within 1e-5, with maximum errors of 2.943e-7 / 2.496e-7. Both engines use actor `67645e7277256692c6cede313aa26ea107c98f5f9dde326d17aebe75f8d14282`. Independent root observers catch the actual training and evaluation processes; owned processes exit and their GPU contexts are released. Rehashed local copies preserve the completion proof's declared remote provenance, but are not new observations of those remote paths. Physical GPU isolation, native app-close return and hardware readiness are not claimed. Recorded-only rendering fully decodes all 145 frames and preserves the failed outcome, all historical results and the initial jump. [Four-panel video](results/2026-10-12-car-drift/trial016/motion_pipeline.mp4) · [Assessment](results/2026-10-12-car-drift/trial016/assessment.json) · [LR and dense-load context](results/2026-10-12-car-drift/trial016/summary.json).
 
+### Recorded wheel-clearance diagnostic (2026-10-12)
+
+A [separate saved-state diagnostic](results/2026-10-12-car-drift/wheel_clearance_diagnostic.json) reconstructs only MuJoCo 3.9.0 position-stage geometry for trials013/016, without new integration, actor calls or solved forces. Across all 1,153 states and both wheels, zero archived bearing count coincides with zero archived normal force, no reconstructed manifold and positive cylinder-plane clearance. Excluding the initial state, each trial has 26 zero-bearing wheel samples. Trial016's right-wheel gaps span 1.10–155.75 micrometers. This is evidence of geometric separation in these saved states, not merely falling below the 5 N bearing threshold.
+
+At one left-wheel event, the link origin descends slightly while cylinder-plane separation increases because camber changes the support extent. Link-origin vertical velocity is therefore not always support-surface separation velocity. The reconstruction is not an archived raw manifold, a PhysX measurement or a causal explanation. All inputs and original gates remain unchanged; trial016 still fails. The initial quaternion-storage refusal and its narrow roundoff-check correction are retained privately. Synthetic geometry/schema tests pass; no new policy or teacher is introduced.
+
+### Trial017 predeclaration: spin-invariant axle priority (2026-10-12)
+
+The [next single-factor protocol](config/car_drift_wheel_axle_trial.json) adds one two-wheel axle-direction reward to trial016: `exp(-mean(axis_angle_squared)/0.4^2)`, weight 1.0, using the same yaw-reanchored robot reference at the unchanged last-substep clock. It ignores axial spin. Parent-knee orientation already contains this direction, so this is reward reweighting, not a new wheel teacher. The original004 parent, 600-update budget, dense load reserve, link-velocity reward, controller, observations, randomization and every behavior gate remain unchanged.
+
+Actual Torch CPU invariance tests and strict profile/contract/entrypoint tests pass. Actual Isaac/GPU reward-ledger, reset and performance fixtures are still required before learning; no trial017 application, training or behavior outcome exists at this snapshot. The reward may suppress useful camber or sideslip and does not guarantee continuous support. Trial016's failure remains unchanged.
+
 Prepare the robot reference after capturing the pinned source:
 
 ```bash

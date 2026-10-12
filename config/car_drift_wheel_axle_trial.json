@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial017",
+  "task": "captured_car_drift",
+  "experiment_type": "lr_synchronized_wheel_axle_priority_continuation",
+  "baseline_trial": "trial016",
+  "parent_trial": "trial004",
+  "comparison_trials": [
+    "trial013",
+    "trial014",
+    "trial015"
+  ],
+  "status_at_predeclaration": "CPU_source_and_configuration_verified_only; no trial017 application, training or policy evaluation",
+  "task_profile": "config/car_drift_wheel_axle_task.json",
+  "task_profile_sha256": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78",
+  "baseline_task_profile": "config/car_drift_dense_ground_load_task.json",
+  "baseline_task_profile_sha256": "989215d55b548e245d6add928411d9e6fa16852a21f6863a777179014e3230b5",
+  "training_entrypoint": "scripts/train_tracking_wheel_axle.py",
+  "evaluation_entrypoint": "scripts/eval_tracking_wheel_axle.py",
+  "scientific_change": "Relative to completed016, add only one explicit both-wheel local+Y axle-direction reward at LAST/50Hz. Retain the SAME robot reference, original seven-link full orientation objective and all other016 terms. Original004 remains the resume parent; do not select an intermediate actor or resume learned016.",
+  "motivation": "Saved states show persistent ~12-degree left camber against the approximately horizontal reference, with left-biased loading in both engines. This is descriptive, not causal. Knee orientation already carries the same axle information. The additional term isolates/increases that posture cue's priority; it is not a new car-wheel teacher, wheel-spin target, contact constraint or new degree of freedom.",
+  "hypothesis": "Additional directed axle tracking may reduce sustained asymmetric posture while preserving captured signed sideslip, tracking and stopping, and thereby improve uninterrupted actual-bearing drift. Outcome unknown. Right-wheel gaps can occur already near reference camber; reduced axle error without improved support would count against this hypothesis.",
+  "rejected_next_factor": "Pure replacement of LINK-vz by cylinder gap-dot is not adopted: the right-wheel signals nearly coincide and every source-window right gap already has an upward-velocity precursor in the previous LAST sample.",
+  "reward": {
+    "term_name": "drift_wheel_axle_orientation",
+    "formula": "exp(-mean_two(theta_i^2)/(0.4 rad)^2)",
+    "theta": "atan2(norm(a_ref cross a_actual), clamp(a_ref dot a_actual,-1,1))",
+    "axis": "Directed local+Y of the named wheel_L_Link/wheel_R_Link LINK quaternion",
+    "weight": 1,
+    "std_rad": 0.4,
+    "target": "Existing command.body_quat_relative_w, including original yaw reanchoring; NOT raw global body_quat_w or observed car-wheel camber",
+    "actual": "command.robot_body_quat_w in the exact nine-body command subset, selected by wheel names; NOT native10-body numeric IDs",
+    "invariances": [
+      "Arbitrary independent reference/actual local-Y wheel spin",
+      "Quaternion sign/scale normalization",
+      "Common world-yaw transformation"
+    ],
+    "directed_axis_reversal": "180-degree axle reversal remains a mismatch, not an unoriented line match",
+    "sampling": "Original LAST physical substep at 50Hz RewardManager clock; no all-substep axle collector",
+    "integration": "Original RewardManager multiplies positive weight1 by policy_dt=.02; no new dt multiplier",
+    "existing_orientation": "Full quaternion tracking remains restricted to the original seven nonwheel links, weight1/std.4 unchanged. Full wheel orientation/spin flag remains false; axle-only objective is explicit in task_profile.",
+    "risks": "May suppress useful abduction/camber/load redistribution and sideslip. This soft LAST-state target does not supervise or guarantee all 5ms contact samples."
+  },
+  "activation_prerequisites": [
+    "Preserve original trial016 eight-file result, all historical artifacts and initial jump; no contact gap tolerance, phase fit or acceptance-gate change.",
+    "Seal all new source/profile/protocol/fixture/launcher/verifier hashes before each application; historical files remain byte-pinned.",
+    "New current-source 8-environment actual GPU fixture: 16 control windows and64 native5ms samples; exact live RewardManager new-function/weight/std identity and all original reward-ledger terms before arming the unchanged legacy fixture-only force-return probe. The axle function remains unwrapped throughout; the force probe delegates once and returns the same value, retaining original nonalias/raw-force checks and never running in production. Independent last-substep axle-reward replay must agree within1e-6 from the captured SAME yaw-reanchored target/state.",
+    "Capture axle reference/state at the final physics substep BEFORE command.compute or resets, not only after step() returns; replay the actual corresponding RewardManager term. Inspect and seal actual installed manager sources: _step_reward is weighted density, with policy_dt applied exactly once for the integrated contribution. The1e-6 bound is arithmetic verification, never a physical gap/gate tolerance.",
+    "Deterministic GPU tensor spin/quaternion-sign/common-yaw invariance; finite51/120/8 observations/actions; unchanged sensor/clock/sampler windows; no extra physics, actor, observation, reset or RNG calls. GPU finite checks may synchronize the host.",
+    "Fresh2048-environment bounded fixture verifies the same term ledger, native clocks/reset isolation and measured runtime overhead. The small raw-contact observer is not installed in production.",
+    "Actual installed RSL3.0.1 loader/PPO/normalizer pins, original mass/gravity/gains/material/motors and uniform restored initial LR pass before learning.",
+    "Choose an explicitly selected currently idle RTX4090D physical index/UUID from fresh all-GPU process inventory before each application; no CUDA mask, automatic fallback, reservation/isolation claim or foreign-job intervention.",
+    "Only one fully completed predesignated600-update final checkpoint may receive the paired nominal episodes. Preserve any failed/incomplete stage; do not silently restart or change source/budget/device."
+  ],
+  "training": {
+    "resume_checkpoint": "trial004/training/model_final.pt",
+    "resume_checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "parent_manifest_sha256": "b5b4b980425f7058a15a0f86ebbc0f534c216afe6a31d93ac7305bdb964a2a2f",
+    "runner_config_sha256": "7c309e49bed37045a29f337e9ed3f418bfaae437483a27d0c947b9685e170738",
+    "iterations": 600,
+    "num_envs": 2048,
+    "rollout_steps_per_update": 24,
+    "seed": 42,
+    "smoke_steps": 8,
+    "save_interval": 600,
+    "additional_environment_steps": 29491200,
+    "parent_saved_iteration": 3996,
+    "expected_final_saved_iteration": 4595,
+    "maximum_stage_wall_time_s": 4500,
+    "checkpoint_selection": "Only predesignated model_final.pt after all600 updates; no intermediate-best checkpoint, extra update, gain/scale search or retrospective factor change.",
+    "failure_policy": "Preserve actual startup/runtime/incomplete records. Incomplete training is not a final trained-policy evaluation; do not automatically restart or change source/budget/device."
+  },
+  "learning_rate_resume": {
+    "rsl_rl_version": "3.0.1",
+    "configured_ppo_learning_rate": 0.001,
+    "expected_loaded_optimizer_learning_rate": 0.00001,
+    "expected_scalar_before": 0.001,
+    "expected_scalar_after": 0.00001,
+    "exactly_uniform_optimizer_groups_required": true,
+    "only_mutated_field": "algorithm.learning_rate",
+    "optimizer_group_learning_rates_or_moments_mutated": false,
+    "normalizers_or_counters_mutated": false,
+    "adaptive_schedule": "Unchanged after the single initial scalar synchronization; no fixed-rate override, clamp or rescheduling.",
+    "recording": "Persist matching dedicated and manifest LR audit before training_started and learning; audit actual installed sources before load.",
+    "installed_source_sha256": {
+      "runners/on_policy_runner.py": "e51e4dd49664ccc8743a16b71d2971d392f40a6988136f10fe8c5f03ab6a83b5",
+      "algorithms/ppo.py": "deafc8c947eba4df3e91b393869426cdab8d7b71e05974c3734125d2331d7d1c",
+      "networks/normalization.py": "7db82f8021d62a660b4229782b52ac47e32d781206dba709d6bc436bf13f6672"
+    }
+  },
+  "installed_isaaclab_manager_sources": {
+    "verification": "Read-only actual installed source capture completed before any trial017 application; fixture must verify these relative source hashes again before AppLauncher and before/after its evidence output.",
+    "source_sha256": {
+      "managers/reward_manager.py": "5d41d6a376cfb456849d861c3232694ea5662cc38970e2e2c7e5152f156d88d7",
+      "managers/scene_entity_cfg.py": "1f187fb964c5ecb77865d2d24f2ff61468e667c4d4e170b2020145888a0eb689",
+      "envs/manager_based_rl_env.py": "8ec2759541c8320ed725411d49564f5617b3ab6b9d340c860bededee13d557d4"
+    },
+    "step_reward_units": "RewardManager first integrates func*weight*policy_dt, then stores value/policy_dt in _step_reward; this term store is weighted per-second density. Multiply the captured density by .02 exactly once when comparing integrated contribution.",
+    "clock": "Capture LAST target/state before RewardManager and command.compute/reset; the post-step command target may already belong to the next control window. No new physics or RNG calls.",
+    "limitations": "Installed-source inspection is not an actual runtime reward-ledger, ordering, reset or performance fixture. No trial017 AppLauncher has started."
+  },
+  "expected_historical_source_sha256": {
+    "training/tron1_tracking.py": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817",
+    "training/tron1_drift.py": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+    "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+    "training/tron1_contact_slip.py": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+    "training/tron1_runtime_device.py": "2a1460d1b48e884fc5608e0365edc43b815d1fc74c8439945d4e2cc18027f775",
+    "training/tron1_terrain.py": "dec819a3c3c526fce706fb6a5a6491388298884b32bfe73a5c331b166f976ebf",
+    "scripts/train_tracking.py": "ea9e4cd14f25ff3ba5202b9ba43ac0f08320418e2311cbae205c8449f3a1da9c",
+    "scripts/train_tracking_lr_sync.py": "9bd544b82e211633bb37c3fd8a658448d6d0e9b90f380f01a78dd9e8de02b8cb",
+    "training/tron1_resume_lr.py": "596f1e2a455a4bba5644965985791aec9d4a934b5079932e6c6c4a208a1a3064",
+    "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d",
+    "training/tron1_substep_rewards.py": "aeec31437226984a326a263109aaadebca004a6ef333f25a1d3377688aa276a5",
+    "scripts/eval_tracking.py": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+    "training/tron1_ground_load_substeps.py": "4df069ea80e37cf7575346201687be934927434db45ea143f5ce797d4979ecd2",
+    "training/tron1_ground_load_substeps_trial.py": "1917e3147783cddc47d8f8aeae366a46f224dd1b4091cc695a7327eded0b5b3f",
+    "scripts/train_tracking_dense_ground_load.py": "361c76f4a2ef9bc3ce4d95a3fbd878ddc7728af2da80c44cf70cc0566fcc4fcd",
+    "scripts/eval_tracking_dense_ground_load.py": "ba44bc4215f2913e59d6fa8c616d2d057c2d9c7fc1bc98b7fc9df68470d14185",
+    "scripts/smoke_dense_ground_load.py": "620c8f2906114cf4cf7aa375413d43034b416acab091ca144a792801436c3d08"
+  },
+  "expected_new_source_sha256": {
+    "training/tron1_wheel_axle_tracking.py": "aa3dac2bdae03f029d2c4bb174e79007f9b7927b5eaa04d35e50eefcff7de256",
+    "training/tron1_wheel_axle_trial.py": "92301d90d844c3b3db0aa82e336abf7823855cde2ec21b01b639924be36e8421",
+    "scripts/train_tracking_wheel_axle.py": "654acc37ccd8ff41f7b10d0b71abe9c85051cafe58be7f3b5d893755906c7bc3",
+    "scripts/eval_tracking_wheel_axle.py": "c865d498c94ceafee1bf20f72ded62ac7ee417ec91e370c475ecbaa029fc1663",
+    "tests/test_tron1_wheel_axle_tracking.py": "f1e8ee6bc6c8a1914565b0ac50aa647146c104fd79af9d693ff17e5fd3357fac",
+    "tests/test_wheel_axle_trial.py": "f00fd99ef17a7b1a3ada824a852c3efbe747c43282a651b9153e6c190123268e",
+    "tests/test_wheel_axle_entrypoints.py": "8498abcb9406983b35b98b101357ed766454c660ce3bb1783d1b0a34a4bc5cbc",
+    "config/car_drift_wheel_axle_task.json": "1db17ea1bb8820396e37bdf7043b6852151fda2b500c69f5d9a7716283932f78"
+  },
+  "unchanged": {
+    "motion_sha256": "8680ac0b331b8c2353701d95dcbce2ea8b0c97342eeb12244867eee33c84fb04",
+    "robot_asset_sha256": "327ca5080e753bbc95d8c3c797e9cd49a0f134d400cfe80494af0ba840e23a8e",
+    "robot_reference_sha256": "ea0b79c1ae84b8deb79961505555ca38decf22f93e44839d8b4cdc8d398deb81",
+    "mujoco_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+    "policy_hz": 50,
+    "physics_hz_both_engines": 200,
+    "actor_critic_action_dimensions": [
+      51,
+      120,
+      8
+    ],
+    "leg_kp_kd": [
+      500,
+      10
+    ],
+    "leg_and_wheel_torque_limits_nm": [
+      80,
+      12
+    ],
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [
+      0.04,
+      2
+    ],
+    "ground_load_cost": "Mean of four instantaneous costs, weight-1/scale.20, unchanged frozen016 collector",
+    "wheel_vertical_cost": "Original LAST wheel LINK-origin vz, weight-5/std.02, unchanged; inherited substep velocity statistic remains unused",
+    "other_rewards": "All original016 seven-link body orientation, signed sideslip2, speed3, yaw1, grounded.4, tilt-.2, action-rate-.5 and leg-target-rate-1 terms remain.",
+    "motor_randomization": "Existing episode-fixed motor-v1 shaft friction/no-load speed/torque capacity with20% nominal resets; no contact/mass/gravity randomization.",
+    "environment": "Same factory, eight zero-action smoke steps/reset, loader/RNG semantics and normalizer updates. New stateless reward reads existing command/state tensors only.",
+    "contact_geometry_margin_or_gap_changed": false,
+    "new_teacher_or_reference": false,
+    "new_observation_or_action": false,
+    "hardware_ready": false
+  },
+  "evaluation": {
+    "episodes_per_engine": 1,
+    "num_envs": 1,
+    "seed": 42,
+    "conditions": "Nominal motors, original frame0/initial velocities, no injected lateral velocity or hidden root writes; same actual completed final017 actor/norm in both engines.",
+    "recording": "Actual200Hz first-episode contact/state records plus unchanged50Hz pre-action observations/actions; reuse exact byte-pinned016 Isaac recorder/metric helpers.",
+    "assessor_source_sha256": "a2214c47d0f8b262fb8f5b70a709908ef1d7487fd2b1393becb8ad8dfc672fa5",
+    "acceptance": "All original gates: >=.200s uninterrupted speed>=.4m/s, positive forward component, abs(beta)>=8deg, both actual ground-bearing contacts Fn>5N and contact-patch lateral slip>=.04m/s concurrently; original tracking/height/progress/support/nonwheel-impact/completion/stable-stop gates unchanged. No gap bridging.",
+    "deployment_provenance": "CPU full-budget checkpoint/optimizer/normalizer verification; all12 exported actor/normalizer tensors match actual final checkpoint; same actual actorbytes and all288 pre-action rows independently replay within1e-5 in both engines.",
+    "fixed_windows_s": [
+      [
+        0.78,
+        1.44
+      ],
+      [
+        1.82,
+        2.32
+      ]
+    ],
+    "comparison": "Original clock/noDTW/phase fitting; evaluate axle error, L/R normal-load distribution, actual bearing-contact absences, signed sideslip and all behavior gates. Bearing absences are not a PhysX manifold/separation measurement. Diagnostics are not causal proof.",
+    "publication": "A reviewed new current-source producer must retain all8 final four-panel artifacts, this added axle objective, runtime/completion/actor proofs, full failed gates, original source limitations and original jump. Do not relabel the frozen016 publisher.",
+    "format": "Captured car -> kinematic TRON1 reference -> recorded Isaac policy -> same actor recorded MuJoCo policy; entire5.76s and all failed contact intervals.",
+    "limitations": "One continued seed and one nominal first episode per engine; no causal/statistical-robustness/hardware/contact-equivalence claim. Captured source is steering-induced inertia drift already moving, not powered standstill drift or physical-car mocap."
+  },
+  "resources": {
+    "device_selection": "Fresh explicitly selected idle native ordinal/UUID before every AppLauncher; no automatic fallback or CUDA_VISIBLE_DEVICES mask.",
+    "stage_wall_time_budgets_s": {
+      "small_fixture": 900,
+      "runtime_fixture": 900,
+      "training": 4500,
+      "isaac_evaluation": 900
+    },
+    "termination_grace_s": 30,
+    "ownership": "Exclusive fsynced receipts/logs with actual owned PID/PGID, live all-GPU context observations and postexit process/context check. Never signal foreign jobs.",
+    "cross_gpu_contexts": "Isaac can create contexts on all eight GPUs; no physical isolation, atomic idle reservation or harmlessness claim."
+  },
+  "verification_snapshot": {
+    "actual_torch_cpu_unittest_tests_passed": 14,
+    "new_helper_profile_entrypoint_pytest_tests_passed": 113,
+    "new_pytest_subtests_passed": 32,
+    "combined_cpu_regression_tests_passed": 341,
+    "combined_cpu_regression_subtests_passed": 107,
+    "runtime_gpu_verified": false,
+    "fixture_launched": false,
+    "training_launched": false,
+    "paired_policy_evaluation_available": false,
+    "goal_achieved": false,
+    "note": "These are arithmetic/schema/CLI-source checks, not a trained-policy or contact-success result. Runtime fixture/launcher/verifier/publication sources are not yet implemented/sealed in this snapshot."
+  }
+}

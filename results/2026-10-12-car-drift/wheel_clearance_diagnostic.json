@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "task": "captured_car_drift",
+  "status": "retrospective_saved_state_geometry_diagnostic",
+  "behavior_success_claimed": false,
+  "engine": "MuJoCo",
+  "engine_version": "3.9.0",
+  "source_sha256": {
+    "diagnostic": "0c13a2cd7cf42cf6f8d181b0ca034c5455a65a4202ca6ec76d5b2b45d4547321",
+    "tests": "bfebacf643c464dff2f6bf22ed60675dc4e649c55fe7b78136a84f09845b3e79",
+    "private_report": "32667c6d16a9241836daabb25f969559e6d83667abe1cc402d1437ba9e5e0ded",
+    "private_arrays": "0b5ce6ea5870174c275c09a021c0f779641d5134b5ac2030ea0d34b24fbd9cc9"
+  },
+  "execution": {
+    "new_physics_steps": 0,
+    "new_actor_calls": 0,
+    "new_episodes": 0,
+    "position_stage": "mj_fwdPosition only",
+    "solver_forces_recomputed": false,
+    "all_15_inputs_per_trial_rehashed_unchanged": true,
+    "pure_tests_passed": 24,
+    "exact_mujoco_synthetic_position_check_passed": true
+  },
+  "measurement": {
+    "saved_states_per_trial": 1153,
+    "sample_period_s": 0.005,
+    "wheel_order": [
+      "L",
+      "R"
+    ],
+    "bearing_count": "archived ground point count with normal force >5 N",
+    "normal_force": "archived current-state ground-normal vector; not reconstructed force or past applied impulse",
+    "manifold_count": "reconstructed current saved-state cylinder-plane geometric candidates, not originally saved raw contacts or bearing proof",
+    "clearance": "exact compiled MuJoCo finite-cylinder support distance to its original plane; positive means separated",
+    "support_extent_formula": "h*abs(n dot axle) + R*sqrt(1-(n dot axle)^2)",
+    "cylinder_radius_m": 0.127,
+    "cylinder_halfwidth_m": 0.025,
+    "undefined_instantaneous_derivative": "masked at exact zero-camber/axial cusps; NPZ zero sentinel is not physical zero",
+    "fixed_source_nominal_grid_halfopen_rows": [
+      [
+        156,
+        288
+      ],
+      [
+        364,
+        464
+      ]
+    ],
+    "phase": "absolute saved-state index modulo 4; not fitted or shifted",
+    "window_endpoint_caveat": "Original floating timestamps and nominal grid labels disagree at some endpoints; both remain unchanged in private report."
+  },
+  "trials": {
+    "trial013": {
+      "input_sha256": {
+        "model": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+        "profile": "174a0543dfbf3c65bdd54867ab8e9b591047c8a572b0212eaaddbcd0573f2064",
+        "contract": "8342bc119ca81a2c3f182fa383024fdc24c82c210504e2d031087f25009be47f",
+        "mujoco_report": "51739326a7eb303652684d9d5911f568f2b91819b207cd9163fd694ea84974c5",
+        "mujoco_rollout": "dc71ee407f56147d1c6e7ff91b797213d5a6786fa70304c8254794adc123b182",
+        "mujoco_evaluator": "da6d1da378b5065589a49f2befaebfb0576665dbd2ad5d34a157d11b8984a3aa",
+        "drift_module": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+        "contact_slip": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+        "assessor": "a2214c47d0f8b262fb8f5b70a709908ef1d7487fd2b1393becb8ad8dfc672fa5",
+        "diagnostic": "0c13a2cd7cf42cf6f8d181b0ca034c5455a65a4202ca6ec76d5b2b45d4547321",
+        "scripts/compare_tracking.py": "1368dc70e7f3b7fa8c07b07c4a29b6a6f09501253e1a54fe82e545d6082b1f7a",
+        "scripts/eval_tracking.py": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+        "training/tron1_physics_clock.py": "bcd89d6a24652d4501baf6744b46944d369fd224a9ab4727fc8b6073a20cf44e",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d"
+      },
+      "saved_state_mask_identity": {
+        "zero_bearing_equals_zero_normal_vector": true,
+        "zero_bearing_equals_absent_reconstructed_manifold": true,
+        "zero_bearing_equals_positive_analytic_clearance": true
+      },
+      "manifold_present_but_zero_bearing_samples": 0,
+      "initial_state_separate": {
+        "zero_bearing_L_R": [
+          true,
+          true
+        ],
+        "clearance_um_L_R": [
+          0.005656669466169717,
+          0.005656669466169717
+        ]
+      },
+      "postinitial_zero_bearing_samples_L_R": [
+        11,
+        15
+      ],
+      "postinitial_positive_clearance_um_range_L_R": [
+        [
+          5.266621794008941,
+          378.1618410697851
+        ],
+        [
+          1.6393368054146151,
+          117.16611722031867
+        ]
+      ],
+      "fixed_source_windows": [
+        {
+          "rows_halfopen": [
+            156,
+            288
+          ],
+          "zero_bearing_samples_L_R": [
+            0,
+            4
+          ],
+          "right_wheel_mod4_counts": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "rows_halfopen": [
+            364,
+            464
+          ],
+          "zero_bearing_samples_L_R": [
+            0,
+            4
+          ],
+          "right_wheel_mod4_counts": [
+            2,
+            1,
+            0,
+            1
+          ]
+        }
+      ],
+      "fk_verification_max_abs_error": {
+        "root_position_m": 0,
+        "root_com_velocity_m_s": 5.551115123125783e-17,
+        "root_angular_velocity_rad_s": 2.220446049250313e-16,
+        "wheel_link_position_m": 0
+      },
+      "fk_storage_tolerance_not_physical_gap_tolerance": 1e-9
+    },
+    "trial016": {
+      "input_sha256": {
+        "model": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+        "profile": "989215d55b548e245d6add928411d9e6fa16852a21f6863a777179014e3230b5",
+        "contract": "9832b7c1ba7d90bb06094cb435aa630be37aed43f31946c0c3caf187dc61199a",
+        "mujoco_report": "63990fae80db971905b2bfe4eaa080a603943a204ccb117646429aad219386e3",
+        "mujoco_rollout": "da44cf91d156d6097050795a7c3b4051974c74bcf516ef29ad7ae750b161cd7e",
+        "mujoco_evaluator": "da6d1da378b5065589a49f2befaebfb0576665dbd2ad5d34a157d11b8984a3aa",
+        "drift_module": "6d5f7974602adec9313a5e4feceb8e3caab392ca99351ac4a5f717e57fe1cf8a",
+        "contact_slip": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+        "assessor": "a2214c47d0f8b262fb8f5b70a709908ef1d7487fd2b1393becb8ad8dfc672fa5",
+        "diagnostic": "0c13a2cd7cf42cf6f8d181b0ca034c5455a65a4202ca6ec76d5b2b45d4547321",
+        "scripts/compare_tracking.py": "1368dc70e7f3b7fa8c07b07c4a29b6a6f09501253e1a54fe82e545d6082b1f7a",
+        "scripts/eval_tracking.py": "fd90089810d3d14bfd96210723afdd3a36113a19f667ec60b2df617dd032f992",
+        "training/tron1_physics_clock.py": "bcd89d6a24652d4501baf6744b46944d369fd224a9ab4727fc8b6073a20cf44e",
+        "training/tron1_domain_randomization.py": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+        "training/tron1_ground_load_reserve.py": "761eccede3c0d90d744a4d9c45c9671b318426ab9bc6f9762ee7cacb3c14496d"
+      },
+      "saved_state_mask_identity": {
+        "zero_bearing_equals_zero_normal_vector": true,
+        "zero_bearing_equals_absent_reconstructed_manifold": true,
+        "zero_bearing_equals_positive_analytic_clearance": true
+      },
+      "manifold_present_but_zero_bearing_samples": 0,
+      "initial_state_separate": {
+        "zero_bearing_L_R": [
+          true,
+          true
+        ],
+        "clearance_um_L_R": [
+          0.005656669466169717,
+          0.005656669466169717
+        ]
+      },
+      "postinitial_zero_bearing_samples_L_R": [
+        10,
+        16
+      ],
+      "postinitial_positive_clearance_um_range_L_R": [
+        [
+          0.5858803699965165,
+          229.0356409162253
+        ],
+        [
+          1.095024937225464,
+          155.750360508633
+        ]
+      ],
+      "fixed_source_windows": [
+        {
+          "rows_halfopen": [
+            156,
+            288
+          ],
+          "zero_bearing_samples_L_R": [
+            1,
+            6
+          ],
+          "right_wheel_mod4_counts": [
+            0,
+            1,
+            4,
+            1
+          ]
+        },
+        {
+          "rows_halfopen": [
+            364,
+            464
+          ],
+          "zero_bearing_samples_L_R": [
+            0,
+            4
+          ],
+          "right_wheel_mod4_counts": [
+            1,
+            1,
+            2,
+            0
+          ]
+        }
+      ],
+      "fk_verification_max_abs_error": {
+        "root_position_m": 0,
+        "root_com_velocity_m_s": 2.220446049250313e-16,
+        "root_angular_velocity_rad_s": 2.220446049250313e-16,
+        "wheel_link_position_m": 0
+      },
+      "fk_storage_tolerance_not_physical_gap_tolerance": 1e-9
+    }
+  },
+  "limitations": [
+    "Retrospective descriptive saved-state audit, not a new episode, causal test, hardware or robustness proof.",
+    "Original acceptance gates, clocks, thresholds and source windows are unchanged; no gaps are bridged or tolerated.",
+    "Archived bearing counts use Fn > 5 N; an empty bearing count does not identify an empty collision manifold.",
+    "Archived normal vectors sum all supplied ground normal forces; MuJoCo ground total additionally includes friction.",
+    "MuJoCo archived forces follow mj_step then mj_forward and are refreshed-current-state forces, not past applied impulses.",
+    "Reconstructed MuJoCo manifolds/distances are current saved-state geometry, not originally saved raw contacts or forces.",
+    "Actual PhysX manifold, separation, cooked cylinder geometry and raw contact point buffers are unavailable.",
+    "No Isaac geometry/manifold reconstruction is attempted; no PhysX/MuJoCo contact-equivalence claim.",
+    "Instantaneous support derivatives are undefined at zero-camber or axial cusps; interval finite differences are separate.",
+    "No regenerated forces, phase fitting, new teacher, contact-law identification, reserve-cost reconstruction or gate changes."
+  ],
+  "storage_check_fix": {
+    "absolute": 7.105427357601002e-15,
+    "definition": "32 * float64 epsilon; FK storage roundoff only, native qpos unchanged; NOT a gap or behavior tolerance"
+  },
+  "first_failed_diagnostic_attempt": "Preserved privately: an exact quaternion storage coefficient check refused 1.11e-15 FK normalization roundoff before output. The fixed 32*float64-epsilon storage check does not rewrite native qpos or change position/joint equality, geometry, contact or behavior gates.",
+  "illustrative_event": {
+    "trial": "trial016",
+    "sample": 248,
+    "time_s": 1.2399999999999956,
+    "wheel": "L",
+    "clearance_um": 0.5858803699965165,
+    "wheel_link_origin_vz_m_s": -0.00005660745099332447,
+    "analytic_support_clearance_rate_m_s": 0.0004288970822705616,
+    "analytic_derivative_defined": true,
+    "camber_deg": 14.691169558331522,
+    "interpretation": "Link origin slightly descends while cylinder-plane separation increases; link-origin vz is not support-surface normal separation velocity. Not a causal test."
+  },
+  "original_trial016_outcome": {
+    "verdict": "fail",
+    "isaac_longest_uninterrupted_qualifying_drift_s": 0.495,
+    "mujoco_longest_uninterrupted_qualifying_drift_s": 0.135,
+    "required_s": 0.2,
+    "failed_checks": [
+      "mujoco.sustained_grounded_contact_patch_drift"
+    ],
+    "public_assessment_sha256": "c6d87f0ee9eb1f6ffbd1a8e5743e510de86dbdc434fb78846eabb6bc2a08b099",
+    "acceptance_gates_changed": false,
+    "gap_tolerance_or_bridging": false
+  }
+}
