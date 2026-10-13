@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 3.0, "grounded": 0.4, "tilt": -0.2},
+  "speed_std_m_s": 0.10,
+  "action_rate_weight": -0.5,
+  "leg_kd": 10.0,
+  "mujoco_contact_solref": [0.04, 2.0],
+  "leg_target_rate_weight": -1.0,
+  "wheel_vertical_velocity_weight": -5.0,
+  "wheel_vertical_velocity_std_m_s": 0.02,
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_max_cost",
+  "wheel_axle_orientation_tracking": {"weight": 1.0, "std": 0.2},
+  "description": "Prospective trial019: only axle-direction angular width .4 to .2 radians; hold actual018 worst-substep load cost and all remaining science. Not an executable/source-sealed activation yet."
+}
