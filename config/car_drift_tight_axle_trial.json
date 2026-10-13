@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial019",
+  "task": "captured_car_drift",
+  "baseline_trial": "trial018",
+  "resume_parent_trial": "trial004",
+  "status_at_predeclaration": "prospective_profile_only_no_trial019_application_or_learning",
+  "task_profile": "config/car_drift_tight_axle_task.json",
+  "task_profile_sha256": "7ea15e293f133343c9df7a0958da1891f9c93f8e4b06a41e380673630008800a",
+  "baseline_task_profile": "config/car_drift_worst_ground_load_task.json",
+  "baseline_task_profile_sha256": "ad76a604264c142761175cad3c887100874394fed041e3b0a25b6b32df41d026",
+  "scientific_change": {
+    "field": "wheel_axle_orientation_tracking.std",
+    "from_rad": 0.4,
+    "to_rad": 0.2,
+    "weight_unchanged": 1,
+    "target_unchanged": "Existing yaw-reanchored robot-reference local+Y wheel axle directions at LAST native substep; no wheel spin phase or new teacher."
+  },
+  "evidence": {
+    "actual_trial018_pair_verdict": "fail",
+    "isaac_contiguous_drift_s": 0.475,
+    "mujoco_contiguous_drift_s": 0.155,
+    "original_threshold_s": 0.2,
+    "recorded_pose_diagnostic": "results/2026-10-12-car-drift/trial018_wheel_pose.json",
+    "zero_force_moving_drift_samples": 5,
+    "supported_but_low_slip_samples": 2,
+    "peak_left_wheel_axle_tilt_deg": 18.01123709090855,
+    "original_reference_axle_tilt_degrees": "below2e-6; yaw reanchoring does not change vertical component"
+  },
+  "hypothesis": "Tighter axle-direction tracking may reduce out-of-plane wheel tilt and uneven support. Observed geometry is descriptive, not proof that this causes unloading or that a tighter reward fixes it. It may suppress useful drift.",
+  "held": {
+    "load_sampling": "all_substeps_max_cost",
+    "instantaneous_load_sum_scale_weight": "original two-wheel exponential sum; scale .20mg and weight-1",
+    "last_LINK_vertical_cost": "weight-5/std.02; inherited substep velocity statistic unused",
+    "other_rewards_and_target_trajectories": "All original018, including signed sideslip2, speed3, yaw1, seven-link pose/orientation and action/leg-target rates",
+    "source_reference_asset_and_mujoco_model": "unchanged exact018/017 data hashes",
+    "leg_kp_kd": [
+      500,
+      10
+    ],
+    "policy_physics_hz": [
+      50,
+      200
+    ],
+    "actor_critic_action_dimensions": [
+      51,
+      120,
+      8
+    ],
+    "motor_randomization": "episode-fixed original motor-v1; nominal evaluation",
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [
+      0.04,
+      2
+    ],
+    "geometry_margins_gaps_changed": false,
+    "all_original_acceptance_gates": true,
+    "contact_gaps_bridged": false
+  },
+  "training": {
+    "original004_checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "iterations": 600,
+    "num_envs": 2048,
+    "rollout_steps": 24,
+    "smoke_steps": 8,
+    "seed": 42,
+    "save_interval": 600,
+    "additional_environment_steps": 29491200,
+    "initial_learning_rate_scalar_restored": 0.00001,
+    "maximum_owned_wall_time_s": 4500,
+    "only_predesignated_fully_completed_final_checkpoint_eligible": true
+  },
+  "activation_prerequisites": [
+    "Complete source-pinned strict019 profile/configuration, training, evaluation and actual runtime fixture entrypoints before any019 application. This profile-only file is not launch authority.",
+    "Use NEW immutable deployment and noncolliding outputs/ledgers; source-seal private guards and CPU producers before fresh8/2048 GPU prerequisites. No old fixture or proof relabeling.",
+    "Keep the same actual original004 parent, PPO constructor, reset/RNG and normalization semantics; verify final600 tensors, Adam/normalizer counters and all input hashes.",
+    "One nominal recorded200Hz episode per engine with the same actual final actor; all original behavior gates plus CPU tensor/action/controller-torque provenance and full four-panel eight-artifact publication, including FAIL.",
+    "Explicit low-context user-authorized sharing or a freshly idle permitted card; never stop foreign jobs or claim isolation. Preserve original jump and every prior failure."
+  ]
+}
