@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "kind": "recorded_pose_wheel_gap_diagnostic_summary",
+  "trial": "trial022",
+  "status": "descriptive_only_original_sim2sim_verdict_fail",
+  "rollout_sha256": "eaee789a1dd26847acbf10ca59d6c8bc5d27ea418976e3dd6a6aa8c0339b4aed",
+  "physical_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "original_assessor_source_sha256": "a2214c47d0f8b262fb8f5b70a709908ef1d7487fd2b1393becb8ad8dfc672fa5",
+  "contact_decomposition_source_sha256": "ab70ccae7929b884b2face0ce8347f723d32b0cd76a377527bc7371152127817",
+  "wheel_pose_audit_source_sha256": "fa6fadae98a71afe4240169999175e13dfe9d8088ad4319f741b2ae6ede88a66",
+  "private_contact_breaks_sha256": "694b2f620d6bda2d4a6d7cfcdc4d16841238f618a615e34a56c7a0fd0bc90ab4",
+  "private_wheel_pose_audit_sha256": "011a4468b583b255d0d8caa64dcf900cdf588f7fc44085a46927c115c2aa01fb",
+  "physics_dt_s": 0.005,
+  "recorded_physical_poses": 1153,
+  "maximum_FK_wheel_position_error_m": 0.0,
+  "moving_drift_samples": 146,
+  "support_failure_samples_while_moving_drift": 5,
+  "slip_only_failure_samples_while_supported_moving_drift": 0,
+  "events": [
+    {"sample_index": 195, "time_s": 0.9750000000000008, "missing_bearing_wheel": "right", "right_cylinder_plane_clearance_um": 79.86401972436691},
+    {"sample_index": 224, "time_s": 1.119999999999998, "missing_bearing_wheel": "right", "right_cylinder_plane_clearance_um": 62.35778024124423},
+    {"sample_index": 256, "time_s": 1.2799999999999947, "missing_bearing_wheel": "right", "right_cylinder_plane_clearance_um": 3.867927099586075},
+    {"sample_index": 377, "time_s": 1.8849999999999818, "missing_bearing_wheel": "right", "right_cylinder_plane_clearance_um": 138.5992465067472},
+    {"sample_index": 396, "time_s": 1.9799999999999798, "missing_bearing_wheel": "right", "right_cylinder_plane_clearance_um": 142.44241695369337}
+  ],
+  "new_physics_steps": 0,
+  "new_actor_calls": 0,
+  "force_solves": 0,
+  "gates_changed": false,
+  "contact_gaps_bridged": false,
+  "limitations": [
+    "Analytic cylinder/plane clearance from recorded MuJoCo qpos is geometric, not a reconstructed contact force or original raw collision manifold.",
+    "No PhysX manifold is inferred, and these single-seed observations do not identify the cause of wheel unloading or establish robustness."
+  ]
+}
