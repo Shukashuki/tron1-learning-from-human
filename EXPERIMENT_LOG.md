@@ -2,6 +2,12 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
+## Trial018 production-phase preparation (2026-10-12)
+
+The new [training](scripts/train_tracking_worst_ground_load.py) and [nominal evaluation](scripts/eval_tracking_worst_ground_load.py) entrypoints are now complete. Relative to trial017, only the four-substep ground-load cost aggregation changes from its mean to its maximum; the original instantaneous two-wheel sum, reward weight, last-substep wheel-link vertical/axle objectives, original004 parent, PPO constructor and 600-update budget are held. Source-only tests preserve the original recorder, terminal capture, action/actor calls and integration loop, and reject gain, clock, terrain, contact-threshold and domain overrides. These tests are not a new policy or behavioral result.
+
+The separate [production protocol](config/car_drift_worst_ground_load_production.json) preserves the earlier runtime-only protocol and both actual readiness fixtures byte-for-byte. It explicitly retains the recorded procedure deviation: those preliminary applications preceded completion of the production entrypoints. The complete production source set, private launch/CPU-verification sources and original owned-process lifecycles must be sealed before a fresh 8/2048 prerequisite sequence in a new deployment, followed by a single original004 600-update run and the same final actor in both nominal engines. User-authorized low-context GPU sharing remains explicit; no foreign tasks are stopped, and no physical isolation or hardware-readiness claim is made. Trial017 remains the latest published behavioral pair and still fails MuJoCo's uninterrupted-grounded-drift gate.
+
 ## Car drift: failed baselines and stable-gain retry (2026-10-11)
 
 The selected DOA/CARLA `sa_traj34` capture now drives a real TRON1 WF tracking experiment. The adapter keeps the captured XY/heading profile with spatial scale 0.08 and time scale 2, solves bounded support-leg IK at 0.75 m root height, and derives wheel rolling rates without suppressing lateral slip. The 50 Hz reference has 288 frames: 3.74 s captured motion, 1.5 s explicitly synthetic stopping, and a 0.5 s stationary tail. The source starts moving; no extra lateral reset velocity is injected.
