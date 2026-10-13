@@ -15,7 +15,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 PAIR_FILE = "outputs/drift-trial022-preparation-20261013/audit_deployment_provenance_trial022.py"
-PAIR_SHA = "b188f3b41669c6669daf286c8afb673a98a9891a02af3249daa1666e3c3e6ef8"
+PAIR_SHA = "766d18d7f9c0d221c29b555736f61383daf1fc281faa5a40ba4b2088d43fdf0c"
 BASE_SHA = "598cd0cf6a78918da8a5e09ca0f20624c0a7379c7311813923366fd2c9b4293d"
 RENDERER_SHA = "e73dcbb83ad65ee20c0ef3c923b2f90ea46c1f22f9dfa51ae4739e2516aa22e8"
 ARTIFACTS = frozenset(("assessment.json", "reference_audit.json", "render_report.json", "summary.json",
