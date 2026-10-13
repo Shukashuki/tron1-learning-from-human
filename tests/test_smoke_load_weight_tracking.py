@@ -78,6 +78,7 @@ def test_original_force_observer_reset_and_cleanup_preserved():
                  "numpy_axle_reward", "deterministic_gpu_invariance"):
         assert ast.dump(before[name], include_attributes=False) == ast.dump(after[name], include_attributes=False)
     assert "configure_load_weight_trial(cfg, profile)" in SCRIPT.read_text()
+    assert "audit_isaac_materials(env, held_sampler_cache_profile(profile))" in SCRIPT.read_text()
     assert "configure_axle_mid_trial(baseline_cfg, baseline_axle_mid_profile())" in SCRIPT.read_text()
 
 

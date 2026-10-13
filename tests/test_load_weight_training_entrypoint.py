@@ -42,6 +42,7 @@ def test_learning_resume_and_final_save_calls_unchanged():
     source=NEW.read_text()
     assert "(2048, 600, 600, 42, 8)" in source
     assert "configure_load_weight_trial(cfg, task_profile)" in source
+    assert "audit_isaac_materials(env, held_sampler_cache_profile(task_profile))" in source
     assert "install_worst_ground_load_accumulator(env)" in source
     assert 'manifest["dense_ground_load_sampling"] = "all_substeps_max_cost"' in source
     assert '"654acc37ccd8ff41f7b10d0b71abe9c85051cafe58be7f3b5d893755906c7bc3"' in source

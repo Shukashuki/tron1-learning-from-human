@@ -371,7 +371,7 @@ def main():
         from training.tron1_runtime_device import validate_simulation_device
         from training.tron1_drift import audit_isaac_materials
         from training.tron1_axle_mid_trial import configure_axle_mid_trial
-        from training.tron1_load_weight_trial import configure_load_weight_trial, baseline_axle_mid_profile
+        from training.tron1_load_weight_trial import configure_load_weight_trial, baseline_axle_mid_profile, held_sampler_cache_profile
         from training.tron1_wheel_axle_trial import baseline_dense_profile
         from training import tron1_tight_axle_tracking as axle
         from training.tron1_worst_ground_load_substeps import (
@@ -405,7 +405,7 @@ def main():
         if len(body_names) != 9 or set(body_names) != set(axle.BODY_NAMES):
             raise RuntimeError("Expected the named nine-body tracking subset")
         wheel_indices = [body_names.index(name) for name in axle.WHEEL_BODY_NAMES]
-        material_audit = audit_isaac_materials(env, profile)
+        material_audit = audit_isaac_materials(env, held_sampler_cache_profile(profile))
         cache = getattr(env, reserve.CACHE_ATTRIBUTE)
         mg = cache.mg_n.clone()
         windows, costs, raw_vectors, point_vectors, counters, native_times = [], [], [], [], [], []

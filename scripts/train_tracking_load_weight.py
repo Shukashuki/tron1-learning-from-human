@@ -157,7 +157,7 @@ def main():
         from training.tron1_domain_randomization import default_profile, validate_profile, domain_randomization_audit
         from training.tron1_wheel_axle_trial import baseline_dense_profile
         from training.tron1_load_weight_trial import (
-            load_load_weight_profile, configure_load_weight_trial,
+            load_load_weight_profile, configure_load_weight_trial, held_sampler_cache_profile,
         )
         if args.task_profile is None:
             raise ValueError("Wheel-axle entry requires an explicit trial022 task profile")
@@ -181,7 +181,7 @@ def main():
         contact_material_audit = None
         if task_profile is not None:
             from training.tron1_drift import audit_isaac_materials
-            contact_material_audit = audit_isaac_materials(env, task_profile)
+            contact_material_audit = audit_isaac_materials(env, held_sampler_cache_profile(task_profile))
         # Bind only after the original material audit initializes the live mg cache.
         from training.tron1_worst_ground_load_substeps import install_worst_ground_load_accumulator
         reward_accumulator = install_worst_ground_load_accumulator(env)

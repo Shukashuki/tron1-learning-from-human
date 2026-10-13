@@ -52,6 +52,17 @@ def load_load_weight_profile(path):
     return validate_load_weight_profile(previous._dense()._read_json(path))
 
 
+def held_sampler_cache_profile(profile):
+    """Keep the frozen max-of-four sampler's cache metadata at its -1 baseline.
+
+    The cache stores mg, sensors and a scale; it never multiplies by this weight.
+    Only RewardManager uses the new -2 weight. This separation must be explicit
+    because the frozen sampler rejects a cache initialized with any other label.
+    """
+    validate_load_weight_profile(profile)
+    return baseline_axle_mid_profile()
+
+
 def validate_load_weight_contract(contract, original_contract, profile):
     checked = validate_load_weight_profile(profile)
     require(type(contract) is dict and previous._dense()._same_typed(contract.get("task_profile"), checked),

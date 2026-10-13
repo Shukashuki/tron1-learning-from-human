@@ -130,7 +130,7 @@ def main():
                              if args.domain_parameters else None)
         from training.tron1_wheel_axle_trial import baseline_dense_profile
         from training.tron1_load_weight_trial import (
-            load_load_weight_profile, configure_load_weight_trial,
+            load_load_weight_profile, configure_load_weight_trial, held_sampler_cache_profile,
         )
         task_profile = load_load_weight_profile(args.task_profile)
         controller_gain_diagnostic = None
@@ -272,7 +272,7 @@ def main():
         contact_material_audit = None
         if task_profile is not None:
             from training.tron1_drift import audit_isaac_materials
-            contact_material_audit = audit_isaac_materials(env, task_profile)
+            contact_material_audit = audit_isaac_materials(env, held_sampler_cache_profile(task_profile))
         terrain_audit = None
         if terrain_spec is not None:
             from training.tron1_terrain import terrain_runtime_audit

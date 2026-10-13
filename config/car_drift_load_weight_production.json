@@ -4,7 +4,7 @@
   "task": "captured_car_drift",
   "baseline_trial": "trial021",
   "resume_parent_trial": "trial004",
-  "status_at_predeclaration": "complete_public_sources_no_trial022_application_or_learning",
+  "status_at_predeclaration": "revised_after_failed_fixture_no_trial022_learning_or_behavior",
   "task_profile": "config/car_drift_load_weight_task.json",
   "task_profile_sha256": "b4492b2e2bc666cd60c5436448fb2c92ff3136767fa225170cb83be7f2a0221b",
   "scientific_change": {
@@ -20,6 +20,16 @@
   "reward_formula": "negative max over four native substeps of sum_i exp(-normal_force_i/(0.20*mg)); i=LEFT,RIGHT",
   "reward_weight": -2.0,
   "reward_integration": "Original RewardManager applies .02s once; no new dt multiplier.",
+  "sampler_cache_metadata": "The frozen max-of-four sampler requires the held trial021 cache setting weight -1. This weight is only a cache-validation label: the raw cost function does not multiply by it. Initialize that cache from the held trial021 profile while the actual RewardManager term has weight -2; independently verify both in native fixture and CPU replay.",
+  "prior_failed_fixture": {
+    "deployment_commit": "17a38797e25c52bd1f297c177eb41cabb76a51f8",
+    "stage": "fixture8",
+    "outcome": "natural_process_exit_but_science_failure",
+    "error": "Ground-load sampling preserves only reserve weight -1 and scale .20",
+    "ppo_learning_started": false,
+    "behavior_evaluated": false,
+    "prior_deployment_preserved": true
+  },
   "expected_historical_source_sha256": {
     "config/car_drift_axle_mid_task.json": "7b69b62dc1ea38e5adc4cea7aef96b56cd279943f02de6ee8d68159805fb3483",
     "training/tron1_axle_mid_trial.py": "d7c849556d6f38e9f56046c9913bb260a196b141db37ab1e516d38f2d4631bc4",
@@ -29,14 +39,14 @@
     "scripts/smoke_axle_mid_tracking.py": "3a62cf75eabc43dac70173668cd98d2d84b1fcd4c002227e13e5f456ff471c86"
   },
   "expected_new_source_sha256": {
-    "training/tron1_load_weight_trial.py": "543aa2495adfe8c6e30cd6367dc7a5e2db56430b33e97f518dca79db8fb769e4",
-    "scripts/train_tracking_load_weight.py": "4906bb81f29159f63fa81ccef3c0c5f55fa47833246b4a9c726cbe3f0a34f14a",
-    "scripts/eval_tracking_load_weight.py": "f291b11080f9250144f0b692e15d859d866679b4da0dd8b4f0cd2ab72922ce8a",
-    "scripts/smoke_load_weight_tracking.py": "effeb81952c0f711f99fc8ab5a044fdfb1ed7426054e828140a9197a5d0e3d31",
-    "tests/test_load_weight_trial.py": "79d93cfb90a5e38922503d0de29f4aba3f768bb2e2ff1455b5520b529d80e72b",
-    "tests/test_load_weight_training_entrypoint.py": "024abdce00cc5d1be46ae4c1c6b881ae332b300f3252d0c63a344691e8f29a2c",
-    "tests/test_load_weight_evaluation_entrypoint.py": "59e4059d5e57428ac75c649182748258b5aa7432f449be24f5d9e3e85bba2aef",
-    "tests/test_smoke_load_weight_tracking.py": "da2100e0d34bae27e35d82c80955f4b54840ce8599958eca4bacfe64dd20f92c"
+    "training/tron1_load_weight_trial.py": "5c7b5324649e667f952f79754500927c565fa1db152c986daf34cb047a95f471",
+    "scripts/train_tracking_load_weight.py": "0d091ce704a329bbf811e94a8cecf1a9149a0de942a140e69713373a134f40d8",
+    "scripts/eval_tracking_load_weight.py": "d4d154201a665a8406784b5cea8a983af246054f3b6eb3c1b04e3908181dbff6",
+    "scripts/smoke_load_weight_tracking.py": "ec9770dc363803baeaee456cfc31071cb8d8ce716f6c90fd842ed5ad35e97621",
+    "tests/test_load_weight_trial.py": "4beb95ec43f373be70aeaa785020239bb632f0c4d41cb557f6b43425a9467e11",
+    "tests/test_load_weight_training_entrypoint.py": "5ae58ab02ae65c017ab77eecebf53df173a31c01eb93335dd69c1d29b9d8f725",
+    "tests/test_load_weight_evaluation_entrypoint.py": "06c040dcdd53fa85ed54bc421a94c39cd9fdc7145e9be0a178b7ee90a2491b92",
+    "tests/test_smoke_load_weight_tracking.py": "c7d6fb4c7fb1e54aa044e8b68d3a7973f08cc083c0ccc5d590e12b88bd2f667e"
   },
   "installed_isaaclab_manager_sources": {
     "verification": "Recheck actual installed source before and after each fixture.",
@@ -98,7 +108,7 @@
   ],
   "activation_prerequisites": [
     "Freeze complete public sources plus private launch guards and CPU verifiers in a new deployment before any022 App.",
-    "Verify exact021-to022 live reward-ledger weight-only delta, raw force max-of-four, dt once, reset/counters, and natural teardown with 8 then 2048 environments.",
+    "Verify exact021-to022 live reward-ledger weight-only delta, held -1 sampler cache label versus actual -2 manager weight, raw force max-of-four, dt once, reset/counters, and natural teardown with 8 then 2048 environments.",
     "Train only the predesignated completed 600-update actor; same actor in nominal Isaac and MuJoCo and original full-200Hz gates. Publish PASS or FAIL without altering thresholds.",
     "Fresh authorized low-context RTX-sharing guard; no foreign-job signals, GPU reset, or isolation claim."
   ],

@@ -93,6 +93,7 @@ def test_no_new_physics_reset_export_action_or_actor_calls():
     assert loops(OLD) == loops(NEW)
     source = NEW.read_text()
     assert "configure_load_weight_trial(cfg, task_profile)" in source
+    assert "audit_isaac_materials(env, held_sampler_cache_profile(task_profile))" in source
     assert "install_worst_ground_load_accumulator(env)" in source
     assert '"dense_ground_load_sampling": "all_substeps_max_cost"' in source
     assert "c865d498c94ceafee1bf20f72ded62ac7ee417ec91e370c475ecbaa029fc1663" in source

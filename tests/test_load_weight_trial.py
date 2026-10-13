@@ -32,6 +32,18 @@ def test_only_load_weight_changes_and_validation_does_not_mutate():
     with pytest.raises(ValueError): trial.previous.validate_axle_mid_profile(current)
 
 
+def test_cache_uses_frozen_sampler_metadata_while_live_reward_changes():
+    value = profile()
+    before = copy.deepcopy(value)
+    cached = trial.held_sampler_cache_profile(value)
+    assert cached == trial.baseline_axle_mid_profile()
+    assert cached[trial.LOAD_KEY] == {"weight": -1.0, "scale_fraction": .20}
+    assert value[trial.LOAD_KEY] == {"weight": -2.0, "scale_fraction": .20}
+    assert value == before and cached is not value
+    cached[trial.LOAD_KEY]["weight"] = 0.0
+    assert trial.baseline_axle_mid_profile()[trial.LOAD_KEY]["weight"] == -1.0
+
+
 @pytest.mark.parametrize("key", sorted(set(profile()) - {"description", trial.LOAD_KEY}))
 def test_other_profile_field_change_refused(key):
     value = profile(); value[key] = "changed"

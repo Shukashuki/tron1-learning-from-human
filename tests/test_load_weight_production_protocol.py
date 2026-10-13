@@ -12,7 +12,10 @@ def test_complete_public_sources_and_original_scope_pinned():
     protocol = json.loads((ROOT / "config/car_drift_load_weight_production.json").read_text())
     assert protocol["trial_id"] == "trial022"
     assert protocol["baseline_trial"] == "trial021"
-    assert protocol["status_at_predeclaration"] == "complete_public_sources_no_trial022_application_or_learning"
+    assert protocol["status_at_predeclaration"] == "revised_after_failed_fixture_no_trial022_learning_or_behavior"
+    assert protocol["prior_failed_fixture"]["ppo_learning_started"] is False
+    assert protocol["prior_failed_fixture"]["behavior_evaluated"] is False
+    assert "actual RewardManager term has weight -2" in protocol["sampler_cache_metadata"]
     assert protocol["scientific_change"]["field"] == "wheel_ground_load_reserve.weight"
     assert protocol["scientific_change"]["from"] == -1.0
     assert protocol["scientific_change"]["to"] == -2.0
