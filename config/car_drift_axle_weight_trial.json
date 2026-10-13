@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "trial_id": "trial020",
+  "task": "captured_car_drift",
+  "baseline_trial": "trial019",
+  "resume_parent_trial": "trial004",
+  "status_at_predeclaration": "prospective_profile_only_no_trial020_application_or_learning",
+  "task_profile": "config/car_drift_axle_weight_task.json",
+  "task_profile_sha256": "daf9475cde738246f9ec91150364662c0c90dd7ada3c274d575b55cb78c601b5",
+  "baseline_task_profile": "config/car_drift_tight_axle_production_task.json",
+  "baseline_task_profile_sha256": "734e4f0cee7eef0aaec71fc413cdb31752043b8f10df1c854cdbee11ccfb9eb6",
+  "scientific_change": {
+    "field": "wheel_axle_orientation_tracking.weight",
+    "from": 1.0,
+    "to": 4.0,
+    "std_held_rad": 0.2,
+    "target_sampling_and_geometry_unchanged": "Existing yaw-reanchored directed local+Y wheel axle at LAST native substep; no wheel spin phase or new teacher."
+  },
+  "hypothesis": "Actual019 tighter width leaves left axle tilt near18deg and5 moving-drift unloaded-wheel samples. Increasing existing objective weight scales the same directed-angle gradient signal without further narrowing its exponential width. It may improve orientation/support, but can suppress drift or degrade path tracking. Neither a causal claim nor a result.",
+  "evidence": {
+    "actual_trial019_pair_verdict": "fail",
+    "isaac_contiguous_drift_s": 0.405,
+    "mujoco_contiguous_drift_s": 0.155,
+    "original_threshold_s": 0.2,
+    "recorded_pose_diagnostic": "results/2026-10-12-car-drift/trial019_wheel_pose.json",
+    "zero_force_moving_drift_samples": 5,
+    "supported_but_low_slip_samples": 6,
+    "wheel_axle_tilt_peak_abs_deg": [17.62242907852624,4.86874282401937],
+    "first_three_right_unloaded_samples_s": [0.915,1.075,1.235],
+    "descriptive_intervals_s": [0.16,0.16],
+    "observed_period_is_not_proof_of_a_mode_or_unloading_cause": true
+  },
+  "held": {
+    "worst_ground_load_sum_scale_weight": "exact019 max over four instantaneous two-wheel exponential sums, scale .20mg/weight-1",
+    "LAST_LINK_vertical_cost": "weight-5/std.02; inherited substep velocity statistic unused",
+    "other_rewards_reference_models_observations_and_actions": "exact019",
+    "leg_kp_kd": [500,10],
+    "policy_physics_hz": [50,200],
+    "actor_critic_action_dimensions": [51,120,8],
+    "motor_randomization": "original episode-fixed motor-v1; nominal evaluation",
+    "contact_friction": 0.15,
+    "mujoco_contact_solref": [0.04,2.0],
+    "geometry_margins_gaps_changed": false,
+    "all_original_acceptance_gates": true,
+    "contact_gaps_bridged": false,
+    "no_restart_of_actual019_episode_or_old_gain_sweep": true
+  },
+  "training": {
+    "original004_checkpoint_sha256": "93bebee533bd59b8a7d707a1cd15b83bdff6c02663910afe59f69df91cd71780",
+    "iterations": 600,
+    "num_envs": 2048,
+    "rollout_steps": 24,
+    "smoke_steps": 8,
+    "seed": 42,
+    "save_interval": 600,
+    "additional_environment_steps": 29491200,
+    "initial_learning_rate_scalar_restored": 0.00001,
+    "maximum_owned_wall_time_s": 4500,
+    "only_predesignated_fully_completed_final_checkpoint_eligible": true
+  },
+  "activation_prerequisites": [
+    "Complete source-pinned strict020 configuration, trainer, evaluator and native fixture before ANY020 App; this profile-only predeclaration is not launch authority.",
+    "Use NEW immutable deployment, noncolliding outputs/owned ledgers and private guard/CPU sources sealed before fresh8/2048 prerequisites. Weighted density is4*exp(-mean(theta squared)/.2 squared), with dt applied once; verify actual live reward ledger, raw8 forces, clocks/reset/cache and natural teardown.",
+    "Keep original004 PPO/resume/RNG/normalizers and full600 budget; verify actual final checkpoint/tensor/Adam/norm/source/input bytes, not self-reported counts alone.",
+    "Freeze paired tensor/action/controller-torque verification before first nominal rollout; same actual final normalized actor in both engines, original full200Hz gates and four-panel exact8 publication includingFAIL. Preserve original jump and actual019.",
+    "Fresh user-authorized low-context shared or fully idle RTX only; no foreign signals or physical isolation claim."
+  ]
+}

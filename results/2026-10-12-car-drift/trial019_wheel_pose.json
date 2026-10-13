@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "status": "recorded_pose_FK_verified",
+  "source_sha256": "fa6fadae98a71afe4240169999175e13dfe9d8088ad4319f741b2ae6ede88a66",
+  "rollout_sha256": "cbf020b5ec4748964be3890779d3797ee3d08a88e497cf818be8d137a7219538",
+  "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "breaks_sha256": "c514d109150513b05a6be688b41cb4532ede0192110c2048bf51a48104c81148",
+  "recorded_physical_poses": 1153,
+  "maximum_FK_wheel_position_error_m": 0.0,
+  "events": [
+    {
+      "sample_index": 183,
+      "time_s": 0.9150000000000007,
+      "planar_speed_m_s": 1.2060907710860276,
+      "sideslip_deg": 8.520250638825981,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        126.56435570050377,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0057369257006920195,
+      "support_failed": true,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -445.3189394274027,
+        41.895102116594465
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -4.840666996970758,
+        0.5426494241306895
+      ]
+    },
+    {
+      "sample_index": 215,
+      "time_s": 1.074999999999999,
+      "planar_speed_m_s": 1.1805990213334636,
+      "sideslip_deg": 10.779328721173213,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        125.05377793073195,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0001348969848463411,
+      "support_failed": true,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -223.99005470757166,
+        72.80066093687114
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -8.671522051000967,
+        0.15955174811592016
+      ]
+    },
+    {
+      "sample_index": 247,
+      "time_s": 1.2349999999999957,
+      "planar_speed_m_s": 1.1603240376460258,
+      "sideslip_deg": 10.297400596787567,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        129.25011108506195,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.007245921443966951,
+      "support_failed": true,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -63.76146278039719,
+        44.088797463998766
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -12.877791438541623,
+        -0.4172708660771553
+      ]
+    },
+    {
+      "sample_index": 265,
+      "time_s": 1.3249999999999937,
+      "planar_speed_m_s": 1.1519390506908298,
+      "sideslip_deg": 8.752668627964143,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        137.55343595854677,
+        75.71235807906486
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.039653736395383506,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -29.046872013141837,
+        -2003.7629542110674
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -14.969653769404308,
+        -1.180673558303461
+      ]
+    },
+    {
+      "sample_index": 266,
+      "time_s": 1.3299999999999936,
+      "planar_speed_m_s": 1.1519246179265392,
+      "sideslip_deg": 8.649168108279602,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        138.6395351808286,
+        80.88464031825379
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03957053902289839,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -28.247523066020527,
+        -1935.8737962227149
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -15.074110252990085,
+        -1.238580449121367
+      ]
+    },
+    {
+      "sample_index": 269,
+      "time_s": 1.3449999999999933,
+      "planar_speed_m_s": 1.150543096107165,
+      "sideslip_deg": 8.333271938915273,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        139.02760891293522,
+        75.33103478877304
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03606089905922023,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -26.816177423633764,
+        -1731.2330113735165
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -15.374303280212951,
+        -1.400732075775315
+      ]
+    },
+    {
+      "sample_index": 270,
+      "time_s": 1.3499999999999932,
+      "planar_speed_m_s": 1.1504849257121548,
+      "sideslip_deg": 8.217801009162416,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        139.9120102978397,
+        80.17901450242123
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03587012657969241,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -26.12422226112507,
+        -1667.211987028434
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -15.473202992204348,
+        -1.4580095903077182
+      ]
+    },
+    {
+      "sample_index": 271,
+      "time_s": 1.354999999999993,
+      "planar_speed_m_s": 1.1502576660872308,
+      "sideslip_deg": 8.115909799810554,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        140.22880572165752,
+        81.28435151887722
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.03652867249499086,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -25.730243990659122,
+        -1602.6179483055864
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -15.568928750095228,
+        -1.5108126181775945
+      ]
+    },
+    {
+      "sample_index": 272,
+      "time_s": 1.359999999999993,
+      "planar_speed_m_s": 1.1500735511519178,
+      "sideslip_deg": 8.017248281360711,
+      "bearing_contact_count": [
+        1,
+        1
+      ],
+      "archived_ground_normal_force_n": [
+        141.49757604740586,
+        81.89067059444042
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0363313501933768,
+      "support_failed": false,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -25.697978698555232,
+        -1538.7115834954377
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -15.661240968656202,
+        -1.559973348173287
+      ]
+    },
+    {
+      "sample_index": 383,
+      "time_s": 1.9149999999999812,
+      "planar_speed_m_s": 1.1246486508068299,
+      "sideslip_deg": -9.530811771851575,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        118.79611850224435,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.0037961664290315084,
+      "support_failed": true,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -147.849104309334,
+        189.8629056447665
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -12.247066827156388,
+        -3.9632529053491443
+      ]
+    },
+    {
+      "sample_index": 405,
+      "time_s": 2.024999999999979,
+      "planar_speed_m_s": 1.1223091024879668,
+      "sideslip_deg": -9.271163487802845,
+      "bearing_contact_count": [
+        1,
+        0
+      ],
+      "archived_ground_normal_force_n": [
+        103.53221609733762,
+        0.0
+      ],
+      "mean_contact_patch_lateral_slip_m_s": 0.00045216769913567417,
+      "support_failed": true,
+      "slip_failed": true,
+      "analytic_cylinder_plane_clearance_um": [
+        -75.86034030009243,
+        112.29345106794673
+      ],
+      "wheel_link_axle_tilt_deg": [
+        -9.588980495940707,
+        -4.687418512525085
+      ]
+    }
+  ],
+  "wheel_axle_tilt_peak_abs_deg": [
+    17.62242907852624,
+    4.86874282401937
+  ],
+  "new_physics_steps": 0,
+  "new_actor_calls": 0,
+  "force_solves": 0,
+  "limitations": [
+    "Analytic cylinder/horizontal-plane support is geometric, not a solved contact force.",
+    "Only MuJoCo recorded FK is reconstructed; PhysX manifolds are not inferred.",
+    "No original drift gate, force, slip or interval is recomputed from geometry."
+  ]
+}
