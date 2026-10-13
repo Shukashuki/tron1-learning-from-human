@@ -1,0 +1,131 @@
+{
+  "actor_and_normalizer_tensors_bit_identical": 12,
+  "actor_outputs_equal_on_fast_observations": 231,
+  "artifacts": [
+    "assessment.json",
+    "contact_overview.png",
+    "final.png",
+    "motion_pipeline.mp4",
+    "overview.png",
+    "reference_audit.json",
+    "render_report.json",
+    "summary.json"
+  ],
+  "baseline_failed_checks": [
+    "mujoco.sustained_grounded_contact_patch_drift"
+  ],
+  "baseline_metrics": {
+    "isaac": {
+      "drift_total_observed_duration_s": 0.485,
+      "final_root_error_m": 0.0508575679762951,
+      "full_two_wheel_support_fraction": 1.0,
+      "maximum_contiguous_drift_s": 0.42000000000000004,
+      "tail_max_abs_sideslip_deg": 0.0,
+      "tail_max_planar_com_speed_m_s": 0.06357237479604325
+    },
+    "mujoco": {
+      "drift_total_observed_duration_s": 0.7049999999999872,
+      "final_root_error_m": 0.05606558799230782,
+      "full_two_wheel_support_fraction": 0.9826388888888888,
+      "maximum_contiguous_drift_s": 0.1549999999999967,
+      "tail_max_abs_sideslip_deg": 0.0,
+      "tail_max_planar_com_speed_m_s": 0.06851624698665008
+    }
+  },
+  "baseline_verdict": "fail",
+  "cross_engine_root_rmse_m_old_new": [
+    0.018463235782147935,
+    0.011691794299783046
+  ],
+  "fast125_failed_checks": [
+    "isaac.stable_exit_sideslip",
+    "mujoco.sustained_grounded_contact_patch_drift",
+    "mujoco.stable_exit_sideslip",
+    "mujoco.stable_exit_planar_speed"
+  ],
+  "fast125_metrics": {
+    "isaac": {
+      "drift_total_observed_duration_s": 0.29500000000000004,
+      "final_root_error_m": 0.12104166761431717,
+      "full_two_wheel_support_fraction": 1.0,
+      "maximum_contiguous_drift_s": 0.2499999999999999,
+      "tail_max_abs_sideslip_deg": 21.009583263274877,
+      "tail_max_planar_com_speed_m_s": 0.18392378971899276
+    },
+    "mujoco": {
+      "drift_total_observed_duration_s": 0.3649999999999961,
+      "final_root_error_m": 0.13111076740527766,
+      "full_two_wheel_support_fraction": 0.976086956521739,
+      "maximum_contiguous_drift_s": 0.14499999999999946,
+      "tail_max_abs_sideslip_deg": 22.85619270643126,
+      "tail_max_planar_com_speed_m_s": 0.22550965284528865
+    }
+  },
+  "fast125_verdict": "fail",
+  "hardware_ready": false,
+  "input_sha256": {
+    "actor": "d93c8d7e0790ddb16832eb2dee2e27b8d26e042fa460153bbf50bf084cf0e4e5",
+    "adaptation": "cc54b1207ad20cc1109cc4bb81427a0bf2383b33dc720f76e7652b99acc666a0",
+    "assessment": "20060f3b9e188259a6071f47e6b00d32e27d6290008f2ffa7dbf0ba22b45e8ff",
+    "baseline_assessment": "5cf1326c2cb7b59c2178fe8ef8fb96f4f7b1c3007f747f1591e1c54dea2894cf",
+    "captured_source": "41e65c8d8da35312a8855080e03591f0acb3a07da8e7da1f990dd80e1605acf7",
+    "checkpoint": "a1b95d85c462e2be314155b895e5089501d021519285d55b7f42afe9152e5231",
+    "export_report": "5e1ebec0ad77032eb4e7c0e943789b260515e6c2f6c30b9cd8d96d3643d5caa0",
+    "isaac_physics_trajectory": "4513abc14ec1b236dd4edb37c306dd37eec4b6357df7449846a45145c7313969",
+    "isaac_report": "2a1e956d487bdb96c71c70a56b04ae8af56c72e976af255a7797749e92045c05",
+    "isaac_trajectory": "104057fd4ab963e63ded364dfe226e387a74e5a23f130b34fe5940982b5fdf6e",
+    "motion": "1baea367b5282396dc7da4cc579145c9c11c3e9fadcfbe5b3cce5e38a1b6642e",
+    "mujoco_report": "c77e1393a01f749a1681025c2b6c9126a9a5e4fc4c19bb068e3dbfc51a9e7745",
+    "mujoco_trajectory": "592cf765604fc708581a13e4a75f1bb3e58c22182ffbe44bac2cf9e8c37787e1",
+    "old_actor": "c4677c07ccffc45bb5f98adab06ddedc97d04dd9e3b14e68f3c132deb01df629",
+    "robot_reference": "96a49d071daf2ca52d5631c528ba2d2a97cef99074fb721e4a87685a87760dd0"
+  },
+  "kind": "fixed_trial022_actor_fast125_zero_shot_diagnostic",
+  "limitations": [
+    "Zero-shot speed stress test of the completed trial022 checkpoint; no 1.25x PPO training or new-policy transfer claim.",
+    "The source clock is estimated, the car source is simulated, and the robot stop is synthetic.",
+    "50 Hz resampling omits a small subframe endpoint; XY path length changes slightly, so timing is the intended but not mathematically sole numerical difference.",
+    "One deterministic episode per engine is not a success probability or hardware validation."
+  ],
+  "original_behavior_gates_and_physics_clocks_unchanged": true,
+  "recovery_s_old_new": [
+    1.5,
+    1.2
+  ],
+  "reference_duration_s_old_new": [
+    5.76,
+    4.6
+  ],
+  "reference_peak_planar_speed_m_s": {
+    "baseline_m_s": 1.3214507102966309,
+    "fast125_m_s": 1.64983069896698
+  },
+  "reference_time_scale_old_new": [
+    2.0,
+    1.6
+  ],
+  "resource": {
+    "foreign_jobs_stopped": false,
+    "mode": "user_authorized_shared_GPU7",
+    "physical_isolation_claimed": false
+  },
+  "safety_verified": false,
+  "same_trained_actor_tensors": true,
+  "schema_version": 1,
+  "stationary_tail_s_old_new": [
+    0.5,
+    0.4
+  ],
+  "task_speed_factor": 1.25,
+  "training_on_faster_reference_performed": false,
+  "video_decode": {
+    "codec": "h264",
+    "fps": 12.5,
+    "frames": 116,
+    "independent_complete_decode": true,
+    "resolution": [
+      1920,
+      1080
+    ]
+  }
+}
