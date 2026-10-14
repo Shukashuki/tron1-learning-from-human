@@ -1,0 +1,15 @@
+{
+  "kind": "open_loop_isaac_action_replay_not_policy_transfer",
+  "isaac_trajectory_sha256": "870d3d2749aecda626515f867818f0068cd937669365fcb9ec214aca465cbd36",
+  "isaac_report_sha256": "8f0147c552e3c51375f62a4dfb297538e6928a7c2f43a18c965935f6ceb063b1",
+  "contract_sha256": "589eb6579111afca893dee9baf3720feb13ffefa413336502b194b04fe531e46",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "replayed_action_count": 70,
+  "source_action_count": 349,
+  "mujoco_rollout_sha256": "defa713c07fe67c245bd2659f952476910821621c84b8535ada9f132a844f959",
+  "mujoco_report_sha256": "7c11c640144df40d275c15ed027eefedfde5ce206b6d6992915175e4d6e10430",
+  "termination": "early_termination",
+  "no_actor_calls_in_mujoco": true,
+  "actions_equal_source_prefix": true
+}
