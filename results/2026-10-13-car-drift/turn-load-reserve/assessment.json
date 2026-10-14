@@ -14,6 +14,8 @@
   "reference_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
   "normalized_actor_sha256": "8ad06855fe18549e091aaec848b5cf67d50efb501b6b6ae62f99320d77e919cb",
   "default_policy_contract_sha256": "3712c2b1fbcfedb555b77c7a6aff93f809b48c87a53def5be38e9aa81a71c0e2",
+  "paired_mujoco_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "paired_mujoco_wheel_collision_halfwidth_m": 0.025,
   "gate": {
     "minimum_speed_m_s": 0.8,
     "minimum_abs_body_sideslip_deg": 8.0,

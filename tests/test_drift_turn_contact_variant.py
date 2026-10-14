@@ -32,6 +32,17 @@ class ContactVariantTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "generic drift-turn"):
             variant(self.saved, "b" * 64, "a" * 64)
 
+    def test_narrow_time_constant_sensitivity_changes_only_one_field(self):
+        for timeconst in (0.02, 0.05):
+            out = variant(self.saved, "b" * 64, "a" * 64,
+                          contact_timeconst_s=timeconst)
+            self.assertEqual(out["task_profile"]["mujoco_contact_solref"], [timeconst, 2.0])
+            del out["task_profile"]["mujoco_contact_solref"]
+            self.assertEqual(out, self.saved)
+        with self.assertRaisesRegex(ValueError, "Invalid explicit MuJoCo"):
+            variant(self.saved, "b" * 64, "a" * 64,
+                    contact_timeconst_s=0.08)
+
 
 if __name__ == "__main__":
     unittest.main()

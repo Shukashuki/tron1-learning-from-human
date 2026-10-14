@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "evaluation_only_mujoco_contact_response_sensitivity",
+  "same_actor_sha256": "8ad06855fe18549e091aaec848b5cf67d50efb501b6b6ae62f99320d77e919cb",
+  "same_reference_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "base_contract_sha256": "3712c2b1fbcfedb555b77c7a6aff93f809b48c87a53def5be38e9aa81a71c0e2",
+  "only_change": "task_profile.mujoco_contact_solref; other contract fields, actor, reference, gate and assessment clock fixed",
+  "rows": [
+    {
+      "solref": [0.004, 1.0],
+      "kind": "compiled_default_not_explicit_contract_override",
+      "status": "FAIL",
+      "both_wheel_support_fraction": 0.5185185185185185,
+      "longest_qualifying_duration_s": 0.024999999999999467,
+      "largest_qualifying_course_turn_deg": 1.1572121306116385,
+      "rollout_sha256": "b9f252495feb6023c41c323fda958ebe0a79ef0029d15e38edcf3a7f34dee3f8"
+    },
+    {
+      "solref": [0.02, 2.0],
+      "kind": "single_field_contract_variant",
+      "variant_contract_sha256": "876b53195d95701477d4adcfdf2243ab79b65b0b172c6488eafec5d3ae1a237e",
+      "status": "FAIL",
+      "core_min_speed_m_s": 0.9149631900950596,
+      "core_path_rmse_m": 0.01776617594070674,
+      "both_wheel_support_fraction": 0.783625730994152,
+      "longest_qualifying_duration_s": 0.05499999999999883,
+      "largest_qualifying_course_turn_deg": 2.8622138033800195,
+      "rollout_sha256": "b7b93a1369be7b96e044c30c24719ef82d7be188f79fb9d6b1ddf8849e5b759a"
+    },
+    {
+      "solref": [0.04, 2.0],
+      "kind": "single_field_contract_variant",
+      "variant_contract_sha256": "8f564c7ba83990042017141fa8335e01b2c01b6a4999cfd96ca78edfacaf136f",
+      "status": "FAIL",
+      "core_min_speed_m_s": 0.9263488804917274,
+      "core_path_rmse_m": 0.016772379813104893,
+      "both_wheel_support_fraction": 0.8869395711500975,
+      "longest_qualifying_duration_s": 0.11499999999999755,
+      "largest_qualifying_course_turn_deg": 3.438264379021392,
+      "rollout_sha256": "a7292df28be1c1151820e808be8d5702caf7f977bb70822ae302bec9d67236c1"
+    },
+    {
+      "solref": [0.05, 2.0],
+      "kind": "single_field_contract_variant",
+      "variant_contract_sha256": "77d8d910a6a0ea254ceee296ac256987301150af43b5035a06b72ffe002b277c",
+      "status": "FAIL",
+      "core_min_speed_m_s": 0.91966555638643,
+      "core_path_rmse_m": 0.014265812684982022,
+      "both_wheel_support_fraction": 0.9044834307992202,
+      "longest_qualifying_duration_s": 0.12499999999999734,
+      "largest_qualifying_course_turn_deg": 3.4479887233282125,
+      "rollout_sha256": "c0b38ed08cdc63c94df7ac1a15afdc184a12958e9e8fa01ebe5cfb3b8c8f5365"
+    }
+  ],
+  "limitations": "Single deterministic episode for one actor on one reference; parameter sweep is not calibration, training, robustness, or hardware validation."
+}

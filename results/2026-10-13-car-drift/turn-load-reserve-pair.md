@@ -20,6 +20,17 @@ The gate accepts speed ≥0.8 m/s, body sideslip ≥8°, mean absolute wheel-gro
 
 ## Evaluation-only contact-response diagnostic
 
-The generic paired MuJoCo model compiles the default `solref=[0.004, 1.0]`. A second MuJoCo rollout of the **unchanged actor and reference** changes only the saved contract's `mujoco_contact_solref` to `[0.04, 2.0]`, the response used in earlier DOA experiments. Both-wheel bearing rises from 51.9% to 88.7% and longest jointly qualified interval from 0.025 to 0.115 s, but the maximum qualifying turn is still only 3.44°: **FAIL** under the same gate. Core minimum speed is 0.926 m/s and path RMSE is 0.0168 m. This sensitivity is not an independently trained candidate, contact-parameter calibration, or sim2sim success; it supports investigating the wheel–ground solver/contact law before another reward-only training run. Exact diagnostic hashes are in the [assessment](turn-load-reserve/assessment.json).
+The generic paired MuJoCo model compiles the default `solref=[0.004, 1.0]`. A bounded sensitivity series replays the **unchanged actor and reference** with only the saved contract's `mujoco_contact_solref` changed. Damping ratio is fixed at 2; tested time constants are 0.02, 0.04 (earlier DOA setting) and 0.05 s. No row passes the original gate:
+
+| MuJoCo contact response | Both-wheel support in core | Longest jointly qualified window | Largest qualified turn |
+|---|---:|---:|---:|
+| Default `[0.004, 1.0]` | 51.9% | 0.025 s | 1.16° |
+| `[0.02, 2.0]` | 78.4% | 0.055 s | 2.86° |
+| `[0.04, 2.0]` | 88.7% | 0.115 s | 3.44° |
+| `[0.05, 2.0]` | 90.4% | 0.125 s | 3.45° |
+
+All four complete the clip and exceed 0.8 m/s minimum speed through the turn core. The `[0.04, 2.0]` row has core minimum speed 0.926 m/s and path RMSE 0.0168 m. This is not an independently trained candidate, contact-parameter calibration, or sim2sim success; it supports investigating the wheel–ground solver/contact law before another reward-only training run. Exact per-row hashes and scores are in the [contact-response sweep](turn-load-reserve/contact-response-sweep.json), while the original paired scores remain in the [assessment](turn-load-reserve/assessment.json).
+
+The paired evaluator uses the *USD-matched derived* MuJoCo model (SHA-256 `bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513`), whose wheel collision cylinders have 25 mm axial half-width and whose base COM passes the evaluator's USD alignment check. The official upstream MJCF has narrower 5 mm half-width wheels, but **that is not the model used in this pair** and cannot explain these particular contact gaps. A proposed width-only replay from that upstream model was rejected before physics because it had the wrong merged base COM; no width-effect result is claimed.
 
 Relative to the [generic baseline](turn-baseline-pair.md), the new load reserve improves the Isaac continuous turn from 1.905 s / 46.72° to 2.260 s / 54.64°. Its MuJoCo default counterpart remains effectively broken (0.020 s / 1.07° → 0.025 s / 1.16°). One paired episode per actor does **not** establish a reliable effect size. The requested same-policy sim2sim drift remains unresolved.
