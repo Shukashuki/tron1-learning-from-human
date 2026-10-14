@@ -1,0 +1,38 @@
+{
+  "kind": "evaluation_only_predictive_knee_feedback_not_paired_sim2sim",
+  "engine": "MuJoCo",
+  "engine_version": "3.9.0",
+  "termination": "motion_end",
+  "termination_terms": [],
+  "completed_full_reference": true,
+  "policy_steps": 349,
+  "physics_steps": 1396,
+  "policy_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "controller": {
+    "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+    "left_threshold_m": 0.0013,
+    "right_threshold_m": 0.0013,
+    "lookahead_s": 0.01,
+    "gain": 1.0,
+    "max_bias_rad": 0.015,
+    "max_change_rad_per_step": 0.004,
+    "wheel_height_per_knee_rad_assumption_m": 0.245,
+    "compiled_floor_and_wheel_contact_margin_m": 0.001,
+    "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+  },
+  "controller_source_sha256": "1ddb76ab0d919f232da7a81595668f80ec456ea7726ac403d7fda90fc936fd4b",
+  "max_abs_knee_bias_rad": [
+    0.009243323357338311,
+    0.010893811270553524
+  ],
+  "root_state_writes": 1,
+  "hidden_resets": 0,
+  "limitations": [
+    "MuJoCo-only feedback feasibility; identical physical-rate law is not yet implemented in Isaac.",
+    "The original actor observation remains unchanged; corrected substep targets are an inner controller.",
+    "No contact gaps are bridged or ignored by the frozen assessor."
+  ]
+}

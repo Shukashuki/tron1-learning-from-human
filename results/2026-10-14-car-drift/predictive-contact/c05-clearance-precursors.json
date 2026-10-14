@@ -1,0 +1,59 @@
+{
+  "kind": "saved_state_finite_cylinder_clearance_precursor_not_physics",
+  "rollout_sha256": "b1a50208dfe0d1931fbafc56767656af0796fcbaf280e9dfc450401a033a33ef",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "source_sha256": "7b40f12b14edd9073d856796a4150f4e00e375dd1503c59e384a09511fe72591",
+  "core_time_s": [
+    1.44,
+    4.0
+  ],
+  "sides": {
+    "L": {
+      "gap_onsets": 25,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.0014967128064604038,
+        0.0005305626728362358,
+        0.0018838667459661308
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0016414394701579893,
+        0.0018844789151346623,
+        0.001994537086808584
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.002026928589870808,
+        0.0021175790456908804,
+        0.0023584502173276075
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 0.84,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    },
+    "R": {
+      "gap_onsets": 22,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.0023024795842707217,
+        -0.0002463457824037,
+        0.0019142885574957623
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0015867540574895872,
+        0.0018473914238752275,
+        0.00199379715108
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.0020173740035320845,
+        0.0021314796540843764,
+        0.002566231554771711
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 0.7727272727272727,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    }
+  },
+  "limitations": [
+    "Analytic finite-cylinder/plane geometry from saved qpos, not a reproduced PhysX contact manifold.",
+    "A signed zero-clearance threshold does not determine positive MuJoCo contact force.",
+    "Retrospective classification is not a causal controller or held-out prediction test."
+  ]
+}

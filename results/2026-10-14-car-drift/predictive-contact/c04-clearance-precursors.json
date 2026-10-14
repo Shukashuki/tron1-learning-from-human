@@ -1,0 +1,59 @@
+{
+  "kind": "saved_state_finite_cylinder_clearance_precursor_not_physics",
+  "rollout_sha256": "5a3da29457dd9b53765a219f661bc547976af674fc963033165aa81efd55fc1e",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "source_sha256": "7b40f12b14edd9073d856796a4150f4e00e375dd1503c59e384a09511fe72591",
+  "core_time_s": [
+    1.44,
+    4.0
+  ],
+  "sides": {
+    "L": {
+      "gap_onsets": 23,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.0021192720535039393,
+        0.0006984523924575344,
+        0.0018972865829651512
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0013025307335506188,
+        0.0018921198844448121,
+        0.0019971030330164317
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.0020041141329060824,
+        0.0020794494280932316,
+        0.002343117700449801
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 0.6956521739130435,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    },
+    "R": {
+      "gap_onsets": 22,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.0025868755210024324,
+        2.712627930809004e-05,
+        0.0017920878068579333
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0014578395255092495,
+        0.0018871776245913859,
+        0.0019945055801181334
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.0020138916294955246,
+        0.0021117791009185307,
+        0.0025190709334814375
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 0.8636363636363636,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    }
+  },
+  "limitations": [
+    "Analytic finite-cylinder/plane geometry from saved qpos, not a reproduced PhysX contact manifold.",
+    "A signed zero-clearance threshold does not determine positive MuJoCo contact force.",
+    "Retrospective classification is not a causal controller or held-out prediction test."
+  ]
+}

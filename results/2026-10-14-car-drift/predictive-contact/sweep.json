@@ -1,0 +1,401 @@
+{
+  "kind": "frozen_actor_predictive_contact_feedback_sweep",
+  "actor_motion_model_contract_sha256": [
+    "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+    "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+    "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+    "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073"
+  ],
+  "trial_count": 13,
+  "all_status_fail": true,
+  "all_full_reference_completed": true,
+  "source_sha256": "428dd5a9d5f7910dd1743ac55816d0cbf9330c6f31df225501b96509cfa1916a",
+  "trials": [
+    {
+      "trial": "p01",
+      "controller": {
+        "left_threshold_m": 0.1288,
+        "right_threshold_m": 0.1295,
+        "lookahead_s": 0.01,
+        "gain": 0.5,
+        "max_bias_rad": 0.006,
+        "max_change_rad_per_step": 0.0015,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.957772980330128,
+      "core_path_rmse_m": 0.0395986435325432,
+      "two_wheel_support_fraction": 0.9103313840155945,
+      "patch_slip_fraction": 0.9551656920077972,
+      "sideslip_fraction": 0.9278752436647173,
+      "longest_qualifying_duration_s": 0.13499999999999712,
+      "largest_qualifying_course_turn_deg": 4.968152791613259,
+      "max_abs_knee_bias_rad": [
+        0.00442986932256202,
+        0.005487741429081703
+      ],
+      "rollout_sha256": "cfb06b77721c86617f6ed71ac780b9617e29f61472922997a52269f18b4c3668",
+      "report_sha256": "f23d383e52ea538e6918aaae80c422aecedba3d489d0b5d9d49c3926d9b86810",
+      "assessment_sha256": "b3b6f4da0f7cff132b378dce939007b699a1a7b967d6bcae982211e904d8d37a"
+    },
+    {
+      "trial": "p02",
+      "controller": {
+        "left_threshold_m": 0.1285,
+        "right_threshold_m": 0.1292,
+        "lookahead_s": 0.01,
+        "gain": 1.0,
+        "max_bias_rad": 0.008,
+        "max_change_rad_per_step": 0.002,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9465800724629377,
+      "core_path_rmse_m": 0.04088045841521011,
+      "two_wheel_support_fraction": 0.9122807017543859,
+      "patch_slip_fraction": 0.9571150097465887,
+      "sideslip_fraction": 0.9200779727095516,
+      "longest_qualifying_duration_s": 0.13499999999999712,
+      "largest_qualifying_course_turn_deg": 3.8445042164037835,
+      "max_abs_knee_bias_rad": [
+        0.008,
+        0.008
+      ],
+      "rollout_sha256": "c4dfaa609c1a7a36be0a9a58e2a5473528f49a52271030868defe55938f9ee96",
+      "report_sha256": "25bef975808fa75a9dbbedf8296f3dfd77df914470b83c77d7abf2041bb4688f",
+      "assessment_sha256": "80880b181eb05670bdcc551c97af0210849667babcdfa72dc6913b513473a079"
+    },
+    {
+      "trial": "p03",
+      "controller": {
+        "left_threshold_m": 0.1285,
+        "right_threshold_m": 0.1292,
+        "lookahead_s": 0.02,
+        "gain": 1.0,
+        "max_bias_rad": 0.008,
+        "max_change_rad_per_step": 0.002,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9428668774211845,
+      "core_path_rmse_m": 0.04002373019167735,
+      "two_wheel_support_fraction": 0.9064327485380117,
+      "patch_slip_fraction": 0.9532163742690059,
+      "sideslip_fraction": 0.9278752436647173,
+      "longest_qualifying_duration_s": 0.12999999999999723,
+      "largest_qualifying_course_turn_deg": 3.588854108597982,
+      "max_abs_knee_bias_rad": [
+        0.008,
+        0.008
+      ],
+      "rollout_sha256": "533973de4f1d253745c97a0267abe160520d71d2f40da78309b4f4695434a38c",
+      "report_sha256": "40ca89edbc5160370032a529dfba074f4643b8925cd0dbbdfc0d61d9b41da987",
+      "assessment_sha256": "a87898502f60cdddd9461477372d4a892bd4ae1aa2838a3969ee5ab987c76f69"
+    },
+    {
+      "trial": "p04",
+      "controller": {
+        "left_threshold_m": 0.1282,
+        "right_threshold_m": 0.1289,
+        "lookahead_s": 0.015,
+        "gain": 1.0,
+        "max_bias_rad": 0.012,
+        "max_change_rad_per_step": 0.003,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9462270957592288,
+      "core_path_rmse_m": 0.038654002509630636,
+      "two_wheel_support_fraction": 0.9142300194931774,
+      "patch_slip_fraction": 0.949317738791423,
+      "sideslip_fraction": 0.9200779727095516,
+      "longest_qualifying_duration_s": 0.1449999999999969,
+      "largest_qualifying_course_turn_deg": 6.859285444255759,
+      "max_abs_knee_bias_rad": [
+        0.012,
+        0.012
+      ],
+      "rollout_sha256": "a1f62dbb30da5f1c6e8e719b2654f23b427d5923612c9f570000d63fef1a838c",
+      "report_sha256": "4926c6bcb983021daf9f4d233c61f0f38e7a2d80e6e00af1df735631f556943a",
+      "assessment_sha256": "d867c967bb90d8d2ad2e666488ff5eef8fa659ffbc6bdc09896991f24dbba3f9"
+    },
+    {
+      "trial": "p05",
+      "controller": {
+        "left_threshold_m": 0.1275,
+        "right_threshold_m": 0.1282,
+        "lookahead_s": 0.015,
+        "gain": 1.5,
+        "max_bias_rad": 0.02,
+        "max_change_rad_per_step": 0.005,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9304269646770849,
+      "core_path_rmse_m": 0.0411741654728392,
+      "two_wheel_support_fraction": 0.9122807017543859,
+      "patch_slip_fraction": 0.9512670565302144,
+      "sideslip_fraction": 0.9278752436647173,
+      "longest_qualifying_duration_s": 0.10999999999999788,
+      "largest_qualifying_course_turn_deg": 3.1717941103817364,
+      "max_abs_knee_bias_rad": [
+        0.02,
+        0.02
+      ],
+      "rollout_sha256": "0c8975cb4159b935650e08f6ed9595dcaab7c5695dbb43359e1cf2665c709b6f",
+      "report_sha256": "7bd9ee47e7f8b2a2b03c1dbd00e02ed7080d9ea1d1a41ab3411e54ed412d5147",
+      "assessment_sha256": "eb12fecb45671636d13673c9acc397ef2a6fbe0e94fe5212cc33c83c9c71dbbf"
+    },
+    {
+      "trial": "p06",
+      "controller": {
+        "left_threshold_m": 0.1282,
+        "right_threshold_m": 0.1289,
+        "lookahead_s": 0.03,
+        "gain": 2.0,
+        "max_bias_rad": 0.02,
+        "max_change_rad_per_step": 0.005,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9214184529504245,
+      "core_path_rmse_m": 0.03652537910491443,
+      "two_wheel_support_fraction": 0.9122807017543859,
+      "patch_slip_fraction": 0.9629629629629629,
+      "sideslip_fraction": 0.9064327485380117,
+      "longest_qualifying_duration_s": 0.1499999999999968,
+      "largest_qualifying_course_turn_deg": 5.535927028684469,
+      "max_abs_knee_bias_rad": [
+        0.02,
+        0.02
+      ],
+      "rollout_sha256": "bab86b5e147d9ed306e756c054440f2929c5fa6f7642b14f8cb863da13e4dc53",
+      "report_sha256": "b3d5b694b1fd307dd9c29ab59a8fdb13a8c333882adf982e7faf20982d5b2130",
+      "assessment_sha256": "3480b523821f3d8728b872b005c8be6c1deb657f55ac3751477abf67e5caef8c"
+    },
+    {
+      "trial": "p07",
+      "controller": {
+        "left_threshold_m": 0.128,
+        "right_threshold_m": 0.1287,
+        "lookahead_s": 0.02,
+        "gain": 2.0,
+        "max_bias_rad": 0.03,
+        "max_change_rad_per_step": 0.01,
+        "wheel_height_per_knee_rad_assumption_m": 0.245
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9376444135729436,
+      "core_path_rmse_m": 0.03786247710235677,
+      "two_wheel_support_fraction": 0.9220272904483431,
+      "patch_slip_fraction": 0.949317738791423,
+      "sideslip_fraction": 0.9122807017543859,
+      "longest_qualifying_duration_s": 0.10999999999999766,
+      "largest_qualifying_course_turn_deg": 6.528138894194506,
+      "max_abs_knee_bias_rad": [
+        0.03,
+        0.03
+      ],
+      "rollout_sha256": "12da9fbe559d5370a656b89dd6e26e1feef245950796a6638bad8d5b16f18c23",
+      "report_sha256": "b5e98ea686524061545005e3546d0036ccaf880f312b3f899748ced0e76ed8b3",
+      "assessment_sha256": "6184c59b731e47beedaaa5a1a61ea129f91cba88b68d7aaef066c30baaf05186"
+    },
+    {
+      "trial": "c01",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0015,
+        "right_threshold_m": 0.0015,
+        "lookahead_s": 0.005,
+        "gain": 1.0,
+        "max_bias_rad": 0.01,
+        "max_change_rad_per_step": 0.003,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9650589744652496,
+      "core_path_rmse_m": 0.04061054352565619,
+      "two_wheel_support_fraction": 0.9161793372319688,
+      "patch_slip_fraction": 0.9259259259259259,
+      "sideslip_fraction": 0.9395711500974658,
+      "longest_qualifying_duration_s": 0.11999999999999744,
+      "largest_qualifying_course_turn_deg": 3.9331677243656555,
+      "max_abs_knee_bias_rad": [
+        0.0062540005201143865,
+        0.007527038955845676
+      ],
+      "rollout_sha256": "1a2b01306cdc49eafa3b070fe9dbdef137ab11819d77e18d3b96b62af2b47ec5",
+      "report_sha256": "af940e79799da305d84ddc32afe11c6d2cf7a3b25e423f21fdc44cb0b8f4c60f",
+      "assessment_sha256": "187fcf115e7100396141ef17e6c77fcfce6e6b6b1c2097d222be9efdcd863624"
+    },
+    {
+      "trial": "c02",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0013,
+        "right_threshold_m": 0.0013,
+        "lookahead_s": 0.01,
+        "gain": 1.0,
+        "max_bias_rad": 0.015,
+        "max_change_rad_per_step": 0.004,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9643492085409237,
+      "core_path_rmse_m": 0.04033907195863677,
+      "two_wheel_support_fraction": 0.9181286549707602,
+      "patch_slip_fraction": 0.9259259259259259,
+      "sideslip_fraction": 0.9122807017543859,
+      "longest_qualifying_duration_s": 0.18999999999999595,
+      "largest_qualifying_course_turn_deg": 6.099804082973169,
+      "max_abs_knee_bias_rad": [
+        0.009243323357338311,
+        0.010893811270553524
+      ],
+      "rollout_sha256": "11b3880cb3af6f874bb7889f3965513d468f47c70b5a6a509b1f70c7d80af253",
+      "report_sha256": "cc20637e43db3573e3dce0de6386091e910c24bbe68086f91ce157ccf5764c02",
+      "assessment_sha256": "7e8518f42144e604379d43aec9d3dae58b3ae5cd18f54aa679018e2d6c0c5297"
+    },
+    {
+      "trial": "c03",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0015,
+        "right_threshold_m": 0.0015,
+        "lookahead_s": 0.015,
+        "gain": 1.0,
+        "max_bias_rad": 0.015,
+        "max_change_rad_per_step": 0.004,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9575067774933818,
+      "core_path_rmse_m": 0.037442804617119144,
+      "two_wheel_support_fraction": 0.9103313840155945,
+      "patch_slip_fraction": 0.9590643274853801,
+      "sideslip_fraction": 0.9434697855750487,
+      "longest_qualifying_duration_s": 0.10999999999999766,
+      "largest_qualifying_course_turn_deg": 4.648465003951435,
+      "max_abs_knee_bias_rad": [
+        0.015,
+        0.012554252871374563
+      ],
+      "rollout_sha256": "b15b8d80087b4a74968f900f11f38aae7845af09ec6f496e4166f6068e181b6b",
+      "report_sha256": "1819cfdd597e42381aadac8138cf77ccbdf8f31674055acad741a09c47f767c7",
+      "assessment_sha256": "d5cd703d899e6744cdf4768df4c080422124456fb6f2ff785a78b01d3a4b2a77"
+    },
+    {
+      "trial": "c04",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0012,
+        "right_threshold_m": 0.0012,
+        "lookahead_s": 0.02,
+        "gain": 1.5,
+        "max_bias_rad": 0.02,
+        "max_change_rad_per_step": 0.005,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9271982993715854,
+      "core_path_rmse_m": 0.030978464262137646,
+      "two_wheel_support_fraction": 0.9083820662768031,
+      "patch_slip_fraction": 0.9395711500974658,
+      "sideslip_fraction": 0.9415204678362573,
+      "longest_qualifying_duration_s": 0.18499999999999606,
+      "largest_qualifying_course_turn_deg": 7.852972060808959,
+      "max_abs_knee_bias_rad": [
+        0.02,
+        0.02
+      ],
+      "rollout_sha256": "5a3da29457dd9b53765a219f661bc547976af674fc963033165aa81efd55fc1e",
+      "report_sha256": "a167929d19211f4d2acef05fe065b286846778fdc4832eb4e460088be1fcc812",
+      "assessment_sha256": "cf119311c9c8129c8fb2435a8653546a291ff7e4cbaf6a97c837743e364166b8"
+    },
+    {
+      "trial": "c05",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0005,
+        "right_threshold_m": 0.0005,
+        "lookahead_s": 0.02,
+        "gain": 2.0,
+        "max_bias_rad": 0.03,
+        "max_change_rad_per_step": 0.01,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9171575882084853,
+      "core_path_rmse_m": 0.041562903028110505,
+      "two_wheel_support_fraction": 0.9083820662768031,
+      "patch_slip_fraction": 0.9610136452241715,
+      "sideslip_fraction": 0.9044834307992202,
+      "longest_qualifying_duration_s": 0.17999999999999616,
+      "largest_qualifying_course_turn_deg": 8.397814468182249,
+      "max_abs_knee_bias_rad": [
+        0.03,
+        0.03
+      ],
+      "rollout_sha256": "b1a50208dfe0d1931fbafc56767656af0796fcbaf280e9dfc450401a033a33ef",
+      "report_sha256": "f90ec3dc50c186df47311c1075571bb87d2e8dc683433564e2af163d4083f769",
+      "assessment_sha256": "06301707d4d6a7c618409d5b9e7b159a1a8831c6eb5a99d1e35fa785fad5665d"
+    },
+    {
+      "trial": "c06",
+      "controller": {
+        "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+        "left_threshold_m": 0.0,
+        "right_threshold_m": 0.0,
+        "lookahead_s": 0.02,
+        "gain": 2.0,
+        "max_bias_rad": 0.04,
+        "max_change_rad_per_step": 0.01,
+        "wheel_height_per_knee_rad_assumption_m": 0.245,
+        "compiled_floor_and_wheel_contact_margin_m": 0.001,
+        "controller_module_source_sha256": "01be15fd65f9bd447ba94b539777b78f7c9b49cef457054f791868acb3285a65"
+      },
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9360043942741898,
+      "core_path_rmse_m": 0.04301944203204696,
+      "two_wheel_support_fraction": 0.9142300194931774,
+      "patch_slip_fraction": 0.9473684210526315,
+      "sideslip_fraction": 0.9103313840155945,
+      "longest_qualifying_duration_s": 0.12499999999999734,
+      "largest_qualifying_course_turn_deg": 5.347187172355194,
+      "max_abs_knee_bias_rad": [
+        0.033552192968160345,
+        0.04
+      ],
+      "rollout_sha256": "82ecbf2a3ecda12b108284c13a9ea9779c2b414d4cc1902148a32122eb1b1777",
+      "report_sha256": "980fdd6270832936a66d68f4beed85d018f1b3b0d7160ec45f13c19900bc85d8",
+      "assessment_sha256": "0192b004b4be2462d2446b722842baed6ef771a2ff612c826a16aaf8faef42e7"
+    }
+  ],
+  "limitations": [
+    "All feedback trials are MuJoCo-only; none proves the same controller in Isaac.",
+    "The frozen assessor is used without gap bridging or changed thresholds."
+  ]
+}

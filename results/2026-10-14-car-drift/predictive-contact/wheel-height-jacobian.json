@@ -1,0 +1,42 @@
+{
+  "physical_samples": 513,
+  "d_wheel_link_height_d_hip_knee_m_per_rad_p05_p50_p95": {
+    "L": [
+      [
+        -0.021198964884907558,
+        0.24307247968334922
+      ],
+      [
+        -0.016544002784247842,
+        0.24868040434319075
+      ],
+      [
+        -0.007046843656132791,
+        0.25232166151728147
+      ]
+    ],
+    "R": [
+      [
+        -0.008410185981812526,
+        -0.2711673788635315
+      ],
+      [
+        0.008575588057920499,
+        -0.24206869675617887
+      ],
+      [
+        0.05595628372060097,
+        -0.22931892559386163
+      ]
+    ]
+  },
+  "rollout_sha256": "d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "source_sha256": "a2b95e5ec9ae4a5ef40a5e7e0a2dc26aa3d16dc452f70031b5b59cc5ef874995",
+  "limitations": [
+    "Root-fixed kinematic Jacobian only; closed-loop contact and slip require a new simulation.",
+    "Wheel-link origin height is not exact finite-cylinder clearance."
+  ]
+}

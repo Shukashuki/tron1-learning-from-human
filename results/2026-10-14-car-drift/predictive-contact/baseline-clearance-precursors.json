@@ -1,0 +1,59 @@
+{
+  "kind": "saved_state_finite_cylinder_clearance_precursor_not_physics",
+  "rollout_sha256": "d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "source_sha256": "7b40f12b14edd9073d856796a4150f4e00e375dd1503c59e384a09511fe72591",
+  "core_time_s": [
+    1.44,
+    4.0
+  ],
+  "sides": {
+    "L": {
+      "gap_onsets": 24,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.001086268657800028,
+        0.0007561744420013158,
+        0.0018558193454291149
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0016442853773864367,
+        0.0018632355839784673,
+        0.00198789552957418
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.0020073402634121643,
+        0.002086282505503299,
+        0.0023719547220407227
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 0.7916666666666666,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    },
+    "R": {
+      "gap_onsets": 20,
+      "stable_clearance_p05_p50_p95_m": [
+        -0.001581236412038122,
+        0.0002748520119390018,
+        0.0017253170154563728
+      ],
+      "one_step_before_gap_clearance_p05_p50_p95_m": [
+        0.0017008684659837502,
+        0.001877199084463296,
+        0.0019648717509962443
+      ],
+      "at_gap_clearance_p05_p50_p95_m": [
+        0.0020125330671432766,
+        0.002228359999660831,
+        0.0025877473359843845
+      ],
+      "fraction_gap_onsets_prior_clearance_above_stable_p90": 1.0,
+      "fraction_gap_onsets_prior_clearance_above_zero": 1.0,
+      "fraction_gap_onsets_at_gap_clearance_above_zero": 1.0
+    }
+  },
+  "limitations": [
+    "Analytic finite-cylinder/plane geometry from saved qpos, not a reproduced PhysX contact manifold.",
+    "A signed zero-clearance threshold does not determine positive MuJoCo contact force.",
+    "Retrospective classification is not a causal controller or held-out prediction test."
+  ]
+}
