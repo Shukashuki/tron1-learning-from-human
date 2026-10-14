@@ -10,6 +10,10 @@ The **exported robot target**, measured from its 50 Hz root XY finite difference
 
 For a future paired policy evaluation, the new task should additionally require an actual large course turn (at least 45°) while moving at a robot-scale speed of at least 0.8 m/s and meeting the existing continuous two-wheel-contact, contact-patch-slip, and body-sideslip tests in both engines. These are **proposed new-task criteria**, not a retroactive change to historical DOA gates. The 0.8 m/s threshold is below the 0.892 m/s reference minimum to allow tracking error; it has not been validated as dynamically achievable. Initial-condition feasibility and a source-sealed Isaac training/evaluation protocol are prerequisites before claiming sim2sim success.
 
+## Frozen trial022 actor on the new turn: zero-shot MuJoCo FAIL
+
+The existing trial022 normalized actor was replayed once in MuJoCo on this new reference, without retraining or touching the historical trial022 rollout. The actual whole-core travel course changed 60.20°, but that number alone conceals a minimum speed of only 0.401 m/s. The [new-task assessor](../../scripts/assess_drift_turn.py) requires speed ≥0.8 m/s, |body sideslip| ≥8°, both actual wheel-ground contacts with ≥5 N normal force each, mean absolute patch slip ≥0.04 m/s, ≥0.20 s continuous qualification, and ≥45° actual course change **within the same uninterrupted native-200-Hz window**. It additionally requires the whole reference to finish and the turn-core root path to stay within 0.15 m RMSE and 0.30 m maximum error. The longest jointly qualified window lasted only 0.155 s and turned 7.27°; path RMSE was 0.294 m and maximum error 0.560 m: **FAIL**. This is a one-actor, one-engine zero-shot diagnostic, not a trained-turn or sim2sim outcome. The 6.64 s MuJoCo episode also ended early before the 6.96 s reference finished. Offline tests include an isolated single-contact-gap case to prevent false success by joining separated windows.
+
 Reproduce the offline kinematics and tests with an environment containing NumPy, SciPy and MuJoCo:
 
 ```bash
