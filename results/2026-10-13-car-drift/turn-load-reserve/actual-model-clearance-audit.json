@@ -1,0 +1,41 @@
+{
+  "kind": "recorded_pose_actual_paired_model_analytic_clearance",
+  "model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "rollout_sha256": "b9f252495feb6023c41c323fda958ebe0a79ef0029d15e38edcf3a7f34dee3f8",
+  "assessment_sha256": "a0699881dbb5444856bfc0ac7ea96cfbe334fccabc4c3ca205f8df2f4224a030",
+  "core_samples": 513,
+  "maximum_recorded_wheel_pose_fk_error_m": 0.0,
+  "floor_compiled_contact_margin_m": 0.0,
+  "wheels": [
+    {
+      "wheel": "wheel_L_collision",
+      "raw_zero_contact_samples": 145,
+      "weak_below_5n_samples": 145,
+      "fraction_positive_analytic_clearance_when_raw_zero": 0.993103448275862,
+      "missing_contact_clearance_quantiles_mm": [
+        0.007016550268551525,
+        0.15717437475198937,
+        0.5380200455034734
+      ],
+      "radius_m": 0.127,
+      "halfwidth_m": 0.025,
+      "compiled_contact_margin_m": 0.0
+    },
+    {
+      "wheel": "wheel_R_collision",
+      "raw_zero_contact_samples": 137,
+      "weak_below_5n_samples": 137,
+      "fraction_positive_analytic_clearance_when_raw_zero": 0.9927007299270073,
+      "missing_contact_clearance_quantiles_mm": [
+        0.010453759863082725,
+        0.13702983045865702,
+        0.39009729944528554
+      ],
+      "radius_m": 0.127,
+      "halfwidth_m": 0.025,
+      "compiled_contact_margin_m": 0.0
+    }
+  ],
+  "new_physics_steps": 0,
+  "limitations": "Cylinder/plane support is a saved-pose geometric proxy, not solved contact, native PhysX clearance, or a unique-cause diagnosis."
+}
