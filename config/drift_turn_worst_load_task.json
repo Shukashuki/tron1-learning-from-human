@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 1.0, "grounded": 0.4, "tilt": -0.2},
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_max_cost",
+  "description": "High-speed drift_drl turn: reward the worst of four ground-normal two-wheel load-reserve costs in each 20ms policy step. Same original004 parent, pinned turn reference, 2048 environments, 600 updates, seed42, 50/200Hz clocks, friction, motor-v1 randomization, controller and frozen two-engine gate. Versus last-substep load-reserve retry, sampling and cost weight both change; no one-factor causal attribution is claimed."
+}

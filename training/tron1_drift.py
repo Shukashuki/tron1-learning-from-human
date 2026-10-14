@@ -46,6 +46,11 @@ def validate_task_profile(profile):
     if "wheel_ground_load_reserve" in out:
         from training.tron1_ground_load_reserve import validate_load_reserve_settings
         out["wheel_ground_load_reserve"] = validate_load_reserve_settings(out["wheel_ground_load_reserve"])
+    if "wheel_ground_load_reserve_sampling" in out:
+        if (out["wheel_ground_load_reserve_sampling"] != "all_substeps_max_cost"
+                or out.get("wheel_ground_load_reserve") != {"weight": -1.0, "scale_fraction": .20}
+                or out.get("wheel_vertical_velocity_sampling") == "all_substeps_mean"):
+            raise ValueError("Worst-substep ground load requires the frozen -1/.20 sampler without a second substep owner")
     json.dumps(out, allow_nan=False)
     return out
 
@@ -147,6 +152,9 @@ def install_drift_reward_sampling(env, profile):
     earlier scene observer. This does not certify actual ground contact.
     """
     profile = validate_task_profile(profile)
+    if profile.get("wheel_ground_load_reserve_sampling") == "all_substeps_max_cost":
+        from training.tron1_worst_ground_load_substeps import install_worst_ground_load_accumulator
+        return install_worst_ground_load_accumulator(env)
     if profile.get("wheel_vertical_velocity_sampling", "last_substep") != "all_substeps_mean":
         return None
     from training.tron1_substep_rewards import install_wheel_vertical_velocity_accumulator
@@ -197,8 +205,12 @@ def configure_drift(cfg, profile, eval_mode=False):
             configure_training_ground_force_sensors, wheel_ground_load_reserve_penalty,
         )
         settings = profile["wheel_ground_load_reserve"]
+        func = wheel_ground_load_reserve_penalty
+        if profile.get("wheel_ground_load_reserve_sampling") == "all_substeps_max_cost":
+            from training.tron1_worst_ground_load_substeps import substep_worst_wheel_ground_load_reserve_penalty
+            func = substep_worst_wheel_ground_load_reserve_penalty
         cfg.rewards.drift_wheel_ground_load_reserve = RewardTermCfg(
-            func=wheel_ground_load_reserve_penalty, weight=settings["weight"],
+            func=func, weight=settings["weight"],
             params={"scale_fraction": settings["scale_fraction"]})
         if not eval_mode:
             configure_training_ground_force_sensors(cfg.scene)
