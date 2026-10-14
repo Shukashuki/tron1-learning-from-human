@@ -1,0 +1,18 @@
+# High-speed sliding-turn reference — kinematics only (2026-10-13)
+
+**Status: reference prepared; no new policy, Isaac rollout, MuJoCo rollout, or sim2sim result.** The previous DOA avoidance trials, including trial022's paired FAIL, are unchanged. This is a separate task aimed at turning the *travel direction* substantially while retaining enough speed, rather than merely showing body sideslip or requiring near-constant speed.
+
+The source is [caipeide/drift_drl](https://github.com/caipeide/drift_drl), a CARLA 0.9.5 high-speed drifting project with seven published reference trajectories. We pin [traj_4.csv](https://github.com/caipeide/drift_drl/blob/9f3a125f76ac2c0415014a761a514a511553322c/code/ref_trajectory/traj_4.csv) at commit `9f3a125f76ac2c0415014a761a514a511553322c`, SHA-256 `eb67a507817605d9b0018bdf2196c04f58f9a9238e7e1906350a7568ab87cf27`, under the upstream MIT license. The cropped source rows are 1535–1595 (inclusive); its preselected sliding core is rows 1553–1584. In the car source, travel course changes 60.409° during that core, speed falls from 31.703 to at least 22.305 m/s (114.1 to 80.3 km/h), and |body sideslip| stays above 8.079°, peaking at 26.690°. The source records full throttle, zero brake, and zero handbrake there. Thus this meets “still fast enough,” **not** “no deceleration.”
+
+The [pinned configuration](../../config/drift_turn_source.json) and [offline-capable generator](../../scripts/prepare_drift_drl_turn_reference.py) convert CARLA left-handed position/heading and body-local velocity to the right-handed reference frame, then estimate a clock from consecutive position/velocity samples; the CSV provides no original timestamps or wheel-ground telemetry. The existing car-to-TRON1 adapter applies 0.08× spatial and 2× temporal scales, a 0.75 m root height, static bounded leg IK, and rolling-direction wheel-spin IK while leaving lateral slip unconstrained. A disclosed 1.5 s synthetic stop and 0.5 s stationary tail follow. The 50 Hz reference has 349 frames over 6.96 s. Source data remain private/ignored under `outputs/drift-drl-turn-reference-20261013-v2/`; the generator can reproduce the output from the pinned upstream CSV or a hash-matched offline copy.
+
+The **exported robot target**, measured from its 50 Hz root XY finite difference over the mapped sliding interval (1.44–4.00 s), retains a 60.928° course turn, at least 0.892 m/s target speed, and at least 8.188° target sideslip. The geometric audit checks all 349 frames: zero joint-limit violation, at most 0.001925 m/s rolling-direction contact-velocity residual, and up to 0.487 m/s *intended* lateral contact slip. These are kinematic quantities, not evidence of wheel loading, tire force, dynamic feasibility, or learned drift.
+
+For a future paired policy evaluation, the new task should additionally require an actual large course turn (at least 45°) while moving at a robot-scale speed of at least 0.8 m/s and meeting the existing continuous two-wheel-contact, contact-patch-slip, and body-sideslip tests in both engines. These are **proposed new-task criteria**, not a retroactive change to historical DOA gates. The 0.8 m/s threshold is below the 0.892 m/s reference minimum to allow tracking error; it has not been validated as dynamically achievable. Initial-condition feasibility and a source-sealed Isaac training/evaluation protocol are prerequisites before claiming sim2sim success.
+
+Reproduce the offline kinematics and tests with an environment containing NumPy, SciPy and MuJoCo:
+
+```bash
+python scripts/prepare_drift_drl_turn_reference.py --source-csv PATH/TO/HASH_MATCHED_traj_4.csv --output-dir outputs/NEW_UNIQUE_DIRECTORY
+python -m unittest discover -s tests -p test_prepare_drift_drl_turn_reference.py -v
+```

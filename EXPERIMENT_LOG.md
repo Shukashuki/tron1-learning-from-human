@@ -2,6 +2,10 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
+## Separate high-speed sliding-turn reference, not yet a policy result (2026-10-13)
+
+A pinned CARLA `drift_drl` trajectory supplies a substantially turning, still-fast car example for a **new** WF TRON1 task: 60.4° source travel-course change at no less than 22.3 m/s during the sliding core. Its exported 50 Hz kinematic robot reference retains a 60.9° course turn at no less than 0.892 m/s target speed and 8.19° target sideslip, after disclosed 0.08× space / 2× time scaling. There are no original timestamps or per-wheel tire/contact measurements; the stop is synthetic. This is **not** a trained policy or paired sim2sim result. [Source, method, limitations, and proposed new-task gates](results/2026-10-13-car-drift/high-speed-turn-reference.md). Historical DOA trials and FAIL verdicts remain unchanged.
+
 ## Exact saved-state MuJoCo action sensitivity (2026-10-13)
 
 An [action-sensitivity audit](results/2026-10-13-car-drift/action-sensitivity.md) exactly replays the original trial021/trial022 MuJoCo state, torque and contact at all ten right-wheel gap windows, then perturbs only one clipped actor-action coordinate. A single 5 ms step can locally restore contact at 3/5 and 1/5 gaps, but is not a deployable 50 Hz policy action. Perturbing the *actual* 20 ms held-action window preserves both-wheel bearing at all four steps for 1/5 and 3/5 gaps, respectively. The other six windows have no single-coordinate rescue among tested action deltas up to 0.08. These are isolated nominal-MuJoCo counterfactuals, not new actor training or full-rollout/Isaac results; all original sim2sim FAIL gates remain unchanged.

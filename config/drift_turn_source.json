@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/caipeide/drift_drl",
+  "commit": "9f3a125f76ac2c0415014a761a514a511553322c",
+  "path": "code/ref_trajectory/traj_4.csv",
+  "sha256": "eb67a507817605d9b0018bdf2196c04f58f9a9238e7e1906350a7568ab87cf27",
+  "license": "MIT; https://github.com/caipeide/drift_drl/blob/9f3a125f76ac2c0415014a761a514a511553322c/LICENSE",
+  "source_row_start_inclusive": 1535,
+  "source_row_end_inclusive": 1595,
+  "drift_row_start_inclusive": 1553,
+  "drift_row_end_inclusive": 1584,
+  "spatial_scale": 0.08,
+  "time_scale": 2.0,
+  "root_height_m": 0.75,
+  "recovery_s": 1.5,
+  "stationary_tail_s": 0.5,
+  "selection": "One preselected high-speed left-turn window with contiguous car sideslip at least 8 degrees, about 60 degrees of travel-direction change, and at least 20 m/s during that sliding interval. The complete source has no original timestamps or per-wheel contact telemetry; the stop is synthetic. This is a new task, not a revision of any DOA trial."
+}
