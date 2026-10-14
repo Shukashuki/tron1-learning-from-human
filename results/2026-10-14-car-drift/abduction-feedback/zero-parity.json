@@ -1,0 +1,23 @@
+{
+  "baseline_rollout_sha256": "8a04cc8df3562635d0e2718b04bef95b0daa4698c1bb031621deae25391f30de",
+  "zero_feedback_rollout_sha256": "1b63189a3cbdff4172b846f3bc0c0bdc176c3be81965cc4040de99439c89e34e",
+  "field_max_abs_errors": {
+    "time_s": 0.0,
+    "qpos": 0.0,
+    "root_pos": 0.0,
+    "root_com_lin_vel_w": 0.0,
+    "root_quat_wxyz": 0.0,
+    "wheel_pos": 0.0,
+    "joint_torque_nm": 0.0,
+    "wheel_ground_contact_force_w_n": 0.0,
+    "wheel_lateral_contact_slip_m_s": 0.0,
+    "action_observation": 0.0,
+    "actions_raw": 0.0,
+    "actions_clipped": 0.0
+  },
+  "all_ground_contact_counts_match": true,
+  "physical_steps": 1396,
+  "policy_steps": 349,
+  "kind": "exact_zero_feedback_full_rollout_parity",
+  "audit_source_sha256": "8506e3e8a4314b39896aba2bd4ec2af20ecbeaf455e9c7c17145cf71457f455d"
+}

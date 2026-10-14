@@ -1,0 +1,36 @@
+{
+  "kind": "evaluation_only_predictive_abduction_feedback_not_paired_sim2sim",
+  "engine": "MuJoCo",
+  "engine_version": "3.9.0",
+  "termination": "motion_end",
+  "termination_terms": [],
+  "completed_full_reference": true,
+  "policy_steps": 349,
+  "physics_steps": 1396,
+  "policy_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "953f6a1cd1bffe2bb34a8aff02b1aa674ddc889aa570bcb30eaf3284192d08f0",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "controller": {
+    "signal_kind": "finite_cylinder_plane_signed_clearance_m",
+    "threshold_m": 0.0018,
+    "lookahead_s": 0.005,
+    "gain": 1.0,
+    "max_bias_rad": 0.08,
+    "max_change_rad_per_step": 0.04,
+    "local_clearance_reduction_per_positive_abduction_action_m_per_rad": 0.005,
+    "compiled_floor_and_wheel_contact_margin_m": 0.001,
+    "controller_source_sha256": "929b508a760cf98bfb29d561eb969c8ec2d9846c4ee5401b9092663ad4a98537"
+  },
+  "max_abs_abduction_bias_rad": [
+    0.08,
+    0.08
+  ],
+  "root_state_writes": 1,
+  "hidden_resets": 0,
+  "limitations": [
+    "MuJoCo-only feedback feasibility; no identical Isaac physical-rate implementation yet.",
+    "The frozen actor observation remains unchanged; corrected substep targets are an inner controller.",
+    "No contact gaps are bridged or ignored by the frozen assessor."
+  ]
+}

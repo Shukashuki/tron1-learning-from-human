@@ -1,0 +1,139 @@
+{
+  "kind": "bounded_mujoco_only_abduction_feedback_sweep_not_paired_sim2sim",
+  "frozen_input_sha256": {
+    "outputs/drift-drl-turn-worst-load-20261014/eval_isaac_final/actor_normalized.pt": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+    "outputs/drift-drl-turn-reference-20261013-v2/motion.npz": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+    "outputs/drift-drl-turn-worst-load-20261014/margin1000_solimp050_090_002_model.xml": "953f6a1cd1bffe2bb34a8aff02b1aa674ddc889aa570bcb30eaf3284192d08f0",
+    "outputs/drift-drl-turn-worst-load-20261014/contact_tc005_ratio2_contract.json": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+    "outputs/drift-drl-turn-reference-20261013-v2/robot_reference.npz": "afc22f19b813cf10b3e3a90affb0f26f5a7743074f98b262394c69de786e9f6e"
+  },
+  "candidate_grid": {
+    "threshold_m": [
+      0.0012,
+      0.0015,
+      0.0018
+    ],
+    "gain": [
+      0.5,
+      1.0
+    ],
+    "lookahead_s": 0.005,
+    "max_bias_rad": 0.08,
+    "max_change_rad_per_step": 0.04
+  },
+  "assessor_sha256": "60b20482d73b5d1f7c8cd26f3ec439804b7a197b80492f26703afd9e252d696e",
+  "candidates": [
+    {
+      "name": "t1200-g050",
+      "threshold_m": 0.0012,
+      "gain": 0.5,
+      "status": "FAIL",
+      "full_reference_completed": false,
+      "minimum_core_speed_m_s": 0.8049949563287199,
+      "core_path_rmse_m": 0.07834977347506482,
+      "two_wheel_support_fraction": 0.847953216374269,
+      "longest_qualifying_duration_s": 0.13499999999999712,
+      "largest_qualifying_course_turn_deg": 5.625885761699948,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "483c5a20f61ab002d5fcb36c5c17d60e489de47e4ec78187427f6dd5af8e3e5d",
+      "report_sha256": "d0844059f63399172c51cdb9737e58c61919b7308840a43bb9b2d3006b2cd318"
+    },
+    {
+      "name": "t1200-g100",
+      "threshold_m": 0.0012,
+      "gain": 1.0,
+      "status": "FAIL",
+      "full_reference_completed": false,
+      "minimum_core_speed_m_s": 0.710089774973951,
+      "core_path_rmse_m": 0.12402119937466358,
+      "two_wheel_support_fraction": 0.7797270955165692,
+      "longest_qualifying_duration_s": 0.06999999999999851,
+      "largest_qualifying_course_turn_deg": 3.9704092859232873,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "87f1e2683cf09553425b8218e15917d9e129be4b09ad392a0341b081b203e31e",
+      "report_sha256": "72ef921b823e0c9208fd266a22e26d5954ce95e87d5fa290523f63ded88be3f8"
+    },
+    {
+      "name": "t1500-g050",
+      "threshold_m": 0.0015,
+      "gain": 0.5,
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.8159011832645582,
+      "core_path_rmse_m": 0.0752292472837036,
+      "two_wheel_support_fraction": 0.8460038986354775,
+      "longest_qualifying_duration_s": 0.21499999999999564,
+      "largest_qualifying_course_turn_deg": 7.260664166029494,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "d1f2e0108f9d35c4768cd543878d07ade0e1b156d9ff086437913ef96c5c202a",
+      "report_sha256": "a07ca7e70b82061e01d8556286879714f237b60148dca648b4045dbb3a3a4e28"
+    },
+    {
+      "name": "t1500-g100",
+      "threshold_m": 0.0015,
+      "gain": 1.0,
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.7447306641059438,
+      "core_path_rmse_m": 0.0912665851847893,
+      "two_wheel_support_fraction": 0.8226120857699805,
+      "longest_qualifying_duration_s": 0.3249999999999933,
+      "largest_qualifying_course_turn_deg": 11.48178155594022,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "a3a67b92aa3346f52ce4eefb1b5764b3a38f7ca55005f3c8a1f0df181243cafd",
+      "report_sha256": "28bef659381f9e2b841f4ab2be09396168069382aac614eec48c85d999ce5571"
+    },
+    {
+      "name": "t1800-g050",
+      "threshold_m": 0.0018,
+      "gain": 0.5,
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.9060936295268699,
+      "core_path_rmse_m": 0.034233090298757415,
+      "two_wheel_support_fraction": 0.8888888888888888,
+      "longest_qualifying_duration_s": 0.17499999999999627,
+      "largest_qualifying_course_turn_deg": 3.8577004033555187,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "65dd1f38c7d9533aebd5ec90fb928bf8e7c6b56354d6ed1550435881b2dd9178",
+      "report_sha256": "6d852bf7f9adb9e548bd1e50a2b69a6e6a9df5bf62eec97115ba6d6bfbaf1539"
+    },
+    {
+      "name": "t1800-g100",
+      "threshold_m": 0.0018,
+      "gain": 1.0,
+      "status": "FAIL",
+      "full_reference_completed": true,
+      "minimum_core_speed_m_s": 0.8420738025940908,
+      "core_path_rmse_m": 0.04766733770320957,
+      "two_wheel_support_fraction": 0.8693957115009746,
+      "longest_qualifying_duration_s": 0.1449999999999969,
+      "largest_qualifying_course_turn_deg": 3.916211067797839,
+      "max_abs_abduction_bias_rad": [
+        0.08,
+        0.08
+      ],
+      "rollout_sha256": "ab8276920bb1cbd3b524f02163e62576378aceb462fae678b743a27b7ca9952c",
+      "report_sha256": "bcf38d55bdd9a7fbe027600b7a7eff9ee02403c7569988d760a2ca444810165a"
+    }
+  ],
+  "limitations": [
+    "MuJoCo-only bounded feasibility sweep; no candidate is paired Isaac-tested.",
+    "The feedback intervention changes the deployed controller, not the frozen outer actor."
+  ]
+}
