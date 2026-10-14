@@ -1,0 +1,1320 @@
+{
+  "kind": "matched_state_20ms_physics_calibration_not_policy_transfer",
+  "input_sha256": {
+    "outputs/drift-drl-turn-worst-load-20261014/eval_isaac_final/physics_trajectory.npz": "b48cc91dbc5b435d15518c26d4be3ce564acd395f8f272cc890722e90a46baea",
+    "outputs/drift-drl-turn-worst-load-20261014/eval_isaac_final/report.json": "8f0147c552e3c51375f62a4dfb297538e6928a7c2f43a18c965935f6ceb063b1",
+    "outputs/drift-drl-turn-worst-load-20261014/contact_tc005_ratio2_contract.json": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+    "outputs/drift-drl-turn-reference-20261013-v2/motion.npz": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+    "outputs/drift-drl-turn-load-reserve-20261013/margin_1000_model.xml": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d"
+  },
+  "frozen": {
+    "clock_s": 0.005,
+    "action_decimation": 4,
+    "solref": [
+      0.05,
+      2.0
+    ],
+    "contact_friction": 0.15,
+    "margin_model": "outputs/drift-drl-turn-load-reserve-20261013/margin_1000_model.xml",
+    "isaac_window_count": 128
+  },
+  "ranking_rule": {
+    "all_four_support_at_least": 0.99,
+    "p95_force_relative_error_at_most": 0.2,
+    "then_minimize": "20ms left-right RMS wheel-center-height error"
+  },
+  "records": [
+    {
+      "solimp": [
+        0.5,
+        0.7,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.990234375,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9609375,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9609375
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00013281698423345896,
+            0.0001118779773324442
+          ],
+          [
+            0.00034631273035921244,
+            0.0003013780695109073
+          ],
+          [
+            0.0006107311843970612,
+            0.0005397296646545588
+          ],
+          [
+            0.0009020743115683265,
+            0.0008131080604696966
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.094527904796682e-06,
+          1.591365499037054e-05,
+          2.8096006592420257e-05,
+          4.222672988435279e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.00952873416583,
+          150.19093326933313
+        ],
+        "maximum_p95_relative_error": 0.010197408742139036
+      },
+      "last_step_wheel_z_rmse_m": 0.0008587440775901346,
+      "physics_admissible": false
+    },
+    {
+      "solimp": [
+        0.5,
+        0.7,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.990234375,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9609375,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9609375
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00013188359828269797,
+            0.00011179836458543011
+          ],
+          [
+            0.00034382084100950807,
+            0.00030118776062975955
+          ],
+          [
+            0.0006065083379327615,
+            0.0005394034698515487
+          ],
+          [
+            0.000896020393298983,
+            0.0008125380594704245
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.088175817859137e-06,
+          1.5893875322814097e-05,
+          2.804229250841446e-05,
+          4.2101173984259036e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.0095287341658,
+          150.19042514173006
+        ],
+        "maximum_p95_relative_error": 0.01019399103125096
+      },
+      "last_step_wheel_z_rmse_m": 0.0008552983816469043,
+      "physics_admissible": false
+    },
+    {
+      "solimp": [
+        0.5,
+        0.7,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.9921875,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.96875,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.96875
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.0001304877445445584,
+            0.0001115957942614586
+          ],
+          [
+            0.0003401964735495844,
+            0.000300533089687552
+          ],
+          [
+            0.0005999031182987585,
+            0.0005372931817254276
+          ],
+          [
+            0.0008857671877288379,
+            0.0008061255125047518
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.041896342277684e-06,
+          1.5752650012251074e-05,
+          2.775470152833101e-05,
+          4.1687575612969604e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.00819911262477,
+          150.1273445877562
+        ],
+        "maximum_p95_relative_error": 0.009769705684730567
+      },
+      "last_step_wheel_z_rmse_m": 0.0008468830653543921,
+      "physics_admissible": false
+    },
+    {
+      "solimp": [
+        0.5,
+        0.9,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011564660463997708,
+            0.00010298528329397806
+          ],
+          [
+            0.00031050692500257,
+            0.0002817927941650827
+          ],
+          [
+            0.0005584272106358531,
+            0.0005116348849159536
+          ],
+          [
+            0.0008385091435334636,
+            0.0007806899656685572
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.35862475972929e-06,
+          1.6744307998305524e-05,
+          2.977362789612587e-05,
+          4.49024233601831e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.36042285669436,
+          150.5289544015514
+        ],
+        "maximum_p95_relative_error": 0.012470968566516971
+      },
+      "last_step_wheel_z_rmse_m": 0.0008101155492535604,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.5,
+        0.9,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011445196440450376,
+            0.00010290833021464167
+          ],
+          [
+            0.0003071487348828431,
+            0.0002816173863014752
+          ],
+          [
+            0.0005523782383312502,
+            0.0005113424979345481
+          ],
+          [
+            0.0008300652878572307,
+            0.0007802415724011439
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.356288115753543e-06,
+          1.6735819921401968e-05,
+          2.9743659337256003e-05,
+          4.487907961206645e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.36042285669433,
+          150.52831421840045
+        ],
+        "maximum_p95_relative_error": 0.012466662638415116
+      },
+      "last_step_wheel_z_rmse_m": 0.0008055387307288573,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.5,
+        0.9,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011240450220992872,
+            0.00010268339168031918
+          ],
+          [
+            0.00030169779958052724,
+            0.0002809146841631726
+          ],
+          [
+            0.000542543124561564,
+            0.000509108668599237
+          ],
+          [
+            0.0008137996290194766,
+            0.0007729372872496388
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.290756487274912e-06,
+          1.653525010098339e-05,
+          2.9329920365708528e-05,
+          4.4169434936733334e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.3584498492211,
+          150.38999189555543
+        ],
+        "maximum_p95_relative_error": 0.011536294545830827
+      },
+      "last_step_wheel_z_rmse_m": 0.0007936314907477741,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.7,
+        0.85,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.99609375,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.984375,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.984375
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011978436598232407,
+            0.00010474247848685927
+          ],
+          [
+            0.0003203748379620791,
+            0.00028576336791268455
+          ],
+          [
+            0.0005738883473512571,
+            0.0005174628505042615
+          ],
+          [
+            0.000858853699389672,
+            0.000787532677901361
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.29715102342268e-06,
+          1.6558665052507083e-05,
+          2.9370582583373075e-05,
+          4.426721441131232e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.292482959571,
+          150.40088487646284
+        ],
+        "maximum_p95_relative_error": 0.011609561692166759
+      },
+      "last_step_wheel_z_rmse_m": 0.0008239652285496682,
+      "physics_admissible": false
+    },
+    {
+      "solimp": [
+        0.7,
+        0.85,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.99609375,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.984375,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.984375
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011933676253840679,
+            0.00010471066592080947
+          ],
+          [
+            0.0003191724694090077,
+            0.0002856869071989688
+          ],
+          [
+            0.0005717637047282211,
+            0.0005173314150640082
+          ],
+          [
+            0.0008557491556148726,
+            0.0007873280719657553
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.29793223589775e-06,
+          1.6553312854478105e-05,
+          2.9353370617176812e-05,
+          4.4226360314841934e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.29248295957095,
+          150.40088487646284
+        ],
+        "maximum_p95_relative_error": 0.011609561692166759
+      },
+      "last_step_wheel_z_rmse_m": 0.0008222506035999247,
+      "physics_admissible": false
+    },
+    {
+      "solimp": [
+        0.7,
+        0.85,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.998046875,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9921875,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9921875
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011861347353428719,
+            0.00010462100177791797
+          ],
+          [
+            0.00031729757995675555,
+            0.0002854011309593594
+          ],
+          [
+            0.000568332939806167,
+            0.0005164050262300752
+          ],
+          [
+            0.0008498885925287548,
+            0.0007844007177321158
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.281716885448595e-06,
+          1.649978288651017e-05,
+          2.924168374512304e-05,
+          4.4033372093420966e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.29124463981205,
+          150.35205764330786
+        ],
+        "maximum_p95_relative_error": 0.011281145433371886
+      },
+      "last_step_wheel_z_rmse_m": 0.0008178004358305168,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.7,
+        0.95,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011349298023400874,
+            0.00010160228032335183
+          ],
+          [
+            0.0003062172886272552,
+            0.0002786960539303656
+          ],
+          [
+            0.0005523994114345963,
+            0.0005071511745671096
+          ],
+          [
+            0.0008316661271883048,
+            0.0007755722081654884
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.438186868445727e-06,
+          1.6964421753044254e-05,
+          3.0183667725271755e-05,
+          4.5531058914139146e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085887152498,
+          150.6493064320719
+        ],
+        "maximum_p95_relative_error": 0.01328046689455964
+      },
+      "last_step_wheel_z_rmse_m": 0.0008041084495237832,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.7,
+        0.95,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.0001129153867749242,
+            0.00010156372430477625
+          ],
+          [
+            0.0003045902650374832,
+            0.0002786098697478033
+          ],
+          [
+            0.0005494413848278324,
+            0.000507002242371053
+          ],
+          [
+            0.0008276584510231746,
+            0.0007753396020057995
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.439452297364836e-06,
+          1.6958470620579703e-05,
+          3.0163137652106306e-05,
+          4.554550567108087e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085887152498,
+          150.6489678251004
+        ],
+        "maximum_p95_relative_error": 0.013278189394328788
+      },
+      "last_step_wheel_z_rmse_m": 0.0008019258101559622,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.7,
+        0.95,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011191223236001753,
+            0.00010142390746140407
+          ],
+          [
+            0.0003019141184181158,
+            0.00027817693259647415
+          ],
+          [
+            0.0005445413506102434,
+            0.0005057162860377259
+          ],
+          [
+            0.0008193802535243587,
+            0.0007713702126462297
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.417917525689989e-06,
+          1.689232776545371e-05,
+          3.0029879433255666e-05,
+          4.5314960605254195e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085984348468,
+          150.56656557635202
+        ],
+        "maximum_p95_relative_error": 0.012723944631691353
+      },
+      "last_step_wheel_z_rmse_m": 0.0007957373953835311,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.95,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.998046875,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9921875,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9921875
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011398295212072175,
+            0.00010165180695307
+          ],
+          [
+            0.00030766531021053536,
+            0.00027883010949811206
+          ],
+          [
+            0.0005551485420275723,
+            0.0005073794477749484
+          ],
+          [
+            0.0008357437177296661,
+            0.0007758754397860123
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.446831744156763e-06,
+          1.6988595159862566e-05,
+          3.0233092270793006e-05,
+          4.559440525993483e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085887152498,
+          150.6493064320719
+        ],
+        "maximum_p95_relative_error": 0.01328046689455964
+      },
+      "last_step_wheel_z_rmse_m": 0.0008063653823756764,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.95,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.998046875,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9921875,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9921875
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011387811864769182,
+            0.0001016442188384306
+          ],
+          [
+            0.0003073777993127113,
+            0.000278812233575162
+          ],
+          [
+            0.000554630800250668,
+            0.0005073494946169506
+          ],
+          [
+            0.0008349749588004863,
+            0.0007758291670258717
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.448247307691525e-06,
+          1.698910290454771e-05,
+          3.0231514031526497e-05,
+          4.558625179005135e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085887152498,
+          150.64924268414651
+        ],
+        "maximum_p95_relative_error": 0.01328003812041434
+      },
+      "last_step_wheel_z_rmse_m": 0.0008059448114579347,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.95,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 0.998046875,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 0.9921875,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          0.9921875
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011370087765176637,
+            0.00010161435964730245
+          ],
+          [
+            0.0003069142868810093,
+            0.0002787179302385192
+          ],
+          [
+            0.0005537849277043336,
+            0.0005070709706497728
+          ],
+          [
+            0.0008335225909486321,
+            0.0007750185693023363
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.4452008875725545e-06,
+          1.6978964809045298e-05,
+          3.0209229098232615e-05,
+          4.55451930269284e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.4085906545774,
+          150.6331787688294
+        ],
+        "maximum_p95_relative_error": 0.013171990815065149
+      },
+      "last_step_wheel_z_rmse_m": 0.0008048023646787952,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.99,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011191574247066189,
+            0.00010065654198369861
+          ],
+          [
+            0.00030298846040182026,
+            0.00027656892321193885
+          ],
+          [
+            0.0005477238422319412,
+            0.0005040969936352856
+          ],
+          [
+            0.0008265735293612735,
+            0.0007721127007917614
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.49379894684801e-06,
+          1.7124002006109638e-05,
+          3.0495219749674886e-05,
+          4.607828546967217e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155392018138,
+          150.73482956360291
+        ],
+        "maximum_p95_relative_error": 0.013855702988906149
+      },
+      "last_step_wheel_z_rmse_m": 0.000799806796096626,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.99,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011174137003163049,
+            0.00010064474071935779
+          ],
+          [
+            0.0003025070430357607,
+            0.00027654261292538857
+          ],
+          [
+            0.0005468520140617253,
+            0.0005040519557718135
+          ],
+          [
+            0.0008252775964622336,
+            0.0007720291208004156
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.497118569324196e-06,
+          1.712681249143504e-05,
+          3.0494290610298483e-05,
+          4.6063191851686646e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155392018143,
+          150.7348295635399
+        ],
+        "maximum_p95_relative_error": 0.013855702988482488
+      },
+      "last_step_wheel_z_rmse_m": 0.0007990970136930634,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.9,
+        0.99,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011144046080816118,
+            0.00010059064016014982
+          ],
+          [
+            0.0003017196318781098,
+            0.0002763767909115881
+          ],
+          [
+            0.0005454142877004662,
+            0.0005035702858161038
+          ],
+          [
+            0.0008228375265974415,
+            0.0007706557046653902
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.49237848230492e-06,
+          1.7110386884344938e-05,
+          3.0455241687392297e-05,
+          4.598803337610609e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155700065878,
+          150.71357505848405
+        ],
+        "maximum_p95_relative_error": 0.013712743320650755
+      },
+      "last_step_wheel_z_rmse_m": 0.0007971736982334228,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.95,
+        0.99,
+        0.0005,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011201162002604854,
+            0.0001006680914944273
+          ],
+          [
+            0.0003032687057324685,
+            0.0002766011985757822
+          ],
+          [
+            0.0005482549086929126,
+            0.0005041538450424043
+          ],
+          [
+            0.0008273840676997046,
+            0.0007721931669143972
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.494518639612876e-06,
+          1.7127853323625686e-05,
+          3.0504703636866225e-05,
+          4.6093989172374396e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155392018138,
+          150.73482956360291
+        ],
+        "maximum_p95_relative_error": 0.013855702988906149
+      },
+      "last_step_wheel_z_rmse_m": 0.0008002645445453009,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.95,
+        0.99,
+        0.001,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.00011193694605103797,
+            0.00010066291841973322
+          ],
+          [
+            0.0003030628838426858,
+            0.0002765893307169738
+          ],
+          [
+            0.0005478820019765488,
+            0.0005041332492454129
+          ],
+          [
+            0.000826829147342453,
+            0.0007721554588368799
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.496024672031491e-06,
+          1.7129138027837686e-05,
+          3.0504462266014013e-05,
+          4.608679186051768e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155392018135,
+          150.73482956357617
+        ],
+        "maximum_p95_relative_error": 0.013855702988726293
+      },
+      "last_step_wheel_z_rmse_m": 0.0007999595275720642,
+      "physics_admissible": true
+    },
+    {
+      "solimp": [
+        0.95,
+        0.99,
+        0.002,
+        0.5,
+        2
+      ],
+      "summary": {
+        "policy_windows": 128,
+        "native_steps": 512,
+        "max_initial_wheel_position_abs_error_m": 7.216966588785567e-07,
+        "isaac_two_wheel_support_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction": 1.0,
+        "isaac_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_all_four_steps_supported_window_fraction": 1.0,
+        "mujoco_two_wheel_support_fraction_by_substep": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "wheel_z_rmse_m_by_substep_and_side": [
+          [
+            0.0001118082263176191,
+            0.00010063842246669403
+          ],
+          [
+            0.000302726535064031,
+            0.00027651495355214084
+          ],
+          [
+            0.0005472674380327331,
+            0.000503919187790573
+          ],
+          [
+            0.000825785432271588,
+            0.0007715417998385892
+          ]
+        ],
+        "root_position_rmse_m_by_substep": [
+          6.493610704114449e-06,
+          1.7120158303288486e-05,
+          3.0482705118468653e-05,
+          4.6045015645968886e-05
+        ]
+      },
+      "forces": {
+        "isaac_p95_n": [
+          142.12012863159055,
+          148.6748352050768
+        ],
+        "mujoco_p95_n": [
+          143.44155528846807,
+          150.72946542640022
+        ],
+        "maximum_p95_relative_error": 0.013819623330938002
+      },
+      "last_step_wheel_z_rmse_m": 0.0007991239982162165,
+      "physics_admissible": true
+    }
+  ],
+  "selected_solimp": [
+    0.5,
+    0.9,
+    0.002,
+    0.5,
+    2
+  ],
+  "limitations": [
+    "Independent 20 ms resets; no actor calls or policy-transfer result.",
+    "Parameter sweep is exploratory, not a unique PhysX contact-law identification."
+  ]
+}
