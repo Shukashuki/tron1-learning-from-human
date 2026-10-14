@@ -1,0 +1,423 @@
+{
+  "status": "completed",
+  "engine": "MuJoCo",
+  "engine_version": "3.9.0",
+  "termination": "motion_end",
+  "terrain": null,
+  "terrain_runtime_audit": null,
+  "terrain_module_sha256": "dec819a3c3c526fce706fb6a5a6491388298884b32bfe73a5c331b166f976ebf",
+  "model_hash_scope": "model_sha256 hashes original input MJCF bytes before in-memory visual stripping, terrain augmentation and configuration; terrain_runtime_audit verifies actual compiled geometry after configuration",
+  "termination_terms": [],
+  "completed_full_reference": true,
+  "physics_stepped": true,
+  "root_state_writes": 1,
+  "hidden_resets": 0,
+  "start_reference_frame": 0,
+  "final_reference_frame": 348,
+  "policy": null,
+  "policy_sha256": null,
+  "policy_kind": "injected_test_callable",
+  "observation_normalization": "included inside TorchScript actor; no second normalizer",
+  "motion_file": "/home/roy/tron1-learning-from-human/outputs/drift-drl-turn-reference-20261013-v2/motion.npz",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model": "/home/roy/tron1-learning-from-human/outputs/drift-drl-turn-load-reserve-20261013/margin_1000_model.xml",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "task_source_sha256": "0a29fa27c1d65c0b9add0886221491e549553e3529d6970f1ec5ba35e2532817",
+  "evaluator_source_sha256": "da6d1da378b5065589a49f2befaebfb0576665dbd2ad5d34a157d11b8984a3aa",
+  "contract": {
+    "policy_fps": 50.0,
+    "physics_dt": 0.005,
+    "decimation": 4,
+    "actor_dim": 51,
+    "critic_dim": 120,
+    "action_dim": 8,
+    "leg_joint_names": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint"
+    ],
+    "wheel_joint_names": [
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "observed_joint_velocity_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint",
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "body_names": [
+      "base_Link",
+      "abad_L_Link",
+      "abad_R_Link",
+      "hip_L_Link",
+      "hip_R_Link",
+      "knee_L_Link",
+      "knee_R_Link",
+      "wheel_L_Link",
+      "wheel_R_Link"
+    ],
+    "orientation_body_names": [
+      "base_Link",
+      "abad_L_Link",
+      "abad_R_Link",
+      "hip_L_Link",
+      "hip_R_Link",
+      "knee_L_Link",
+      "knee_R_Link"
+    ],
+    "actor_terms": [
+      [
+        "ref_leg_q_ref_leg_dq_phase_sin_cos",
+        14
+      ],
+      [
+        "motion_anchor_pos_b",
+        3
+      ],
+      [
+        "motion_anchor_ori_b_6d_first_two_columns_row_major",
+        6
+      ],
+      [
+        "base_lin_vel_b",
+        3
+      ],
+      [
+        "base_ang_vel_b",
+        3
+      ],
+      [
+        "leg_joint_pos_rel",
+        6
+      ],
+      [
+        "joint_velocities",
+        8
+      ],
+      [
+        "previous_clipped_actions",
+        8
+      ]
+    ],
+    "raw_action_clip": [
+      -1.0,
+      1.0
+    ],
+    "leg_position_scale": 1.0,
+    "leg_position_offset": "reference_frame_0_joint_pos",
+    "wheel_torque_scale_nm": 12.0,
+    "leg_kp": 500.0,
+    "leg_kd": 10.0,
+    "leg_torque_limit_nm": 80.0,
+    "wheel_torque_limit_nm": 12.0,
+    "actuator_model": "dc_motor",
+    "leg_saturation_effort_nm": 80.0,
+    "wheel_saturation_effort_nm": 12.0,
+    "leg_motor_velocity_limit_rad_s": 15.0,
+    "wheel_motor_velocity_limit_rad_s": 100.0,
+    "solver_joint_velocity_limit_rad_s": 1000.0,
+    "motor_velocity_limit_semantics": "no_load_speed_for_torque_speed_curve_not_hard_qvel_clip",
+    "legacy_joint_friction_coefficient": 0.0,
+    "legacy_joint_friction_startup_readback_required": true,
+    "rigid_body_max_angular_speed_rad_s": 100.0,
+    "rigid_body_angular_speed_config_units": "degrees_per_second",
+    "quaternion_order": "wxyz",
+    "root_prescribed_during_steps": false,
+    "wheel_orientation_tracking": false,
+    "wheel_angle_observation": false,
+    "reference_state_initialization_training_only": true,
+    "training_full_clip_start_fraction": 0.2,
+    "deterministic_evaluation_start_frame": 0,
+    "motion_end_hidden_teleport": false,
+    "domain_randomization": "disabled during evaluation; fixed actuator parameters",
+    "actuator_limits_provenance": "project sim2sim baseline settings; NOT verified manufacturer hardware ratings",
+    "hardware_ready": false,
+    "task_profile": {
+      "schema_version": 1,
+      "task": "car_drift",
+      "contact_friction": 0.15,
+      "env_spacing_m": 8.0,
+      "reward_weights": {
+        "sideslip": 2.0,
+        "yaw_rate": 1.0,
+        "speed": 1.0,
+        "grounded": 0.4,
+        "tilt": -0.2
+      },
+      "wheel_ground_load_reserve": {
+        "weight": -1.0,
+        "scale_fraction": 0.2
+      },
+      "wheel_ground_load_reserve_sampling": "all_substeps_max_cost",
+      "description": "High-speed drift_drl turn: reward the worst of four ground-normal two-wheel load-reserve costs in each 20ms policy step. Same original004 parent, pinned turn reference, 2048 environments, 600 updates, seed42, 50/200Hz clocks, friction, motor-v1 randomization, controller and frozen two-engine gate. Versus last-substep load-reserve retry, sampling and cost weight both change; no one-factor causal attribution is claimed.",
+      "mujoco_contact_solref": [
+        0.05,
+        2.0
+      ]
+    },
+    "training_domain_randomization": {
+      "schema_version": 1,
+      "mode": "random",
+      "seed": 42,
+      "torque_scale_range": [
+        0.85,
+        1.0
+      ],
+      "velocity_scale_range": [
+        0.85,
+        1.0
+      ],
+      "wheel_friction_nm_range": [
+        0.0,
+        0.3
+      ],
+      "nominal_probability": 0.2,
+      "friction_smoothing_rad_s": 0.5
+    },
+    "actor_file": "actor_normalized.pt",
+    "actor_includes_observation_normalizer": true,
+    "actor_output_is_unclipped": true,
+    "actor_observation_groups": [
+      "policy"
+    ],
+    "export_validation_max_abs_error": 9.872019290924072e-08,
+    "actual_joint_order": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint",
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "actual_body_order": [
+      "base_Link",
+      "abad_L_Link",
+      "abad_R_Link",
+      "limx_imu",
+      "hip_L_Link",
+      "hip_R_Link",
+      "knee_L_Link",
+      "knee_R_Link",
+      "wheel_L_Link",
+      "wheel_R_Link"
+    ],
+    "reference_file_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+    "checkpoint_sha256": "6b1d8dc1c822a366ecd9930b5c9fbc5aad3ca316a8527dfaabf4985216aa0054",
+    "default_joint_position_rad": [
+      0.0,
+      0.0,
+      0.3447771668434143,
+      -0.3447771668434143,
+      0.7936588525772095,
+      -0.7936588525772095,
+      0.0,
+      0.0
+    ]
+  },
+  "reference_frames": 349,
+  "contract_source": "/home/roy/tron1-learning-from-human/outputs/drift-drl-turn-worst-load-20261014/contact_tc005_ratio2_contract.json",
+  "contract_source_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "actuator_model": "dc_motor",
+  "actual_joint_velocity_hard_clipped": false,
+  "contact_material_audit": {
+    "expected_friction": 0.15,
+    "colliding_geom_count": 10,
+    "explicit_contact_solref": [
+      0.05,
+      2.0
+    ],
+    "compiled_solref_ranges": [
+      [
+        0.05,
+        0.05
+      ],
+      [
+        2.0,
+        2.0
+      ]
+    ],
+    "refsafe_minimum_timeconst_s": 0.01,
+    "contact_margin_and_gap_changed": false,
+    "compiled_friction_range": [
+      0.15,
+      0.15
+    ],
+    "combination_note": "Both contacting materials have the same value; max/average combination agree."
+  },
+  "domain_parameters": {
+    "joint_names": [
+      "abad_L_Joint",
+      "abad_R_Joint",
+      "hip_L_Joint",
+      "hip_R_Joint",
+      "knee_L_Joint",
+      "knee_R_Joint",
+      "wheel_L_Joint",
+      "wheel_R_Joint"
+    ],
+    "torque_scale": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "velocity_scale": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "wheel_friction_nm": [
+      0.0,
+      0.0
+    ],
+    "friction_smoothing_rad_s": 0.5,
+    "is_nominal": true
+  },
+  "domain_parameters_resampled_during_episode": false,
+  "domain_parameter_implementation": "scaled DC motor envelope, then smooth wheel axle drag, then nominal net-effort guard",
+  "domain_source_sha256": "3f3a0b62c85a0af496ae9e9e0d75dda85c3ec30da587e4a47969843f5b1b1dca",
+  "expected_duration_s": 6.98,
+  "recorded_duration_s": 6.979999999999873,
+  "physics_steps": 1396,
+  "policy_steps": 349,
+  "root_com_link_offset_m": [
+    0.04576,
+    0.00014,
+    -0.16398
+  ],
+  "compiled_base_com_m": [
+    0.0457599982619,
+    0.000140000003739,
+    -0.163980007172
+  ],
+  "base_link_height_gain_m": 0.013360455275991612,
+  "base_link_peak_height_m": 0.7633604552759916,
+  "reference_base_link_height_gain_m": 0.0,
+  "reference_height_rmse_m": 0.012856963287489812,
+  "reference_root_position_rmse_m": 0.050634277843277134,
+  "max_base_tilt_deg": 2.8388188999237682,
+  "final_base_tilt_deg": 2.031446674852715,
+  "max_abs_joint_speed_rad_s": [
+    1.2983322814099023,
+    2.352399374396221,
+    0.7364872502042579,
+    0.708412229417763,
+    1.5740901870528936,
+    1.5864404796509783,
+    12.605159632293581,
+    14.528151536900536
+  ],
+  "joint_speed_reference_rad_s": [
+    15.0,
+    15.0,
+    15.0,
+    15.0,
+    15.0,
+    15.0,
+    100.0,
+    100.0
+  ],
+  "joint_speed_reference_kind": "dc_motor_no_load_speed",
+  "joint_speed_exceedance_fraction_by_joint": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "max_abs_joint_torque_nm": [
+    28.199198848035522,
+    36.56559569610696,
+    9.838790903328139,
+    10.984123222778507,
+    37.58293988798178,
+    34.65389651552555,
+    2.3701765537261963,
+    3.447351336479187
+  ],
+  "contact": {
+    "available": true,
+    "force_threshold_n": 5.0,
+    "sampling_interval_s": 0.004999999999999893,
+    "minimum_prior_support_s": 0.1,
+    "minimum_flight_s": 0.04,
+    "minimum_landing_support_s": 0.1,
+    "two_wheel_contact_fraction": 0.9584824624194703,
+    "left_contact_fraction": 0.9763779527559056,
+    "right_contact_fraction": 0.9813886900501074,
+    "flight_intervals": [],
+    "first_takeoff_s": null,
+    "first_landing_s": null,
+    "max_flight_duration_s": 0.0,
+    "reason": "no qualifying flight after sustained two-wheel support was detected",
+    "force_source": "summed wheel-ground normal contact forces, excluding robot self-contact"
+  },
+  "jump_and_landing_detected": false,
+  "wheel_lateral_contact_slip_evidence_kind": "actual_ground_contact_points",
+  "contact_slip_helper_sha256": "52ef38de9cece19a8ee02c120cb85d472ffd831e4587e5f0d1f340974ab699f4",
+  "contact_slip_measurement": {
+    "point_source": "MuJoCo data.contact.pos for wheel/world collision pairs only",
+    "velocity_source": "mj_jacBodyCom at data.xipos; COM linear and angular velocity transported to each contact point",
+    "lateral_axis": "body local +Y wheel axle projected into each actual contact tangent plane",
+    "aggregation": "normal-force-weighted RMS over active contact points per wheel",
+    "active_point_normal_force_threshold_n": 5.0,
+    "active_point_comparison": ">",
+    "no_contact": "count=0 and slip=0; slip requires positive contact count for interpretation",
+    "ground_force_kind": "sum of normal contact forces, matching the filtered PhysX contact API",
+    "ground_is_stationary": true,
+    "sample_dt_s": 0.005
+  },
+  "nonwheel_ground_contact_recorded": true,
+  "nonwheel_ground_contact_force_kind": "sum of actual wheel-excluded ground contact normal forces; point count uses normal force >1N",
+  "max_nonwheel_ground_contact_force_norm_n": 0.0,
+  "nonwheel_ground_contact_sample_count": 0,
+  "full_clip_with_detected_jump_and_landing": false,
+  "self_collision_enabled_in_memory": true,
+  "self_collision_geoms": [
+    "base_collision",
+    "abad_L_collision",
+    "hip_L_collision",
+    "knee_L_collision",
+    "wheel_L_collision",
+    "abad_R_collision",
+    "hip_R_collision",
+    "knee_R_collision",
+    "wheel_R_collision"
+  ],
+  "no_visual_mesh": true,
+  "removed_visual_geom_count": 9,
+  "isaac_observation_validation": null,
+  "hardware_ready": false,
+  "wall_time_s": 2.12927666696487,
+  "limitations": [
+    "One deterministic sim2sim episode, not a robustness or real-hardware validation.",
+    "Contact solver/cylinder approximations and self-collision parent filtering remain engine-specific.",
+    "DC no-load speed defines a torque-speed envelope, not a hard qvel limit; external forces can exceed it.",
+    "DC motor parameters are simulation assumptions, not validated manufacturer ratings. The DC model changes training physics.",
+    "MuJoCo contact forces are instantaneous constraint forces; Isaac contact sensors may aggregate differently.",
+    "Lateral contact slip uses real contact points sampled at 200 Hz; contact patch resolution remains engine-specific.",
+    "Reference is held for each 20 ms action; training termination predicates are checked before phase advances."
+  ]
+}

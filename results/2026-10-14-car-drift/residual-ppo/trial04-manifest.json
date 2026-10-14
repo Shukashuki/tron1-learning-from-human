@@ -1,0 +1,27 @@
+{
+  "kind": "exploratory_mujoco_ppo_residual_not_sim2sim",
+  "seed": 42,
+  "device": "cpu",
+  "torch_threads": 1,
+  "updates": 50,
+  "initial_residual_gaussian_log_std": -5.3,
+  "episodes_per_update": 4,
+  "eval_every": 5,
+  "policy_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "robot_reference_sha256": "afc22f19b813cf10b3e3a90affb0f26f5a7743074f98b262394c69de786e9f6e",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "trainer_sha256": "cafbe23d60e72e8bade5a41252e1486046bb40e513bc5ae24a1e46177259a408",
+  "environment_sha256": "eb01b305abe4b15e296b240843187cd082b4b62619e3ccbc09ba9cd693dce32a",
+  "reward_sha256": "083eb1191a370350ffd257ca29f5b1ee2664aa9287a5bbbf2b1aa91af3e64277",
+  "streak_sha256": "fcdf8c7af1cacdd63cc505e474310d4b622a55a12963f1839e5eea82dd1d2bf6",
+  "streak_record_improvement_reward_per_degree": 10.0,
+  "policy_observation_dim": 51,
+  "policy_action_dim": 8,
+  "no_isaac_training_or_validation": true,
+  "limitations": [
+    "Any MuJoCo PASS remains provisional until the same exported actor passes paired Isaac/MuJoCo assessment.",
+    "This fixed-reference residual PPO run is exploratory, not a generalization or hardware-safety result."
+  ]
+}

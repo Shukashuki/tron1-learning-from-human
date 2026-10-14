@@ -1,0 +1,76 @@
+{
+  "kind": "read_only_reward_alignment_audit_not_gate",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "robot_reference_sha256": "afc22f19b813cf10b3e3a90affb0f26f5a7743074f98b262394c69de786e9f6e",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "reward_sha256": "083eb1191a370350ffd257ca29f5b1ee2664aa9287a5bbbf2b1aa91af3e64277",
+  "streak_sha256": "fcdf8c7af1cacdd63cc505e474310d4b622a55a12963f1839e5eea82dd1d2bf6",
+  "episodes": [
+    {
+      "policy_steps": 349,
+      "core_policy_steps": 128,
+      "sum_reward": 349.9512348284165,
+      "streak_bonus": 31.75580396269449,
+      "sum_with_streak_bonus": 381.70703879111096,
+      "largest_qualifying_course_turn_deg": 4.536543423242167,
+      "longest_qualifying_duration_s": 0.13999999999999702,
+      "core_mean_joint_qualifying_soft_fraction": 0.6985418814675761,
+      "core_mean_support_fraction": 0.912109375,
+      "rollout_sha256": "d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345",
+      "residual": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "policy_steps": 349,
+      "core_policy_steps": 128,
+      "sum_reward": 329.9660624173593,
+      "streak_bonus": 84.82816824549104,
+      "sum_with_streak_bonus": 414.79423066285034,
+      "largest_qualifying_course_turn_deg": 8.482816824549104,
+      "longest_qualifying_duration_s": 0.2349999999999952,
+      "core_mean_joint_qualifying_soft_fraction": 0.6100147193779288,
+      "core_mean_support_fraction": 0.904296875,
+      "rollout_sha256": "8f8889a4def73fdb666a57664474607d89367f262b9e9602d4414fd7bd71788e",
+      "residual": [
+        0.0,
+        0.0,
+        0.01,
+        -0.01,
+        -0.01,
+        0.01,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "policy_steps": 349,
+      "core_policy_steps": 128,
+      "sum_reward": 175.58434817970362,
+      "streak_bonus": 0.0,
+      "sum_with_streak_bonus": 175.58434817970362,
+      "largest_qualifying_course_turn_deg": 0.0,
+      "longest_qualifying_duration_s": 0.0,
+      "core_mean_joint_qualifying_soft_fraction": 0.07562814656429108,
+      "core_mean_support_fraction": 0.9921875,
+      "rollout_sha256": "642e524c77a9a9b850fae7b7a4ccfe9f206da841ee13ec8a1b53106439272faf",
+      "residual": [
+        0.0,
+        0.0,
+        0.04,
+        -0.04,
+        -0.04,
+        0.04,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

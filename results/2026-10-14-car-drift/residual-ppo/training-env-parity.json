@@ -1,0 +1,21 @@
+{
+  "policy_steps": 349,
+  "physical_steps": 1396,
+  "max_qpos_abs_error": 0.0,
+  "max_torque_abs_error_nm": 0.0,
+  "max_ground_force_abs_error_n": 0.0,
+  "max_actor_observation_abs_error": 0.0,
+  "exact_action_count": 349,
+  "exact_contact_count_samples": 1396,
+  "baseline_rollout_sha256": "d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345",
+  "kind": "full_rollout_mujoco_training_environment_parity",
+  "policy_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "environment_source_sha256": "eb01b305abe4b15e296b240843187cd082b4b62619e3ccbc09ba9cd693dce32a",
+  "audit_source_sha256": "a155465675b0b88f9eef3a4e4d0fd5e79ee97a461310f2f0f225e008f843ff71",
+  "limitations": [
+    "This proves baseline evaluator parity, not that a newly trained actor transfers to Isaac."
+  ]
+}
