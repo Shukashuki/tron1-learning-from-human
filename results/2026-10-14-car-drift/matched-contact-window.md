@@ -15,3 +15,16 @@ The calibrated variant uses the [frozen 1 mm-margin MJCF](turn-worst-load/margin
 Crucially, an independent **full 7 s closed-loop** MuJoCo run of the **unchanged Isaac-trained actor** under the calibrated variant still **FAILS** the [unchanged gate](turn-worst-load-pair.md): minimum core speed 0.967 m/s, path RMSE 0.041 m, two-wheel support 91.23%, and longest uninterrupted jointly fast/sliding/supported window only **0.140 s / 4.54°** (required ≥0.20 s / ≥45°). Of the 513 core samples, 45 lack simultaneous ≥5 N support. There is no contact-gap interpolation. Thus strong one-window physical matching is insufficient for this same-policy sim2sim task; the independent windows do not reveal whether accumulated state error, subsequent actor feedback, or both create the long-horizon gaps. This calibration is exploratory and does **not** establish a unique PhysX-equivalent MuJoCo contact law or hardware robustness.
 
 Raw four-step ledgers: [original](turn-worst-load/matched-contact-window-default.json), [calibrated](turn-worst-load/matched-contact-window-margin1000-tc005.json). Independent closed-loop [assessment](turn-worst-load/mujoco-margin1000-tc005-assessment.json) and [report](turn-worst-load/mujoco-margin1000-tc005-report.json) preserve exact model, contract, actor, motion and rollout hashes. The original [paired Isaac/MuJoCo video](turn-worst-load/motion_pipeline.mp4) remains the nominal uncalibrated comparison; it is not footage of this calibrated diagnostic.
+
+### Frozen-actor contact-margin sensitivity
+
+To test whether the remaining single-step support gaps disappear with a slightly larger collision margin, three more **evaluation-only MuJoCo** full-clip episodes held the actor, `solref=[0.05, 2]`, contact friction, controller, reference, 200 Hz clock and gate fixed. Only the robot collision margin changed. Every run completed the reference but **none passed**:
+
+| Robot collision margin | Minimum core speed | Core path RMSE | Core two-wheel ≥5 N support | Longest qualifying interval | Largest qualifying turn |
+|---|---:|---:|---:|---:|---:|
+| 1.0 mm | 0.967 m/s | 0.041 m | 91.23% | 0.140 s | 4.54° |
+| 1.5 mm | 0.931 m/s | 0.030 m | 90.06% | 0.145 s | 5.89° |
+| 2.0 mm | 0.937 m/s | 0.039 m | 90.45% | 0.105 s | 3.44° |
+| 3.0 mm | 0.948 m/s | 0.038 m | 91.03% | 0.135 s | 4.91° |
+
+The [1.5](turn-worst-load/mujoco-margin1500-tc005-assessment.json), [2.0](turn-worst-load/mujoco-margin2000-tc005-assessment.json), and [3.0 mm](turn-worst-load/mujoco-margin3000-tc005-assessment.json) assessments each link to a corresponding `report.json`; their exact [1.5](turn-worst-load/margin1500-model.xml), [2.0](turn-worst-load/margin2000-model.xml), and [3.0 mm](turn-worst-load/margin3000-model.xml) MJCFs are archived alongside. The margins do not monotonically improve sustained contact. This sweep does not show that further contact-law adjustment is impossible, but offers no reason to call margin increase a transfer fix. The evaluator rejects `solref` time constants above 0.05 s by its pre-existing validation bound, so no additional softer-contact episodes were run.
