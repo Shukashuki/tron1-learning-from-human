@@ -1,0 +1,17 @@
+# Matched-state 5 ms contact response: PhysX versus MuJoCo
+
+This is a **physics identification diagnostic**, not another policy rollout or a sim2sim PASS. For each of the 512 physical steps from 1.44 to 4.00 s in the [Isaac-PASS worst-substep trial](turn-worst-load-pair.md), [`audit_drift_matched_contact_step.py`](../../scripts/audit_drift_matched_contact_step.py) reconstructs the *same* recorded root pose, COM twist and eight named joint positions/velocities in the audited MuJoCo model. It then injects the **actual Isaac joint effort recorded for the next step** and advances MuJoCo once by 5 ms. The actor is never called. The maximum initial wheel-center position mismatch is 0.72 µm; initial root twist matches to floating-point precision. Both models retain 0.15 contact friction, 200 Hz physics, the corrected 0.127 m-radius / 0.025 m-halfwidth wheels, and zero compiled contact margin. The only sensitivity change across the nondefault rows is MuJoCo's explicitly reported `solref`.
+
+| MuJoCo contact `solref` | Initial two-wheel bearing manifold | After same 5 ms Isaac effort: MuJoCo both ≥5 N | Left/right next-wheel-height RMSE vs Isaac | Left/right normal force p95 |
+|---|---:|---:|---:|---:|
+| Original compiled `[0.004, 1]` | 51.8% | 12.7% | 0.495 / 0.936 mm | 234 / 358 N |
+| `[0.02, 2]` | 51.8% | 14.5% | 0.379 / 0.905 mm | 155 / 234 N |
+| `[0.03, 2]` | 51.8% | 15.0% | 0.355 / 0.900 mm | 142 / 202 N |
+| `[0.04, 2]` | 51.8% | 16.2% | 0.346 / 0.898 mm | 142 / 187 N |
+| `[0.05, 2]` | 51.8% | 16.8% | 0.342 / 0.897 mm | 140 / 178 N |
+
+The recorded Isaac next steps had two-wheel ≥5 N support in **100%** of these samples and left/right normal-force p95 of 142/149 N. MuJoCo's analytic cylinder/plane clearance at the same initial poses lies within a few micrometers of zero (95th percentiles +1.17/+3.51 µm); a small visible pose mismatch does not explain the result. However, the engines may differ in contact activation, constraint response, inertial/collision representation, and solver state. This audit does **not** isolate a unique solver parameter or show that PhysX's contact offset equals a MuJoCo margin.
+
+To test whether fresh MuJoCo state reconstruction itself causes the discrepancy, the identical reset/one-step method was applied to **each solver variant's own saved MuJoCo rollout**. All 512 next-step bearing contact counts matched their original records, and the maximum next generalized-position error was ≤7.11e−15. Thus the large Isaac-to-MuJoCo discrepancy is not an artifact of this MuJoCo state-replay procedure. Changing `solref` brings force peaks closer to Isaac but leaves >83% of Isaac-supported next steps without simultaneous ≥5 N support in MuJoCo; the independent full closed-loop soft-contact episodes also fail the [unchanged drift gate](turn-worst-load-pair.md).
+
+Complete per-step rows, exact input hashes, initial clearances and self-replay controls: [original](turn-worst-load/matched-contact-step-default.json), [0.02](turn-worst-load/matched-contact-step-tc002.json), [0.03](turn-worst-load/matched-contact-step-tc003.json), [0.04](turn-worst-load/matched-contact-step-tc004.json), [0.05](turn-worst-load/matched-contact-step-tc005.json). The diagnostic cannot establish that changing the contact model alone will yield a transferable policy; it identifies an immediate physical-response mismatch that a new policy has to tolerate or a validated simulator model has to reduce.
