@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "task": "drift_drl_traj4_high_speed_turn",
+  "verdict": "FAIL",
+  "reason": "Same final actor passes Isaac but fails MuJoCo uninterrupted two-wheel-supported sliding-turn gate",
+  "training": {
+    "initial_checkpoint": "original004",
+    "environments": 2048,
+    "additional_updates": 600,
+    "additional_environment_steps": 29491200,
+    "task_profile_sha256": "479e72d41c18ff894e5f0888a58fc6fd2e934469269d891ed0ff08c1cde9a96b",
+    "final_checkpoint_sha256": "6b1d8dc1c822a366ecd9930b5c9fbc5aad3ca316a8527dfaabf4985216aa0054",
+    "reward_sampling_mode": "all_substeps_max_cost",
+    "physics_force_samples_total": 57632,
+    "reward_reads_total": 14408,
+    "force_samples_last_control_step": 4
+  },
+  "reference_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "normalized_actor_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "default_policy_contract_sha256": "589eb6579111afca893dee9baf3720feb13ffefa413336502b194b04fe531e46",
+  "paired_mujoco_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "gate": {
+    "minimum_speed_m_s": 0.8,
+    "minimum_abs_body_sideslip_deg": 8.0,
+    "minimum_mean_abs_patch_slip_m_s": 0.04,
+    "minimum_each_wheel_normal_force_n": 5.0,
+    "minimum_uninterrupted_duration_s": 0.2,
+    "minimum_abs_travel_course_turn_deg": 45.0,
+    "maximum_core_path_rmse_m": 0.15,
+    "maximum_core_path_error_m": 0.3,
+    "full_reference_completion_required": true
+  },
+  "isaac": {
+    "status": "PASS",
+    "full_reference_completed": true,
+    "whole_core_course_turn_deg": 60.71295450396074,
+    "whole_core_min_speed_m_s": 0.9300769601637946,
+    "core_path_rmse_m": 0.03749629584783398,
+    "core_two_wheel_support_fraction": 1.0,
+    "longest_qualifying_duration_s": 2.075,
+    "largest_qualifying_course_turn_deg": 48.53355959608354,
+    "physics_trajectory_sha256": "b48cc91dbc5b435d15518c26d4be3ce564acd395f8f272cc890722e90a46baea"
+  },
+  "mujoco": {
+    "status": "FAIL",
+    "full_reference_completed": true,
+    "whole_core_course_turn_deg": 61.878820597167625,
+    "whole_core_min_speed_m_s": 0.9539415018025998,
+    "core_path_rmse_m": 0.033613568782228306,
+    "core_two_wheel_support_fraction": 0.5399610136452242,
+    "longest_qualifying_duration_s": 0.019999999999999574,
+    "largest_qualifying_course_turn_deg": 1.043960481783218,
+    "physics_trajectory_sha256": "54613a91ad75184f61a5dc3f832aa8bb49efe88f2fdaec99a8068d1eed063678"
+  },
+  "contact_response_diagnostic": {
+    "status": "FAIL",
+    "evaluation_only": true,
+    "only_contract_change": "task_profile.mujoco_contact_solref absent to [0.04, 2.0]",
+    "variant_contract_sha256": "1a512e372b37a3ff44f90975c8591398513bf58c0e928850e3792df99df8c9d2",
+    "core_two_wheel_support_fraction": 0.8927875243664717,
+    "whole_core_min_speed_m_s": 0.9610345981935512,
+    "core_path_rmse_m": 0.037911680304529856,
+    "longest_qualifying_duration_s": 0.12499999999999734,
+    "largest_qualifying_course_turn_deg": 5.778319001263778,
+    "physics_trajectory_sha256": "8b17afbfc54bbede7c1e45808a251eec4f014513f6e0ddd39d3ac4e0bb4cde5c"
+  },
+  "isaac_observations_replayed_in_mujoco_evaluator": 350,
+  "isaac_observation_max_abs_replay_error": 4.76837158203125e-7,
+  "episodes_per_engine": 1,
+  "hardware_ready": false
+}

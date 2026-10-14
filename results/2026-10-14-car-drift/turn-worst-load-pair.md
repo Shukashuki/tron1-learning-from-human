@@ -1,0 +1,25 @@
+# High-speed turn: worst-substep wheel-load candidate, paired sim2sim FAIL
+
+The [predeclared candidate](../../config/drift_turn_worst_load_task.json) trains on the same pinned `drift_drl/traj_4` WF turn reference, original004 parent checkpoint, 2,048 environments, 600 PPO updates, seed 42, motor-v1 randomization, 50/200 Hz clocks and friction/controller settings as the prior [last-substep load-reserve retry](../2026-10-13-car-drift/turn-load-reserve-pair.md). Its wheel ground-normal-load cost now uses the **worst of all four native 5 ms samples** within each 20 ms action window. Its cost weight also changes from −2 to −1, the existing audited sampler's supported setting; the experiment cannot assign a difference to sampling alone.
+
+An eight-environment/one-update native fixture passed before the one designated full run. That run finished naturally after 29,491,200 environment steps in 999.9 s. Its final checkpoint SHA-256 is `6b1d8dc1c822a366ecd9930b5c9fbc5aad3ca316a8527dfaabf4985216aa0054`. The final sampling audit records 57,632 actual physics force samples and 14,408 reward reads, with four samples in the last action window and no extra physics, actor, reset or reward-manager calls. This proves the new training signal was active; it does not prove physical drift.
+
+One deterministic final-checkpoint Isaac evaluation exported normalized actor SHA-256 `20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31`. The **same actor** then ran one zero-shot MuJoCo episode on reference SHA-256 `da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254`. Reconstructing all 350 Isaac actor observations in the MuJoCo deployment evaluator differed by at most 4.77e−7. Both engines completed the full clip. This is nominal one-seed evidence, not robustness or hardware validation.
+
+| Actual 200 Hz turn-core measurement | Isaac | MuJoCo default |
+|---|---:|---:|
+| Whole-core travel-course turn | 60.71° | 61.88° |
+| Minimum whole-core COM speed | 0.930 m/s | 0.954 m/s |
+| Root path RMSE | 0.0375 m | 0.0336 m |
+| Core samples with both wheels bearing ≥5 N | 100.0% | 54.0% |
+| Longest uninterrupted *jointly fast, sliding, supported* window | 2.075 s | 0.020 s |
+| Largest actual course turn within a qualifying window | 48.53° | 1.04° |
+| [Unchanged new-task gate](../../scripts/assess_drift_turn.py) | **PASS** | **FAIL** |
+
+The gate checks speed ≥0.8 m/s, body sideslip ≥8°, mean absolute wheel-ground patch slip ≥0.04 m/s, both wheels bearing ≥5 N, ≥0.20 s uninterrupted, and ≥45° actual travel-course change in the **same** physical window. It also requires full-reference completion and ≤0.15/0.30 m core path RMSE/maximum error. No 5 ms gap is bridged. The objective does not require zero deceleration, but the overall 61.88° MuJoCo turn does not compensate for fragmented contact.
+
+[Source → robot kinematics → Isaac → MuJoCo video](turn-worst-load/motion_pipeline.mp4) · [Overview](turn-worst-load/overview.png) · [machine-readable paired assessment](turn-worst-load/assessment.json) · [render provenance](turn-worst-load/render_report.json). The source is a simulated CARLA vehicle, not a physical car capture. Robot panels only replay saved states; native physical arrays determine the gate.
+
+An evaluation-only replay of the unchanged actor with MuJoCo `solref=[0.04, 2.0]` instead of the paired model's compiled default `[0.004, 1.0]` raises two-wheel support from 54.0% to 89.3%, but still **FAILS**: longest jointly qualified interval 0.125 s and largest qualified turn 5.78°. Its core minimum speed is 0.961 m/s and path RMSE 0.0379 m. This is one contact-law sensitivity point, not new training or validated PhysX matching; exact hashes are in the [assessment](turn-worst-load/assessment.json).
+
+The prior last-substep candidate reached 2.260 s / 54.64° in Isaac and 0.025 s / 1.16° in default MuJoCo. This new candidate reaches 2.075 s / 48.53° and 0.020 s / 1.04°, respectively. One episode per actor does not establish a statistical effect, but this experiment offers **no evidence** that worst-substep load shaping fixes the cross-engine contact gaps. The requested same-policy sim2sim high-speed drift remains unresolved; the original jump animation and historical trials are unchanged.
