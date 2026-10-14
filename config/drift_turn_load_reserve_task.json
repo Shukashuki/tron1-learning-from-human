@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 1.0, "grounded": 0.4, "tilt": -0.2},
+  "wheel_ground_load_reserve": {"weight": -2.0, "scale_fraction": 0.20},
+  "description": "New drift_drl high-speed turn retry: relative to the completed generic baseline on the same reference, add only the existing last-5-ms-substep smooth symmetric ground-normal wheel-load-reserve cost. Same original004 resume parent, 2048 environments, 600 updates, seed42, motor-v1 domain randomization, friction, gains, 50/200 Hz clocks and paired new-task gates. This is an Isaac training signal, not a certified MuJoCo contact-law match or hardware claim."
+}
