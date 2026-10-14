@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "task": "drift_drl_traj4_high_speed_turn",
+  "verdict": "FAIL",
+  "reason": "Same final actor passes Isaac but fails MuJoCo uninterrupted wheel-ground sliding-turn gate",
+  "training": {
+    "initial_checkpoint": "original004",
+    "environments": 2048,
+    "additional_updates": 600,
+    "additional_environment_steps": 29491200,
+    "final_checkpoint_sha256": "bcd7dee5ac6049c437cb62571de6a94c320a9797f6094e13be853593caf50373"
+  },
+  "reference_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "normalized_actor_sha256": "12a5643add301a22e626883fe45955a63ef454898a3733d2f5f4702157f54e97",
+  "gate": {
+    "minimum_speed_m_s": 0.8,
+    "minimum_abs_body_sideslip_deg": 8.0,
+    "minimum_mean_abs_patch_slip_m_s": 0.04,
+    "minimum_each_wheel_normal_force_n": 5.0,
+    "minimum_uninterrupted_duration_s": 0.2,
+    "minimum_abs_travel_course_turn_deg": 45.0,
+    "maximum_core_path_rmse_m": 0.15,
+    "maximum_core_path_error_m": 0.3,
+    "full_reference_completion_required": true
+  },
+  "isaac": {
+    "status": "PASS",
+    "full_reference_completed": true,
+    "whole_core_course_turn_deg": 57.10291603878396,
+    "whole_core_min_speed_m_s": 0.8595505070239832,
+    "core_path_rmse_m": 0.06164318330103027,
+    "core_two_wheel_support_fraction": 0.9629629629629629,
+    "longest_qualifying_duration_s": 1.9049999999999998,
+    "largest_qualifying_course_turn_deg": 46.72036620835612,
+    "physics_trajectory_sha256": "d476a0a03ca4fea8942299432e76b0e9013cdc25b6318d7d6f082491a0959273"
+  },
+  "mujoco": {
+    "status": "FAIL",
+    "full_reference_completed": true,
+    "whole_core_course_turn_deg": 61.606880472148774,
+    "whole_core_min_speed_m_s": 0.9048631080703032,
+    "core_path_rmse_m": 0.027170244412501918,
+    "core_two_wheel_support_fraction": 0.4951267056530214,
+    "longest_qualifying_duration_s": 0.019999999999999574,
+    "largest_qualifying_course_turn_deg": 1.066609217665857,
+    "physics_trajectory_sha256": "d73ac237e45a70b6f21223760d13f59648cb0ec5d2f9c26e75bad5710946187b"
+  },
+  "isaac_observations_replayed_in_mujoco_evaluator": 350,
+  "isaac_observation_max_abs_replay_error": 4.76837158203125e-7,
+  "episodes_per_engine": 1,
+  "hardware_ready": false
+}

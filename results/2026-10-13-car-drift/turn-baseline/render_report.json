@@ -1,0 +1,22 @@
+{
+  "status": "rendered",
+  "simulation_steps": 0,
+  "frames": 176,
+  "video_resolution": [
+    1600,
+    900
+  ],
+  "video_fps": 12.5,
+  "input_hashes": {
+    "source_csv": "eb67a507817605d9b0018bdf2196c04f58f9a9238e7e1906350a7568ab87cf27",
+    "reference": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+    "actor": "12a5643add301a22e626883fe45955a63ef454898a3733d2f5f4702157f54e97",
+    "isaac_physics": "d476a0a03ca4fea8942299432e76b0e9013cdc25b6318d7d6f082491a0959273",
+    "mujoco_physics": "d73ac237e45a70b6f21223760d13f59648cb0ec5d2f9c26e75bad5710946187b"
+  },
+  "video_sha256": "5677fa2f96bc3c9f0931b798dcec92400851488068463a3b9c75e3a7680186d8",
+  "overview_sha256": "a8395bcd2d7e60528e819a671bdc9cf50986d8a5e2d573ce4bf036497a93d1c7",
+  "isaac_verdict": "PASS",
+  "mujoco_verdict": "FAIL",
+  "hardware_ready": false
+}
