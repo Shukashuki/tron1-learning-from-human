@@ -1,0 +1,40 @@
+{
+  "kind": "evaluation_only_zero_shot_common_leg_damping_diagnostic",
+  "status": "FAIL_IN_BOTH_ENGINES",
+  "trained_leg_kd_N_m_s_per_rad": 10.0,
+  "evaluated_leg_kd_N_m_s_per_rad": 13.0,
+  "additional_training_updates": 0,
+  "same_normalized_actor_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "same_motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "source_checkpoint_sha256": "6b1d8dc1c822a366ecd9930b5c9fbc5aad3ca316a8527dfaabf4985216aa0054",
+  "mujoco_input_model_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "profile_and_physics_contract_comparison": "Isaac and MuJoCo exported task profiles are identical. Their contract differences are only controller_gain_diagnostic and export_validation_max_abs_error provenance fields.",
+  "isaac": {
+    "status": "FAIL",
+    "full_clip_completed": true,
+    "whole_core_course_turn_deg_not_a_pass_gate": 61.09496532984111,
+    "whole_core_min_speed_m_s": 0.9522651135118232,
+    "core_path_rmse_m": 0.04161216278764749,
+    "core_fraction_two_wheel_support_ok": 1.0,
+    "longest_qualifying_duration_s": 1.935,
+    "largest_qualifying_course_turn_deg": 44.19009317218717,
+    "physics_trajectory_sha256": "d25ea09b305738d8936221f7f82f492a0f20c5ed10e324fc7ba350ddd87fb363",
+    "engine_report_sha256": "a8d998d08d6fa622f18687c34d3d8f3415347e8d01ed09c19508acacbb89fc9a",
+    "exported_contract_sha256": "33bcd88867fa844a95178cf9872e9c6d16d0e95dbd9f81e86f4306eefb8504ab"
+  },
+  "mujoco": {
+    "status": "FAIL",
+    "full_clip_completed": true,
+    "whole_core_course_turn_deg_not_a_pass_gate": 60.049950877292,
+    "whole_core_min_speed_m_s": 0.9069360730443098,
+    "core_path_rmse_m": 0.0456676793155338,
+    "core_fraction_two_wheel_support_ok": 0.4775828460038986,
+    "longest_qualifying_duration_s": 0.019999999999999574,
+    "largest_qualifying_course_turn_deg": 1.326536540079188,
+    "rollout_sha256": "ec16c6ef75b5980b392793b7a26a9264ccecc37658f9264720fd30838d6bca37",
+    "engine_report_sha256": "7cf978eef1d79cfb90bccc1cfd616d363683b53bdfec366f472485eba6d5aa28",
+    "input_contract_sha256": "34cb8d3191f17ddbef817b791fe5c5e5a61244820ba1304e2dba96d67d46cc7c"
+  },
+  "gate": "Unchanged assess_drift_turn.py: speed >=0.8 m/s, sideslip >=8 deg, mean abs wheel patch slip >=0.04 m/s, both wheel loads >=5 N, same uninterrupted >=0.2 s window with >=45 deg actual travel-course turn, full clip and path errors within thresholds.",
+  "interpretation": "Raising common leg damping does not establish cross-engine high-speed drift: MuJoCo contact remains fragmented, and Isaac's longest jointly qualifying window falls 0.81 deg short of the predeclared turn threshold. This is one deterministic episode per engine, not a robustness or hardware claim."
+}
