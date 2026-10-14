@@ -70,6 +70,8 @@ Four of six tasks pass the predefined gates in both engines, with the turning-ju
 
 [Video gallery](results/2026-10-03-motion-pipeline-suite/index.html) · [Metrics and assessments](results/2026-10-03-motion-suite/summary.json) · [Detailed experiment log and reproduction instructions](EXPERIMENT_LOG.md)
 
+The newer **high-speed turning** task uses a separate pinned CARLA `drift_drl/traj_4` reference with a genuine ~60° travel-direction turn, rather than the earlier DOA drift-and-stop reference below. “Fast enough” means the robot stays at least 0.8 m/s during one continuous, supported sliding turn; the test does not require zero slowing. Its first trained baseline and one-factor wheel-load-reserve retry both pass the new physical gate in Isaac but fail in MuJoCo because the jointly fast/sliding/two-wheel-supported interval fragments. The retry reaches 2.260 s / 54.64° in Isaac but only 0.025 s / 1.16° in default MuJoCo, despite both engines tracking the overall path. [Watch the four-panel retry](results/2026-10-13-car-drift/turn-load-reserve/motion_pipeline.mp4) · [Paired evidence and contact-response diagnostic](results/2026-10-13-car-drift/turn-load-reserve-pair.md). **Same-policy sim2sim high-speed drift is not yet demonstrated.**
+
 Car drift uses actual ground-contact measurements at **200 Hz in both engines**. The same-actor baseline fails: Isaac sustains 0.28 s of qualifying drift, but MuJoCo reaches only 0.03 s because of real contact micro-gaps; both fail stable-exit sideslip. A higher-damping retry also fails, with MuJoCo terminating at 2.22 s. Historical snapshots remain available; the original 50 Hz Isaac baseline is not overwritten.
 
 | Car-drift trial | Result | Four-panel video / assessment |

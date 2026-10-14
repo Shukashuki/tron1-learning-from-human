@@ -2,6 +2,10 @@
 
 For the concise English project overview, see [README.md](README.md). This log preserves the detailed experiment history, reproduction commands, and limitations; earlier results describe earlier policies, not the latest suite.
 
+## High-speed turn load-reserve retry: Isaac PASS / MuJoCo FAIL (2026-10-13)
+
+The predeclared one-factor wheel-load-reserve candidate completed its 2,048-environment, 600-update run naturally, then ran one deterministic final-only paired evaluation using the identical actor and `drift_drl/traj_4` turn reference. Isaac sustains a jointly fast/sliding/two-wheel-supported 2.260 s window and turns 54.64°; default MuJoCo sustains only 0.025 s / 1.16°. Both engines complete the clip at core minimum speed ≈0.92 m/s. An evaluation-only MuJoCo contact-response variant raises two-wheel support from 51.9% to 88.7% but still fails the frozen uninterrupted-turn gate (0.115 s / 3.44°). Thus the requested same-policy sim2sim drift **has not been demonstrated**; a reward-only improvement in Isaac did not solve the engine contact mismatch. [Four-panel video, exact metrics, hashes and limitations](results/2026-10-13-car-drift/turn-load-reserve-pair.md). The previous baseline and historical trials remain unchanged.
+
 ## High-speed turn first trained baseline: Isaac PASS / MuJoCo FAIL (2026-10-13)
 
 The separate `drift_drl/traj_4` WF turn task now has one naturally completed original004-parent, 2048-environment/600-update generic-PPO baseline and one same-final-actor nominal episode per engine. The new task's actual simultaneous high-speed/side-slip/two-wheel-contact/patch-slip/large-course-turn gate **passes Isaac but fails MuJoCo**: uninterrupted qualifying windows reach 1.905 s / 46.72° versus only 0.020 s / 1.07°, respectively. Both engines complete the clip and track the path, but MuJoCo has both wheels bearing in only 49.5% of the selected turn-core 200 Hz samples versus Isaac's 96.3%. This is a one-seed paired FAIL, not sim2sim drift success. [Full paired evidence and limitations](results/2026-10-13-car-drift/turn-baseline-pair.md). The earlier DOA trials remain untouched.
