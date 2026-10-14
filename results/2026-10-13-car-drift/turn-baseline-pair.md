@@ -20,6 +20,10 @@ The gate requires ≥0.8 m/s COM speed, ≥8° body sideslip, ≥0.04 m/s mean a
 
 MuJoCo's left/right wheel contact fractions in the core are 68.0%/75.8%; neither wheel is persistently unsupported, but only 49.5% of samples have both. Saved-pose FK against the declared 0.127 m radius/0.005 m half-width cylinders puts the missing-wheel analytic clearance positive in 98.8% of left and 100% of right unloaded samples. Missing-contact median analytic clearance is approximately 0.675/0.991 mm left/right; this is *geometry at recorded states*, not the actual solver's original manifold, a PhysX separation measurement, or proof of a unique cause. The nominal MuJoCo model has 1 mm contact margins on the floor and wheel geoms, so positive analytic clearance alone cannot identify its contact threshold. There are zero recorded non-wheel ground contacts in the core.
 
+### Contact-response diagnostic, not a new policy
+
+The generic baseline's MuJoCo model actually compiled `solref=[0.004, 1.0]`, while earlier DOA drift experiments explicitly used `[0.04, 2.0]`. An [evaluation-only, single-contract-field variant](../../scripts/prepare_drift_turn_contact_variant.py) replays the **same actor and motion** with that earlier MuJoCo response; it does not touch Isaac, actor weights, rewards, friction or the turn gate. MuJoCo both-wheel support rises from 49.5% to 87.3%, and its longest jointly qualified interval from 0.020 to 0.115 s, but it still **FAILS** the 0.20 s / 45° uninterrupted-turn requirement. The variant's whole-core minimum speed is 0.899 m/s and path RMSE 0.0184 m. [Exact input and result hashes](turn-baseline/contact-response-diagnostic.json). This is one evaluation-only sensitivity result, not hardware calibration or causal proof that the policy improved.
+
 The result suggests prioritizing continuous wheel load/contact during this **turn**, while preserving speed, sideslip and path tracking. It does not support a claim that the actor can perform the requested drift in sim2sim yet. Previous DOA trial outcomes and the initial jump animation remain unchanged.
 
 ## Predeclared one-factor retry (no result yet)
