@@ -1,0 +1,223 @@
+{
+  "kind": "mujoco_only_frozen_actor_constant_symmetric_leg_residual_search_not_sim2sim",
+  "policy_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+  "motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "model_sha256": "d557bf853c74b0e80c6f5ea124c427986fe395d95cf1b37c7817e8d5a5f28b6d",
+  "robot_reference_sha256": "afc22f19b813cf10b3e3a90affb0f26f5a7743074f98b262394c69de786e9f6e",
+  "residual_source_sha256": "419cbbac7f41b3a150c9d8722d7a94331208a83f596d7ce8a8e21f9332f85cf7",
+  "candidates": [
+    {
+      "hip_action_offset": -0.04,
+      "knee_action_offset": -0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        -0.03999999910593033,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.9578087512684111,
+      "core_path_rmse_m": 0.08351347410888807,
+      "core_two_wheel_support_fraction": 0.9103313840155945,
+      "longest_qualifying_duration_s": 0.18499999999999606,
+      "largest_qualifying_turn_deg": 6.204050947018539,
+      "rollout_sha256": "42a3a3e934751a31833849d7d92e46ff282969bcb4f2be5dfc03ad8db2929fb8",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipm0d040_kneem0d040"
+    },
+    {
+      "hip_action_offset": -0.04,
+      "knee_action_offset": 0.0,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        -0.03999999910593033,
+        0.03999999910593033,
+        0.0,
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.7696375273097504,
+      "core_path_rmse_m": 0.065153099650705,
+      "core_two_wheel_support_fraction": 0.8966861598440545,
+      "longest_qualifying_duration_s": 0.11499999999999755,
+      "largest_qualifying_turn_deg": 4.582328995291042,
+      "rollout_sha256": "371362e170ac29cd9f6e8c44b9b99e16132f482437bcc61a2bdefbd07b515c82",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipm0d040_kneep0d000"
+    },
+    {
+      "hip_action_offset": -0.04,
+      "knee_action_offset": 0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        -0.03999999910593033,
+        0.03999999910593033,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.5964830074620506,
+      "core_path_rmse_m": 0.16167243425685252,
+      "core_two_wheel_support_fraction": 0.8596491228070176,
+      "longest_qualifying_duration_s": 0.09499999999999797,
+      "largest_qualifying_turn_deg": 4.0157015446673014,
+      "rollout_sha256": "1b70bf00aa12393ebea7149c7710f5f3eead2f616f097fd7a6b4f4759dcb41a5",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipm0d040_kneep0d040"
+    },
+    {
+      "hip_action_offset": 0.0,
+      "knee_action_offset": -0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.03999999910593033,
+        0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.7299866223873315,
+      "core_path_rmse_m": 0.13366899521478384,
+      "core_two_wheel_support_fraction": 0.9103313840155945,
+      "longest_qualifying_duration_s": 0.18499999999999606,
+      "largest_qualifying_turn_deg": 6.100148372659169,
+      "rollout_sha256": "ca13329c39f127a9a4f86da174fecd9e756e49f9dee26d79a0efec965d9d9d20",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d000_kneem0d040"
+    },
+    {
+      "hip_action_offset": 0.0,
+      "knee_action_offset": 0.0,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        0.0,
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.966691359255816,
+      "core_path_rmse_m": 0.04115294578499603,
+      "core_two_wheel_support_fraction": 0.9122807017543859,
+      "longest_qualifying_duration_s": 0.13999999999999702,
+      "largest_qualifying_turn_deg": 4.536543423242167,
+      "rollout_sha256": "d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d000_kneep0d000"
+    },
+    {
+      "hip_action_offset": 0.0,
+      "knee_action_offset": 0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.8156258106765876,
+      "core_path_rmse_m": 0.11165362644866896,
+      "core_two_wheel_support_fraction": 0.8752436647173489,
+      "longest_qualifying_duration_s": 0.12499999999999734,
+      "largest_qualifying_turn_deg": 4.678627083005752,
+      "rollout_sha256": "261f897d35bbb909829be8b287dcb5e10e6ffbd6305bee2d7b6eebb1c29566d2",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d000_kneep0d040"
+    },
+    {
+      "hip_action_offset": 0.04,
+      "knee_action_offset": -0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.03999999910593033,
+        -0.03999999910593033,
+        -0.03999999910593033,
+        0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.32276229883333385,
+      "core_path_rmse_m": 0.3777104311395978,
+      "core_two_wheel_support_fraction": 0.9922027290448343,
+      "longest_qualifying_duration_s": 0.0,
+      "largest_qualifying_turn_deg": 0.0,
+      "rollout_sha256": "642e524c77a9a9b850fae7b7a4ccfe9f206da841ee13ec8a1b53106439272faf",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d040_kneem0d040"
+    },
+    {
+      "hip_action_offset": 0.04,
+      "knee_action_offset": 0.0,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.0,
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.7868249809519938,
+      "core_path_rmse_m": 0.08021408761550126,
+      "core_two_wheel_support_fraction": 0.9103313840155945,
+      "longest_qualifying_duration_s": 0.1749999999999965,
+      "largest_qualifying_turn_deg": 6.132891493526563,
+      "rollout_sha256": "df1ea1201ad57318fef5bf192916745b6e6d3b6ddb68fca902d0474f13f4f823",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d040_kneep0d000"
+    },
+    {
+      "hip_action_offset": 0.04,
+      "knee_action_offset": 0.04,
+      "raw_action_bias": [
+        0.0,
+        0.0,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.03999999910593033,
+        -0.03999999910593033,
+        0.0,
+        0.0
+      ],
+      "status": "FAIL",
+      "completed_full_reference": true,
+      "minimum_core_speed_m_s": 0.7475364801732495,
+      "core_path_rmse_m": 0.13023797461382786,
+      "core_two_wheel_support_fraction": 0.8869395711500975,
+      "longest_qualifying_duration_s": 0.11999999999999744,
+      "largest_qualifying_turn_deg": 3.986984536812806,
+      "rollout_sha256": "7b46b97962978e132e0d991fb60422f84d449126efaf35cb470d840a2d9a26b5",
+      "output_dir": "outputs/drift-drl-turn-worst-load-20261014/leg_residual_grid_004/hipp0d040_kneep0d040"
+    }
+  ],
+  "limitations": [
+    "These are separate full closed-loop MuJoCo episodes; no Isaac residual-actor evaluation is included.",
+    "Candidate search on the same reference is exploratory, not a generalization test.",
+    "The raw actor output is biased before the original evaluator's action clipping."
+  ]
+}

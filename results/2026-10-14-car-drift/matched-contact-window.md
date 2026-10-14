@@ -28,3 +28,15 @@ To test whether the remaining single-step support gaps disappear with a slightly
 | 3.0 mm | 0.948 m/s | 0.038 m | 91.03% | 0.135 s | 4.91° |
 
 The [1.5](turn-worst-load/mujoco-margin1500-tc005-assessment.json), [2.0](turn-worst-load/mujoco-margin2000-tc005-assessment.json), and [3.0 mm](turn-worst-load/mujoco-margin3000-tc005-assessment.json) assessments each link to a corresponding `report.json`; their exact [1.5](turn-worst-load/margin1500-model.xml), [2.0](turn-worst-load/margin2000-model.xml), and [3.0 mm](turn-worst-load/margin3000-model.xml) MJCFs are archived alongside. The margins do not monotonically improve sustained contact. This sweep does not show that further contact-law adjustment is impossible, but offers no reason to call margin increase a transfer fix. The evaluator rejects `solref` time constants above 0.05 s by its pre-existing validation bound, so no additional softer-contact episodes were run.
+
+### Frozen-actor leg residual feasibility check
+
+As a policy-level probe, [`search_drift_leg_residual.py`](../../scripts/search_drift_leg_residual.py) adds constant, mirrored raw-action offsets to the frozen actor's hip and knee outputs, leaving abduction/wheel actions, original clipping, all physics and the assessor unchanged. Two small grids produced **18 separate full MuJoCo closed-loop episodes** at 1 mm margin / `solref=[0.05, 2]`. The zero-residual episode exactly reproduces the earlier calibrated rollout SHA-256 `d28199b462896493fd7f980ddf38da53061b9cf770e396ae5b934f52a78db345`. All nonzero candidates **FAIL** the original gate; these are not Isaac-tested residual actors.
+
+| Hip / knee raw-action offset | Minimum core speed | Path RMSE | Two-wheel support | Longest qualifying interval / turn | Verdict |
+|---|---:|---:|---:|---:|---:|
+| 0 / 0 (frozen actor) | 0.967 m/s | 0.041 m | 91.23% | 0.140 s / 4.54° | FAIL |
+| +0.01 / −0.01 | 0.924 m/s | 0.047 m | 90.45% | 0.235 s / 8.48° | FAIL |
+| +0.04 / −0.04 | 0.323 m/s | 0.378 m | 99.22% | 0 / 0° | FAIL |
+
+The +0.01 / −0.01 candidate exceeds the 0.20 s *duration* threshold but not the simultaneous 45° turn threshold. Stronger joint preload can almost eliminate wheel-support gaps but destroys the required high-speed path; a static action bias is therefore not adopted. Complete candidate summaries with exact rollout hashes: [±0.04 grid](turn-worst-load/leg-residual-grid-004.json), [small-offset grid](turn-worst-load/leg-residual-grid-002.json). This does not rule out a state-dependent, trained residual policy, which would need independent paired Isaac and MuJoCo evaluation.
