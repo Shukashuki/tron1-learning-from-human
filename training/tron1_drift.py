@@ -43,6 +43,12 @@ def validate_task_profile(profile):
                 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value)
                 or not .01 <= value[0] <= .05 or not 1. <= value[1] <= 2.):
             raise ValueError("Invalid explicit MuJoCo contact time constant/damping ratio")
+    if "training_robot_restitution_range" in out:
+        value = out["training_robot_restitution_range"]
+        if (not isinstance(value, list) or len(value) != 2
+                or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value)
+                or value[0] != 0. or not .05 <= value[1] <= .5):
+            raise ValueError("Training robot restitution range must be [0, finite 0.05..0.5]")
     if "wheel_ground_load_reserve" in out:
         from training.tron1_ground_load_reserve import validate_load_reserve_settings
         out["wheel_ground_load_reserve"] = validate_load_reserve_settings(out["wheel_ground_load_reserve"])
@@ -161,6 +167,16 @@ def install_drift_reward_sampling(env, profile):
     return install_wheel_vertical_velocity_accumulator(env)
 
 
+def robot_restitution_event_settings(profile, *, eval_mode):
+    """Training-only bounded contact disturbance; deployment stays zero-restitution."""
+    profile = validate_task_profile(profile)
+    if "training_robot_restitution_range" not in profile:
+        return None
+    return {"restitution_range": ((0., 0.) if eval_mode
+                                  else tuple(profile["training_robot_restitution_range"])),
+            "num_buckets": 1 if eval_mode else 32}
+
+
 def configure_drift(cfg, profile, eval_mode=False):
     profile = validate_task_profile(profile)
     from isaaclab.managers import RewardTermCfg
@@ -176,6 +192,9 @@ def configure_drift(cfg, profile, eval_mode=False):
     params = cfg.events.physics_material.params
     params["static_friction_range"] = (mu, mu)
     params["dynamic_friction_range"] = (mu, mu)
+    restitution = robot_restitution_event_settings(profile, eval_mode=eval_mode)
+    if restitution is not None:
+        params.update(restitution)
     # Existing global pose objectives remain active in addition to slip/velocity.
     cfg.rewards.motion_global_anchor_pos.weight = 2.0
     cfg.rewards.motion_global_anchor_ori.weight = 2.0
@@ -231,6 +250,22 @@ def audit_isaac_materials(env, profile):
     materials = env.scene["robot"].root_physx_view.get_material_properties().cpu().numpy()
     if not np.allclose(materials[..., :2], mu, atol=1e-6):
         raise RuntimeError("Runtime robot friction differs from the declared drift contract")
+    restitution_audit = None
+    if "training_robot_restitution_range" in profile:
+        configured = env.cfg.events.physics_material.params
+        actual = tuple(configured["restitution_range"])
+        trained = tuple(profile["training_robot_restitution_range"])
+        if actual not in (trained, (0., 0.)):
+            raise RuntimeError("Runtime robot restitution event differs from training or nominal evaluation")
+        values = materials[..., 2]
+        lower, upper = actual
+        if (not np.isfinite(values).all() or np.any(values < lower - 1e-6)
+                or np.any(values > upper + 1e-6)
+                or (upper == 0. and not np.allclose(values, 0., atol=1e-6))
+                or (upper > 0. and env.num_envs > 1 and np.ptp(values) < .01)):
+            raise RuntimeError("Runtime robot restitution draw was not applied within declared bounds")
+        restitution_audit = {"event_range": list(actual), "runtime_range": [float(values.min()), float(values.max())],
+                             "num_buckets": configured["num_buckets"], "nominal_evaluation": upper == 0.}
     legs = env.scene["robot"].actuators["legs"]
     kp, kd = legs.stiffness.detach().cpu().numpy(), legs.damping.detach().cpu().numpy()
     if not np.allclose(kp, profile.get("leg_kp", 500.)) or not np.allclose(kd, profile.get("leg_kd", 10.)):
@@ -246,6 +281,10 @@ def audit_isaac_materials(env, profile):
             static, dynamic = api.GetStaticFrictionAttr().Get(), api.GetDynamicFrictionAttr().Get()
             if static is None or dynamic is None or not np.allclose([static, dynamic], mu, atol=1e-6):
                 raise RuntimeError("Authored ground friction differs from the declared drift contract")
+            if restitution_audit is not None:
+                ground_restitution = api.GetRestitutionAttr().Get()
+                if ground_restitution is None or not np.isclose(ground_restitution, 0., atol=1e-6):
+                    raise RuntimeError("Training restitution disturbance requires zero-restitution ground")
             ground.append({"collider": str(prim.GetPath()), "material": str(mat.GetPath()),
                            "static_friction": float(static), "dynamic_friction": float(dynamic)})
     if not ground:
@@ -257,6 +296,8 @@ def audit_isaac_materials(env, profile):
     audit = {"expected_friction": mu, "robot_runtime_friction_range": [float(materials[..., :2].min()), float(materials[..., :2].max())],
              "leg_pd_gain_readback": {"kp_range": [float(kp.min()), float(kp.max())], "kd_range": [float(kd.min()), float(kd.max())]},
              "ground_colliders": ground, "ground_audit": "USD-bound material; robot materials additionally read back from live PhysX"}
+    if restitution_audit is not None:
+        audit["robot_restitution_randomization"] = restitution_audit
     if "wheel_ground_load_reserve" in profile:
         from training.tron1_ground_load_reserve import initialize_ground_load_reserve
         audit["ground_load_reserve"] = initialize_ground_load_reserve(env, profile["wheel_ground_load_reserve"])

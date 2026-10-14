@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "task": "car_drift",
+  "contact_friction": 0.15,
+  "env_spacing_m": 8.0,
+  "reward_weights": {"sideslip": 2.0, "yaw_rate": 1.0, "speed": 1.0, "grounded": 0.4, "tilt": -0.2},
+  "wheel_ground_load_reserve": {"weight": -1.0, "scale_fraction": 0.20},
+  "wheel_ground_load_reserve_sampling": "all_substeps_max_cost",
+  "training_robot_restitution_range": [0.0, 0.3],
+  "description": "One-factor contact-robustness PPO candidate on the pinned high-speed drift_drl turn. Same original004 parent, reward, friction, 50/200Hz clocks, motor-v1 randomization, seed42 and fixed two-engine gate as the worst-substep trial. Only during training, randomly assign robot restitution in [0,0.3] (32 material buckets); deterministic evaluation retains zero robot/ground restitution. No MuJoCo contact response changes are part of the nominal paired gate."
+}

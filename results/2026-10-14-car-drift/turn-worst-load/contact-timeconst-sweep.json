@@ -1,0 +1,48 @@
+{
+  "kind": "evaluation_only_mujoco_contact_time_constant_sensitivity",
+  "paired_sim2sim_success_claimed": false,
+  "frozen_actor_sha256": "20bcb91bc8a9200d5dfbfb4a1f322140f8f88725697d0771ea60c5266355ba31",
+  "frozen_motion_sha256": "da9945c25e6a9afc8ed27c6a3af117b7c5f091a5a8e98834457964a5640b9254",
+  "unchanged_input_mjcf_sha256": "bd92264b72b4d09084732888dbd81fd94a64a1678978e58a2ab0dd191887f513",
+  "single_change": "All colliding geoms' positive-format MuJoCo solref time constant; damping ratio remains 2.0. Actor, reference, friction, controller, clock, contact margin and gate remain fixed.",
+  "core_time_s": [1.44, 4.0],
+  "rows": [
+    {
+      "solref": [0.02, 2.0], "status": "FAIL", "whole_core_min_speed_m_s": 0.9612272743228364,
+      "core_fraction_two_wheel_support_ok": 0.797270955165692,
+      "core_fraction_patch_slip_ok": 0.8557504873294347,
+      "longest_qualifying_duration_s": 0.049999999999998934,
+      "largest_qualifying_course_turn_deg": 1.8975652127829685,
+      "core_path_rmse_m": 0.03930204433446476,
+      "wheel_ground_normal_force_p95_n": [164.3, 201.8],
+      "contract_sha256": "ffb927c5134ab3a3c686b581ea9ebe34c88ee4deed6517d18939952db612ad4a",
+      "rollout_sha256": "600ebf48ee033e831fe157c3fa482e8a9637abf71ce4b84bb1aac6d758e92089",
+      "engine_report_sha256": "0cb098fa4632a8f36cffeea05c6e4b5984e51d0f55e4cdd115abc57998e6b252"
+    },
+    {
+      "solref": [0.03, 2.0], "status": "FAIL", "whole_core_min_speed_m_s": 0.9523563581975464,
+      "core_fraction_two_wheel_support_ok": 0.8615984405458089,
+      "core_fraction_patch_slip_ok": 0.884990253411306,
+      "longest_qualifying_duration_s": 0.0749999999999984,
+      "largest_qualifying_course_turn_deg": 3.169268436951625,
+      "core_path_rmse_m": 0.03331537072480925,
+      "wheel_ground_normal_force_p95_n": [144.0, 163.6],
+      "contract_sha256": "9ac0918c4d7ed19c1c7f661cec7270f716a341871f52063ab65f94e3fecf2e3b",
+      "rollout_sha256": "4b116e9da44f5157688e46f72e6c8e42879b367cadc4a750f3b6e0cd898191d3",
+      "engine_report_sha256": "ccbca411da7a07225ad556597cc07b571e80651220a05480ee5583e9d0bd3b1d"
+    },
+    {
+      "solref": [0.05, 2.0], "status": "FAIL", "whole_core_min_speed_m_s": 0.9588263401702789,
+      "core_fraction_two_wheel_support_ok": 0.9103313840155945,
+      "core_fraction_patch_slip_ok": 0.9181286549707602,
+      "longest_qualifying_duration_s": 0.11999999999999744,
+      "largest_qualifying_course_turn_deg": 5.290201071310817,
+      "core_path_rmse_m": 0.03647228063054739,
+      "wheel_ground_normal_force_p95_n": [136.6, 145.7],
+      "contract_sha256": "f37a7d74938f43aff2754c80da00cdd769f0ec700b7a69d3a9fe9b1f51db8073",
+      "rollout_sha256": "158d6e56e341be8936a336be32df0989dcfef80d345f36f0135c507c96f1ecb2",
+      "engine_report_sha256": "f86b2c890e553e8c3290ce5ba8e282d08349e7a851ec18c16fe3ee42001eb75f"
+    }
+  ],
+  "interpretation": "Softening the contact response reduces force spikes and increases two-wheel support, but every unchanged-actor episode still fails the same continuous drift gate. The sweep is a solver sensitivity test, not contact-model calibration or a new trained policy."
+}
